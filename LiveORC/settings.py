@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,7 +20,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-u4v@a%&d#ysvblnq(86o&7os8=5_fajrktjp5n5^4s5f9#2(x_'
+# SECRET_KEY = 'django-insecure-u4v@a%&d#ysvblnq(86o&7os8=5_fajrktjp5n5^4s5f9#2(x_'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "abcdefghijklmnopqrstuvwxyz1234567890")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -38,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'api'
+    'api',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -55,8 +57,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication'
-    )
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 ROOT_URLCONF = 'LiveORC.urls'
 
@@ -89,7 +92,13 @@ DATABASES = {
     }
 }
 
-
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'LiveORC API',
+    'DESCRIPTION': 'Live OpenRiverCam REST API and administrator dashboard',
+    'VERSION': '0.1.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # OTHER SETTINGS
+}
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 

@@ -6,7 +6,7 @@ from .serializers import SiteSerializer
 
 class SiteViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows users to be viewed or edited.
+    API endpoints that allows sites to be viewed or edited.
     """
     queryset = Site.objects.all().order_by('name')
     serializer_class = SiteSerializer

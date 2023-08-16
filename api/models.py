@@ -14,11 +14,12 @@ class Site(models.Model):
     def __str__(self):
         return f"{self.name}"
 
-    name = models.CharField(max_length=100)
-    x = models.FloatField("x-coordinate")
-    y = models.FloatField("y-coordinate")
-    crs = models.CharField("Coordinate Reference System", max_length=254, default="EPSG:4326")
+    name = models.CharField(max_length=100, help_text="Recognizable unique name for your site")
+    x = models.FloatField("x-coordinate", help_text="If a CRS is provided, the x-coordinate must be provided in this CRS, otherwise defaults to WGS84 latitude longitude")
+    y = models.FloatField("y-coordinate", help_text="If a CRS is provided, the y-coordinate must be provided in this CRS, otherwise defaults to WGS84 latitude longitude")
+    crs = models.CharField("Coordinate Reference System", max_length=254, default="EPSG:4326", help_text='You may provide a CRS in e.g. EPSG code format (e.g. "EPSG:4326", well-known text formats or proj4 string.')
 
+## UNCOMMENT MODELS BELOW AS THEY ARE BEING DEVELOPED
 #
 # class Profile(models.Model):
 #     """
