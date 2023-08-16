@@ -4,9 +4,6 @@ from django.utils import timezone
 from django.contrib import admin
 
 
-# class CameraConfig(models.Model):
-#     raise NotImplementedError
-
 class Site(models.Model):
     """
     Location of one or more videos
@@ -20,6 +17,9 @@ class Site(models.Model):
     crs = models.CharField("Coordinate Reference System", max_length=254, default="EPSG:4326", help_text='You may provide a CRS in e.g. EPSG code format (e.g. "EPSG:4326", well-known text formats or proj4 string.')
 
 ## UNCOMMENT MODELS BELOW AS THEY ARE BEING DEVELOPED
+#
+# class CameraConfig(models.Model):
+#     raise NotImplementedError
 #
 # class Profile(models.Model):
 #     """
