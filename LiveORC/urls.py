@@ -15,18 +15,50 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+# from django.contrib.admin import AdminSite
 from django.urls import path, include
 from rest_framework import routers
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView
 )
-from api.views import SiteViewSet
+from api.views import SiteViewSet, ProfileViewSet, RecipeViewSet, CameraConfigViewSet
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 router = routers.DefaultRouter()
-router.register(r'sites', SiteViewSet)
+router.register(r'site', SiteViewSet)
+router.register(r'cameraconfig', CameraConfigViewSet)
+router.register(r'profile', ProfileViewSet)
+router.register(r'recipe', RecipeViewSet)
 
+## CODE BELOW IS TO REORDER MENU ITEMS, CAN BE FINISHED WHEN ADMIN VIEW IS DONE
+# def get_app_list(self, request):
+#     """
+#     Modified version of original get_app_list that reorders the required parts
+#     """
+#     ordering = {
+#         "Sites": 1,
+#         "Camera configs": 2,
+#         "Recipes": 3,
+#         "Profiles": 4,
+#         "Videos": 5,
+#         "Projects": 6,
+#         "Servers": 7,
+#         "Tasks": 8,
+#         "Groups": 9,
+#         "Users": 10
+#     }
+#     app_dict = self._build_app_dict(request)
+#     # a.sort(key=lambda x: b.index(x[0]))
+#     # Sort the apps alphabetically.
+#     app_list = sorted(app_dict.values(), key=lambda x: x['name'].lower())
+#
+#     # Sort the models alphabetically within each app.
+#     for app in app_list:
+#         app['models'].sort(key=lambda x: ordering[x['name']])
+#     return app_list
+#
+# admin.AdminSite.get_app_list = get_app_list
 
 urlpatterns = [
     path('admin/', admin.site.urls),
