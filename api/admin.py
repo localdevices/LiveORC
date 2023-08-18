@@ -11,6 +11,8 @@ class VideoInline(admin.TabularInline):
     model = Video
     extra = 3
 
+
+
 class WaterLevelInline(admin.TabularInline):
     """
     Display water level for given site in admin view of site
@@ -25,15 +27,19 @@ class SiteAdmin(gisadmin.GISModelAdmin):
         ("Coordinates", {"fields": ["geom"]})
     ]
     search_fields = ["name"]
+    list_display = ["name", "geom"]
     inlines = [WaterLevelInline]
-    list_filter = ["geom"]
     search_fields = ["name"]
 
 
 class CameraConfigAdmin(admin.ModelAdmin):
+    list_display = ["name", "get_site_name"]
     search_fields = ["name"]
     list_filter = ["site"]
     inlines = [VideoInline]
+    @admin.display(ordering='site__name', description="Site")
+    def get_site_name(self, obj):
+        return obj.site.name
 
 
 class ProjectAdmin(admin.ModelAdmin):
@@ -44,12 +50,30 @@ class TaskAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
+class ServerAdmin(admin.ModelAdmin):
+    list_display = ["type", "url", "end_point", "wildcard", "frequency"]
+
+class VideoAdmin(admin.ModelAdmin):
+    list_display = ["get_site_name", "created_at", "timestamp", "thumbnail", "water_level"]
+    list_filter = ["created_at", "timestamp"]
+    @admin.display(ordering='camera_config__site__name', description="Site")
+    def get_site_name(self, obj):
+        return obj.camera_config.site.name
+
+class WaterLevelAdmin(admin.ModelAdmin):
+    list_display = ["get_site_name", "timestamp", "value"]
+    list_filter = ["site__name"]
+    @admin.display(ordering='site__name', description="Site")
+    def get_site_name(self, obj):
+        return obj.site.name
+
 
 admin.site.register(Site, SiteAdmin)
 admin.site.register(CameraConfig, CameraConfigAdmin)
 admin.site.register(Profile)
 admin.site.register(Recipe)
-admin.site.register(Project, ProjectAdmin)
-admin.site.register(Video)
-admin.site.register(Server)
+# admin.site.register(Project, ProjectAdmin)  # leave out for now, may become relevant for future geospatial applications
+admin.site.register(Video, VideoAdmin)
+admin.site.register(Server, ServerAdmin)
 admin.site.register(Task, TaskAdmin)
+admin.site.register(WaterLevel, WaterLevelAdmin)

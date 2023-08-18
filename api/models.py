@@ -30,7 +30,7 @@ class Site(gismodels.Model):
     Location of one or more videos
     """
     def __str__(self):
-        return f"{self.name}"
+        return "{:s} at lon: {:0.1f}, lat: {:0.1f}".format(self.name, self.geom.x, self.geom.y)
 
     name = models.CharField(max_length=100, help_text="Recognizable unique name for your site")
     # x = models.FloatField("x-coordinate", help_text="If a CRS is provided, the x-coordinate must be provided in this CRS, otherwise defaults to WGS84 latitude longitude")
@@ -44,6 +44,9 @@ class CameraConfig(models.Model):
     """
     Contains JSON with a full camera configuration
     """
+    def __str__(self):
+        return f"{self.name} at {self.site.name}"
+
     name = models.CharField(max_length=100, help_text="Recognizable unique name for the camera configuration")
     data = models.JSONField(help_text="JSON fields containing a camera configuration, see https://localdevices.github.io/pyorc/user-guide/camera_config/index.html for setup instructions")
     start_date = models.DateTimeField("start validity date", auto_now_add=True)
@@ -121,12 +124,14 @@ class Video(models.Model):
         help_text="Data and time on which video was taken. If not provided by the user, this is taken from the file's time stamp"
     )
     file = models.FileField()
-    thumbnail = models.ImageField()
-    water_level = models.FloatField(blank=True, null=True)
+    keyframe = models.ImageField(help_text="Extracted frame for user contextual understanding or for making camera configurations")
+    thumbnail = models.ImageField(help_text="Thumbnail frame for list views")
+    water_level = models.FloatField(blank=True, null=True, help_text="Water level occurring within time range close to timestamp of video")
     status = models.PositiveSmallIntegerField(
         choices=VideoStatus.choices,
         default=VideoStatus.NEW,
-        editable=False
+        editable=False,
+        help_text="Status of processing"
     )
     camera_config = models.ForeignKey(CameraConfig, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
@@ -146,7 +151,7 @@ class Server(models.Model):
     url = models.URLField(max_length=254, help_text="URL of server including port number, in the form of <your-protocol>://<your-server-name>:<your-port-nr> e.g. ftp://liveopenrivercam.com:2345")
     end_point = models.CharField(max_length=254, help_text='End point of server, where files are stored, e.g. "videos" would result in scraping from <your-protocol>://<your-server-name>:<your-port-nr>/videos')
     wildcard = models.CharField(max_length=100, default="*", help_text="Wildcard to use to look for (new) files")
-    token = models.CharField(max_length=254, help_text="Access token to site")
+    token = models.CharField(max_length=254, help_text="Access token to site", blank=True, null=True)
     username = models.CharField(max_length=100, help_text="Your user name", blank=True, null=True)
     password = models.CharField(max_length=100, help_text="Your password", blank=True, null=True)
     frequency = models.DurationField(help_text="Amount of seconds")  # TODO maybe this needs to go to the cameraconfig.
