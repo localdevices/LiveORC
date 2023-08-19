@@ -54,11 +54,23 @@ class ServerAdmin(admin.ModelAdmin):
     list_display = ["type", "url", "end_point", "wildcard", "frequency"]
 
 class VideoAdmin(admin.ModelAdmin):
-    list_display = ["get_site_name", "created_at", "timestamp", "thumbnail", "water_level"]
+    list_display = ["get_site_name", "created_at", "timestamp", "water_level", "thumbnail_preview"]  #  "thumbnail",
+    readonly_fields = ('thumbnail_preview', 'video_preview',)
     list_filter = ["created_at", "timestamp"]
     @admin.display(ordering='camera_config__site__name', description="Site")
     def get_site_name(self, obj):
         return obj.camera_config.site.name
+
+    def thumbnail_preview(self, obj):
+        return obj.thumbnail_preview
+    thumbnail_preview.short_description = 'Keyframe preview'
+    thumbnail_preview.allow_tags = True
+
+    def video_preview(self, obj):
+        return obj.video_preview
+    video_preview.short_description = 'video preview'
+    video_preview.allow_tags = True
+
 
 class WaterLevelAdmin(admin.ModelAdmin):
     list_display = ["get_site_name", "timestamp", "value"]

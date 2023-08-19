@@ -3,11 +3,17 @@ import datetime
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils import timezone
+from django.utils.html import mark_safe
 from django.contrib.gis.db import models as gismodels
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
+from PIL import Image
+import io
 import os
 import uuid
 import pyorc
+import cv2
+
 
 VIDEO_EXTENSIONS = ["MOV", "MKV", "MP4", "AVI", "M4V"]
 
@@ -154,8 +160,8 @@ class Video(models.Model):
         help_text="Data and time on which video was taken. If not provided by the user, this is taken from the file's time stamp"
     )
     file = models.FileField(upload_to=get_video_path, validators=[FileExtensionValidator(allowed_extensions=VIDEO_EXTENSIONS)])
-    keyframe = models.ImageField(help_text="Extracted frame for user contextual understanding or for making camera configurations")
-    thumbnail = models.ImageField(help_text="Thumbnail frame for list views")
+    keyframe = models.ImageField(upload_to=get_video_path, help_text="Extracted frame for user contextual understanding or for making camera configurations", editable=False, max_length=254)
+    # thumbnail = models.ImageField(help_text="Thumbnail frame for list views", editable=False)
     water_level = models.FloatField(blank=True, null=True, help_text="Water level occurring within time range close to timestamp of video")
     status = models.PositiveSmallIntegerField(
         choices=VideoStatus.choices,
@@ -166,7 +172,58 @@ class Video(models.Model):
     camera_config = models.ForeignKey(CameraConfig, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # TODO: setup storage model for S3. Organize settings.py for choice local or S3.
+    def save(self, *args, **kwargs):
+        super(Video, self).save(*args, **kwargs)
+        if not self.make_keyframe():
+            # set to a default thumbnail
+            raise Exception('Could not create keyframe - is the file type valid?')
+        super(Video, self).save(*args, **kwargs)
+
+    def make_keyframe(self):
+        """
+        Recipe to extract a keyframe from the video.
+        Inspired by https://stackoverflow.com/questions/23922289/django-pil-save-thumbnail-version-right-when-image-is-uploaded
+        """
+        cap = cv2.VideoCapture(self.file.path)
+        res, image = cap.read()
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        img_name, video_extension = os.path.splitext(os.path.basename(self.file.name))
+        img_extension = ".jpg"
+        FTYPE = 'JPEG'
+        img_filename = img_name + img_extension
+
+        # Save thumbnail to in-memory file as StringIO
+        img = Image.fromarray(image, "RGB")
+        temp_thumb = io.BytesIO()
+        img.save(temp_thumb, FTYPE)
+        temp_thumb.seek(0)
+
+        # set save=False, otherwise it will run in an infinite loop
+        self.keyframe.save(img_filename, ContentFile(temp_thumb.read()), save=False)
+        temp_thumb.close()
+
+        return True
+
+    def make_thumbnail(self):
+        raise NotImplementedError
+
+    @property
+    def thumbnail_preview(self):
+        height = int(300)
+        width = int((self.keyframe.width / self.keyframe.height) * height)
+        if self.keyframe:
+            return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.keyframe.url, width, height))
+        return ""
+
+    @property
+    def video_preview(self):
+        height = int(300)
+        width = int((self.keyframe.width / self.keyframe.height) * height)
+        if self.file:
+            return mark_safe('<video src="{}" width="{}" height="{}" type=video/mp4 />'.format(self.file.url, width, height))
+        return ""
+
+    # TODO: Organize settings.py for choice local or S3.
     # TODO: when timestamp not provided, assume it must be harvested from the file time stamp
     # TODO: when water level provided, change status and start a task
     # TODO: when task complete, status change to ERROR or FINISHED
