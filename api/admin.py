@@ -54,8 +54,8 @@ class ServerAdmin(admin.ModelAdmin):
     list_display = ["type", "url", "end_point", "wildcard", "frequency"]
 
 class VideoAdmin(admin.ModelAdmin):
-    list_display = ["get_site_name", "created_at", "timestamp", "water_level", "thumbnail_preview"]  #  "thumbnail",
-    readonly_fields = ('thumbnail_preview', 'video_preview',)
+    list_display = ["get_site_name", "created_at", "timestamp", "water_level", "thumbnail_preview"]
+    readonly_fields = ('video_preview',)
     list_filter = ["created_at", "timestamp"]
     @admin.display(ordering='camera_config__site__name', description="Site")
     def get_site_name(self, obj):
@@ -63,7 +63,7 @@ class VideoAdmin(admin.ModelAdmin):
 
     def thumbnail_preview(self, obj):
         return obj.thumbnail_preview
-    thumbnail_preview.short_description = 'Keyframe preview'
+    thumbnail_preview.short_description = 'Thumbnail'
     thumbnail_preview.allow_tags = True
 
     def video_preview(self, obj):

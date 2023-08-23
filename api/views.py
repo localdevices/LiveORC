@@ -1,7 +1,10 @@
+from django.http import HttpResponse
 from rest_framework import viewsets, permissions
-from .models import Site, Profile, Recipe, CameraConfig
+from rest_framework.decorators import action
+from rest_framework import renderers
+from .models import Site, Profile, Recipe, CameraConfig, Video
 from .serializers import SiteSerializer, ProfileSerializer, RecipeSerializer, CameraConfigSerializer
-
+import mimetypes
 
 class SiteViewSet(viewsets.ModelViewSet):
     """
@@ -37,4 +40,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+
+class VideoViewSet(viewsets.ModelViewSet):
+    """
+    API endpoints that allows recipes to be viewed or edited.
+    """
+    queryset = Video.objects.all()
+    serializer_class = RecipeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def playback(self, request, *args, **kwargs):
+        video = self.get_object().file
+        mimetype, _ = mimetypes.guess_type(video.file.name)
+        return HttpResponse(video, content_type=mimetype)
+
 # Create your views here.
+# @api_view(["GET"])
+# def get_video(request, id):
+#     img = Video.objects.get(pk=id).thumbnail
+#     return HttpResponse(img, content_type="image/jpg")
+#

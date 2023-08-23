@@ -24,7 +24,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView
 )
-from api.views import SiteViewSet, ProfileViewSet, RecipeViewSet, CameraConfigViewSet
+from api.views import SiteViewSet, ProfileViewSet, RecipeViewSet, CameraConfigViewSet, VideoViewSet
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 router = routers.DefaultRouter()
@@ -32,6 +32,7 @@ router.register(r'site', SiteViewSet)
 router.register(r'cameraconfig', CameraConfigViewSet)
 router.register(r'profile', ProfileViewSet)
 router.register(r'recipe', RecipeViewSet)
+router.register(r'video', VideoViewSet)
 
 ## CODE BELOW IS TO REORDER MENU ITEMS, CAN BE FINISHED WHEN ADMIN VIEW IS DONE
 # def get_app_list(self, request):
