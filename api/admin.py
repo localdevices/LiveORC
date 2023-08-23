@@ -1,6 +1,15 @@
+from django import forms
 from django.contrib import admin
+from django.core.exceptions import ValidationError
+
 from django.contrib.gis import admin as gisadmin
 from .models import Site, Profile, Recipe, CameraConfig, Video, Task, Server, Project, WaterLevel
+
+import json
+import pyorc
+from pyproj import CRS, Transformer
+import shapely
+
 
 
 # Register your models here.
@@ -31,15 +40,85 @@ class SiteAdmin(gisadmin.GISModelAdmin):
     inlines = [WaterLevelInline]
     search_fields = ["name"]
 
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
 
-class CameraConfigAdmin(admin.ModelAdmin):
+class CameraConfigForm(forms.ModelForm):
+    json_file = forms.FileField()
+    class Meta:
+        model = CameraConfig
+        fields = ["name", "site", "server", "recipe", "profile", "bbox"]
+
+
+    def clean(self):
+        super().clean()
+        # open the json file and try to parse
+        if "json_file" in self.files:
+            data = json.load(self.files["json_file"])
+            try:
+                pyorc.CameraConfig(**data)
+                # see if you can make a camera config object
+            except BaseException as e:
+                raise ValidationError(f"Problem with Camera Configuration: {e}")
+
+    # def save(self):
+    #     data = json.load(self.files["json_file"])
+    #     # fill in the parts
+    #     self.data["height"] = data["height"]
+
+class CameraConfigAdmin(gisadmin.GISModelAdmin):
+    fieldsets = [
+        ("User input", {"fields": ["name", "end_date", "site", "server", "recipe", "profile", "json_file"]}),
+        ("Resulting non-editable camera configuration", {"fields": ["bbox", "height", "width", "camera_calibration", "gcps", "window_size", "resolution", "crs_wkt"]})
+    ]
+
     list_display = ["name", "get_site_name"]
     search_fields = ["name"]
     list_filter = ["site"]
+    form = CameraConfigForm
     inlines = [VideoInline]
+    readonly_fields = ["height", "width", "camera_calibration", "gcps", "window_size", "resolution", "crs_wkt", "end_date"]
     @admin.display(ordering='site__name', description="Site")
     def get_site_name(self, obj):
         return obj.site.name
+
+    def save_model(self, request, obj, form, change):
+        request._files["json_file"].seek(0)
+        data = json.load(request._files["json_file"])
+        # fill in the missing components from the parsed json
+        form.instance.height = data["height"]
+        form.instance.width = data["width"]
+        form.instance.camera_calibration = {
+            "camera_matrix": data["camera_matrix"],
+            "dist_coeffs": data["dist_coeffs"],
+            "stabilize": data["stabilize"] if "stabilize" in data else None
+        }
+        form.instance.gcps = data["gcps"]
+        form.instance.window_size = data["window_size"]
+        form.instance.resolution = data["resolution"]
+        form.instance.bbox_wkt = data["bbox"]
+        if "crs" in data:
+            form.instance.crs_wkt = data["crs"]
+            transformer = Transformer.from_crs(
+                CRS.from_user_input(data["crs"]),
+                CRS.from_epsg(4326),
+                always_xy=True).transform
+
+            polygon = shapely.wkt.loads(data["bbox"])
+            polygon = shapely.ops.transform(transformer, polygon)
+            form.instance.bbox = polygon.wkt
+        if "is_nadir" in data:
+            form.instance.is_nadir = data["is_nadir"]
+        if "lens_position" in data:
+            lp = data["lens_position"]
+            if lp is not None:
+                form.instance.lens_position = {
+                    "x": lp[0],
+                    "y": lp[1],
+                    "z": lp[2]
+                }
+
+        super().save_model(request, obj, form, change)
 
 
 class ProjectAdmin(admin.ModelAdmin):

@@ -8,3 +8,4 @@ from .project import Project
 from .video import *
 from .task import Task
 from .water_level import WaterLevel
+from .validators import *
