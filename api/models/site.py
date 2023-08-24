@@ -10,3 +10,4 @@ class Site(gismodels.Model):
 
     name = models.CharField(max_length=100, help_text="Recognizable unique name for your site")
     geom = gismodels.PointField("Location", srid=4326, help_text="Approximate location of the site")
+

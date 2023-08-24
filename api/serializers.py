@@ -11,7 +11,7 @@ class SiteSerializer(serializers.HyperlinkedModelSerializer):
 class CameraConfigSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = CameraConfig
-        fields = ['url', 'name', 'site', 'start_date', 'end_date', 'version']
+        fields = ['url', 'name', 'site', 'start_date', 'end_date', 'version', 'camera_config']
 
 
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):

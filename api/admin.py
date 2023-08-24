@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 
 from django.contrib.gis import admin as gisadmin
+from django.contrib.gis.forms.widgets import OSMWidget
 from .models import Site, Profile, Recipe, CameraConfig, Video, Task, Server, Project, WaterLevel
 
 import json
@@ -47,7 +48,7 @@ class CameraConfigForm(forms.ModelForm):
     json_file = forms.FileField()
     class Meta:
         model = CameraConfig
-        fields = ["name", "site", "server", "recipe", "profile", "bbox"]
+        fields = ["name", "site", "server", "recipe", "profile", "camera_config"] #, "bbox"]
 
 
     def clean(self):
@@ -67,59 +68,81 @@ class CameraConfigForm(forms.ModelForm):
     #     self.data["height"] = data["height"]
 
 class CameraConfigAdmin(gisadmin.GISModelAdmin):
+    class Media:
+        js = (
+            'https://cdn.jsdelivr.net/npm/ol@v7.2.2/dist/ol.js',
+            'gis/js/OLMapWidget.js',
+              )
+        css = {
+            'all': (
+                'https://cdn.jsdelivr.net/npm/ol@v7.2.2/ol.css',
+                'gis/css/ol3.css',
+            )
+        }
     fieldsets = [
         ("User input", {"fields": ["name", "end_date", "site", "server", "recipe", "profile", "json_file"]}),
-        ("Resulting non-editable camera configuration", {"fields": ["bbox", "height", "width", "camera_calibration", "gcps", "window_size", "resolution", "crs_wkt"]})
+        ("Resulting non-editable camera configuration", {
+            "fields": [
+                "bbox",
+                "height",
+                "width",
+                "resolution",
+                "window_size",
+                "bounding_box_view"
+            ]}
+         )
     ]
-
     list_display = ["name", "get_site_name"]
     search_fields = ["name"]
     list_filter = ["site"]
     form = CameraConfigForm
     inlines = [VideoInline]
-    readonly_fields = ["height", "width", "camera_calibration", "gcps", "window_size", "resolution", "crs_wkt", "end_date"]
+    readonly_fields = ["bounding_box_view", "height", "width", "resolution", "window_size", "bbox"]
+    formfield_overrides = {}
     @admin.display(ordering='site__name', description="Site")
     def get_site_name(self, obj):
         return obj.site.name
 
     def save_model(self, request, obj, form, change):
         request._files["json_file"].seek(0)
-        data = json.load(request._files["json_file"])
+        form.instance.camera_config = json.load(request._files["json_file"])
         # fill in the missing components from the parsed json
-        form.instance.height = data["height"]
-        form.instance.width = data["width"]
-        form.instance.camera_calibration = {
-            "camera_matrix": data["camera_matrix"],
-            "dist_coeffs": data["dist_coeffs"],
-            "stabilize": data["stabilize"] if "stabilize" in data else None
-        }
-        form.instance.gcps = data["gcps"]
-        form.instance.window_size = data["window_size"]
-        form.instance.resolution = data["resolution"]
-        form.instance.bbox_wkt = data["bbox"]
-        if "crs" in data:
-            form.instance.crs_wkt = data["crs"]
-            transformer = Transformer.from_crs(
-                CRS.from_user_input(data["crs"]),
-                CRS.from_epsg(4326),
-                always_xy=True).transform
-
-            polygon = shapely.wkt.loads(data["bbox"])
-            polygon = shapely.ops.transform(transformer, polygon)
-            form.instance.bbox = polygon.wkt
-        if "is_nadir" in data:
-            form.instance.is_nadir = data["is_nadir"]
-        if "lens_position" in data:
-            lp = data["lens_position"]
-            if lp is not None:
-                form.instance.lens_position = {
-                    "x": lp[0],
-                    "y": lp[1],
-                    "z": lp[2]
-                }
+        # form.instance.height = data["height"]
+        # form.instance.width = data["width"]
+        # form.instance.camera_calibration = {
+        #     "camera_matrix": data["camera_matrix"],
+        #     "dist_coeffs": data["dist_coeffs"],
+        #     "stabilize": data["stabilize"] if "stabilize" in data else None
+        # }
+        # form.instance.gcps = data["gcps"]
+        # form.instance.window_size = data["window_size"]
+        # form.instance.resolution = data["resolution"]
+        # form.instance.bbox_wkt = data["bbox"]
+        # if "crs" in data:
+        #     form.instance.crs_wkt = data["crs"]
+        #     transformer = Transformer.from_crs(
+        #         CRS.from_user_input(data["crs"]),
+        #         CRS.from_epsg(4326),
+        #         always_xy=True).transform
+        #
+        #     polygon = shapely.wkt.loads(data["bbox"])
+        #     polygon = shapely.ops.transform(transformer, polygon)
+        #     form.instance.bbox = polygon.wkt
+        # if "is_nadir" in data:
+        #     form.instance.is_nadir = data["is_nadir"]
+        # if "lens_position" in data:
+        #     lp = data["lens_position"]
+        #     if lp is not None:
+        #         form.instance.lens_position = {
+        #             "x": lp[0],
+        #             "y": lp[1],
+        #             "z": lp[2]
+        #         }
 
         super().save_model(request, obj, form, change)
 
+    def bounding_box_view(self, obj):
+        return obj.bbox_view
 
 class ProjectAdmin(admin.ModelAdmin):
     search_fields = ["name", "description"]
