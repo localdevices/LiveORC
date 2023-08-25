@@ -3,7 +3,7 @@ from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework import renderers
 from .models import Site, Profile, Recipe, CameraConfig, Video
-from .serializers import SiteSerializer, ProfileSerializer, RecipeSerializer, CameraConfigSerializer
+from .serializers import SiteSerializer, ProfileSerializer, RecipeSerializer, CameraConfigSerializer, VideoSerializer
 import mimetypes
 
 class SiteViewSet(viewsets.ModelViewSet):
@@ -46,7 +46,7 @@ class VideoViewSet(viewsets.ModelViewSet):
     API endpoints that allows recipes to be viewed or edited.
     """
     queryset = Video.objects.all()
-    serializer_class = RecipeSerializer
+    serializer_class = VideoSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])

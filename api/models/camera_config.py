@@ -125,8 +125,6 @@ class CameraConfig(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True)
     # TODO also connect to server
     # TODO connect to recipe and profile (where necessary)
-    def save(self):
-        super().save()
 
     # def clean(self):
     #     super().clean()

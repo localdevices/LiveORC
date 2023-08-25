@@ -1,5 +1,5 @@
 from django.contrib.gis import admin as gisadmin
-from ..admin import WaterLevelInline
+from .time_series import TimeSeriesInline
 
 
 # Register your models here.
@@ -10,7 +10,7 @@ class SiteAdmin(gisadmin.GISModelAdmin):
     ]
     search_fields = ["name"]
     list_display = ["name", "geom"]
-    inlines = [WaterLevelInline]
+    inlines = [TimeSeriesInline]
     search_fields = ["name"]
 
     def save_model(self, request, obj, form, change):

@@ -7,5 +7,5 @@ from .camera_config import CameraConfig
 from .project import Project
 from .video import *
 from .task import Task
-from .water_level import WaterLevel
+from .time_series import TimeSeries
 from .validators import *

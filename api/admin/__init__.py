@@ -1,7 +1,7 @@
 from django.contrib import admin
-from ..models import Site, CameraConfig, Video, Task, Server, Profile, Recipe, WaterLevel
+from ..models import Site, CameraConfig, Video, Task, Server, Profile, Recipe, TimeSeries
 
-from .water_level import WaterLevelAdmin, WaterLevelInline
+from .time_series import TimeSeriesAdmin
 from .camera_config import CameraConfigAdmin
 from .video import VideoInline, VideoAdmin
 from .site import SiteAdmin
@@ -16,4 +16,4 @@ admin.site.register(Recipe)
 admin.site.register(Video, VideoAdmin)
 admin.site.register(Server, ServerAdmin)
 admin.site.register(Task, TaskAdmin)
-admin.site.register(WaterLevel, WaterLevelAdmin)
+admin.site.register(TimeSeries, TimeSeriesAdmin)

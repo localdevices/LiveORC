@@ -105,7 +105,7 @@ class Video(models.Model):
         help_text="Date and time on which video record is created"
     )
     timestamp = models.DateTimeField(
-        blank=True,
+        null=False,
         help_text="Data and time on which video was taken. If not provided by the user, this is taken from the file's time stamp"
     )
     file = models.FileField(
@@ -146,10 +146,10 @@ class Video(models.Model):
         super(Video, self).save(*args, **kwargs)
         # now store the video
         self.file = file
-        super(Video, self).save(*args, **kwargs)
+        super(Video, self).save(*(), **{})
         if not(self.make_frames()):
             raise Exception('Could not create keyframe - is the file type valid?')
-        super(Video, self).save(*args, **kwargs)
+        super(Video, self).save(*(), **{})
 
     def make_frames(self):
         """

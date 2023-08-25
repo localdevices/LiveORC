@@ -1,17 +1,17 @@
-from .models import Site, Profile, Recipe, CameraConfig, Video, Server, Task, Project, WaterLevel
+from .models import Site, Profile, Recipe, CameraConfig, Video, Server, Task, Project, TimeSeries
 from rest_framework import serializers
 
 
 class SiteSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Site
-        fields = ['url', 'name', 'geom']
+        fields = ['id', 'url', 'name', 'geom']
 
 
-class CameraConfigSerializer(serializers.HyperlinkedModelSerializer):
+class CameraConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = CameraConfig
-        fields = ['url', 'name', 'site', 'start_date', 'end_date', 'version', 'camera_config']
+        fields = ['url', 'name', 'site', 'start_date', 'end_date', 'camera_config']
 
 
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
@@ -26,7 +26,7 @@ class RecipeSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['data']
 
 
-class VideoSerializer(serializers.HyperlinkedModelSerializer):
+class VideoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Video
         fields = "__all__"
@@ -52,7 +52,7 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
         fields = "__all__"
 
 
-class WaterLevelSerializer(serializers.HyperlinkedModelSerializer):
+class TimeSeriesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = WaterLevel
+        model = TimeSeries
         fields = "__all__"
