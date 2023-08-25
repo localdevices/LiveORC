@@ -9,6 +9,7 @@ import io
 import mimetypes
 import os
 import cv2
+import numpy as np
 from django.conf import settings
 
 from ..models import CameraConfig, Project, TimeSeries
@@ -56,6 +57,15 @@ def add_frame_to_model(video_field, img_field, frame_nr=0, suffix="", thumb=Fals
     img_field.save(img_filename, ContentFile(temp_img.read()), save=False)
     temp_img.close()
 
+
+def get_closest_to_dt(queryset, timestamp):
+    greater = queryset.filter(timestamp__gte=timestamp).order_by("timestamp").first()
+    less = queryset.filter(timestamp__lte=timestamp).order_by("-timestamp").first()
+
+    if greater and less:
+        return greater if abs(greater.timestamp - timestamp) < abs(less.timestamp - timestamp) else less
+    else:
+        return greater or less
 
 
 def get_video_path(instance, filename):
@@ -145,7 +155,24 @@ class Video(models.Model):
         super(Video, self).save(*(), **{})
         if not(self.make_frames()):
             raise Exception('Could not create keyframe - is the file type valid?')
+        # now check for a water level series
+        if self.time_series is not None:
+            return
+        # look for time series instances that are for the same site and not yet associated with a video
+        ts_at_site = TimeSeries.objects.filter(
+            site=self.camera_config.site
+        ) # TODO: exclude time series records that are already used by another video ....filter(
+        #     video__time_series__ne=...
+        if len(ts_at_site) != 0:
+            # apparently there is a candidate time series record
+            ts_closest = get_closest_to_dt(ts_at_site, self.timestamp)
+            # check if time diff is acceptable
+            dt = np.abs(self.timestamp - ts_closest.timestamp)
+            if dt < self.camera_config.allowed_dt:
+                self.time_series = ts_closest
         super(Video, self).save(*(), **{})
+
+
 
     def make_frames(self):
         """
