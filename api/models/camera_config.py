@@ -1,4 +1,4 @@
-# from django.db import models
+from datetime import timedelta
 import shapely.wkt
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
@@ -9,7 +9,8 @@ from pyproj import CRS, Transformer
 from shapely import ops
 
 from ..models import Site, Server, Recipe, Profile, validators
-import jsonschema
+import pyorc
+
 
 map_template = """
 <div id="id_geom_div_map" class="dj_map_wrapper">
@@ -44,8 +45,6 @@ map_template = """
 
 """
 
-import pyorc
-
 lens_position_schema = {
     'schema': 'http://json-schema.org/draft-07/schema#',
     'type': 'object',
@@ -67,59 +66,26 @@ class CameraConfig(models.Model):
     def __str__(self):
         return f"{self.name} at {self.site.name}"
     name = models.CharField(max_length=100, help_text="Recognizable unique name for the camera configuration")
-    # height = models.IntegerField(help_text="Height of the image frame in nr. of pixels")
-    # width = models.IntegerField(help_text="Width of the image frame in nr. of pixels")
-    # crs_wkt = models.CharField(
-    #     max_length=2000,
-    #     help_text="Well-known text or EPSG code for the camera configuration. If set, it must be a metre projection type",
-    #     null=True,
-    #     blank=True
-    # )
-    # resolution = models.FloatField(
-    #     validators=[MinValueValidator(0.001), MaxValueValidator(0.1)],
-    #     default=0.03,
-    #     help_text="Resolution of the planar reprojected image over the bounding box of interest. For small streams like 1 meter, this may be as low as 0.001 or 0.002, for large 100m streams with large scale patterns, a value of 0.05 is recommended.",
-    # )
-    # window_size = models.IntegerField(
-    #     validators=[MinValueValidator(5), MaxValueValidator(50)],
-    #     help_text="Amount of pixels to use to find patterns in, typically a value of 15 or 20 is good.",
-    #     default=15
-    # )
-    # lens_position = models.JSONField(
-    #     validators=[validators.JSONSchemaValidator(limit_value=lens_position_schema)],
-    #     null=True,
-    #     blank=True,
-    #     editable=False
-    # )
-    #
-    # gcps = models.JSONField(
-    #     help_text='Ground control points and vertical reference as JSON. Must contain fields "src", "dst", "h_ref", "z_0" and may contain field "crs".'
-    # )
-    # is_nadir = models.BooleanField(
-    #     default=False,
-    #     editable=False,
-    #     help_text="If set, the video is assumed to be taken at nadir, making it possible to orthorectify with only 2 points."
-    # )
-    # camera_calibration = models.JSONField(
-    #     null=True,
-    #     blank=True,
-    #     editable=False,
-    #     help_text="Intrinsic matrix, stabilization and distortion parameters of the camera, defining the objective size, center and focal length, lens distortion and polygon of non-moving areas."
-    # )
-    # # stabilize = models.JSONField(
-    # #     null=True,
-    # #     blank=True,
-    # #     help_text="Polygon, that bounds the water surface. Area outside is used to define stabilization region."
-    # # )
-    # bbox_wkt = models.CharField(max_length=2000, editable=False)
-    # bbox = models.PolygonField(srid=4326, help_text="Polygon in lat-lon for display purposes", null=True) #, editable=False)
-    camera_config = models.JSONField(null=True, blank=True)
-
-    # data = models.JSONField(help_text="JSON fields containing a camera configuration, see https://localdevices.github.io/pyorc/user-guide/camera_config/index.html for setup instructions")
+    camera_config = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="JSON fields containing a camera configuration, "
+                  "see https://localdevices.github.io/pyorc/user-guide/camera_config/index.html for setup instructions"
+    )
+    allowed_dt = models.DurationField(
+        "Allowed difference in time stamp",
+        help_text="Maximum time difference allowed between a time stamp of an associated video, and a time series "
+                  "instance at the associated site [sec]",
+        default=timedelta(seconds=1800),
+        validators=[
+            MinValueValidator(timedelta(seconds=0)),
+            MaxValueValidator(timedelta(seconds=86400))
+        ]
+    )
     start_date = models.DateTimeField("start validity date", auto_now_add=True)
     end_date = models.DateTimeField("end validity date", null=True)
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
-    version = models.CharField("pyORC version copmpatibility", max_length=15, blank=True, default=pyorc.__version__, editable=False)
+    version = models.CharField("pyORC version compatibility", max_length=15, blank=True, default=pyorc.__version__, editable=False)
     server = models.ForeignKey(Server, on_delete=models.SET_NULL, null=True, blank=True)
     recipe = models.ForeignKey(Recipe, on_delete=models.SET_NULL, null=True, blank=True)
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True)
@@ -176,37 +142,14 @@ class CameraConfig(models.Model):
 
     @property
     def resolution(self):
-        return self.camera_config["resolution"]
+        if self.camera_config:
+            return self.camera_config["resolution"]
 
     resolution.fget.short_description = "Resolution for orthorectification [m]"
     @property
     def window_size(self):
-        return self.camera_config["window_size"]
+        if self.camera_config:
+            return self.camera_config["window_size"]
 
     window_size.fget.short_description = "interrogation window size [pix]"
 
-    # @property
-    # def camera_config(self):
-    #     """
-    #
-    #     Returns
-    #     -------
-    #     camera config dict as it should be forwarded to pyOpenRiverCam
-    #     """
-    #     if self.lens_position is not None:
-    #         lens_position = [self.lens_position["x"], self.lens_position["y"], self.lens_position["z"]]
-    #     else:
-    #         lens_position = None
-    #     cam_config = dict(
-    #         height=self.height,
-    #         width=self.width,
-    #         gcps=self.gcps,
-    #         bbox=self.bbox_wkt,
-    #         lens_position=lens_position,
-    #         crs=self.crs_wkt,
-    #         is_nadir=self.is_nadir,
-    #         window_size=self.window_size,
-    #         resolution=self.resolution,
-    #         **self.camera_calibration
-    #     )
-    #     return cam_config

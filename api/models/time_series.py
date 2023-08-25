@@ -23,5 +23,5 @@ class TimeSeries(models.Model):
     # TODO: create link with videos, filtered on site, to add water level to those videos.
 
     class Meta:
-        indexes = [models.Index(fields=['site'])]
+        indexes = [models.Index(fields=['site', 'timestamp'])]
         verbose_name_plural = "time series"

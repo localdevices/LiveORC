@@ -49,7 +49,7 @@ class CameraConfigAdmin(gisadmin.GISModelAdmin):
             )
         }
     fieldsets = [
-        ("User input", {"fields": ["name", "end_date", "site", "server", "recipe", "profile", "json_file"]}),
+        ("User input", {"fields": ["name", "end_date", "site", "allowed_dt", "server", "recipe", "profile", "json_file"]}),
         ("Resulting non-editable camera configuration", {
             "fields": [
                 "bbox",

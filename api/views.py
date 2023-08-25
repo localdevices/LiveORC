@@ -2,8 +2,8 @@ from django.http import HttpResponse
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework import renderers
-from .models import Site, Profile, Recipe, CameraConfig, Video
-from .serializers import SiteSerializer, ProfileSerializer, RecipeSerializer, CameraConfigSerializer, VideoSerializer
+from .models import Site, Profile, Recipe, CameraConfig, Video, TimeSeries
+from .serializers import SiteSerializer, ProfileSerializer, RecipeSerializer, CameraConfigSerializer, VideoSerializer, TimeSeriesSerializer
 import mimetypes
 
 class SiteViewSet(viewsets.ModelViewSet):
@@ -39,6 +39,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+class TimeSeriesViewSet(viewsets.ModelViewSet):
+    """
+    API endpoints that allows recipes to be viewed or edited.
+    """
+    queryset = TimeSeries.objects.all()
+    serializer_class = TimeSeriesSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
 
 
 class VideoViewSet(viewsets.ModelViewSet):

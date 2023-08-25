@@ -5,7 +5,7 @@ from .recipe import Recipe
 from .server import Server
 from .camera_config import CameraConfig
 from .project import Project
+from .time_series import TimeSeries
 from .video import *
 from .task import Task
-from .time_series import TimeSeries
 from .validators import *

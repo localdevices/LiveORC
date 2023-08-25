@@ -11,7 +11,7 @@ import os
 import cv2
 from django.conf import settings
 
-from ..models import CameraConfig, Project
+from ..models import CameraConfig, Project, TimeSeries
 
 VIDEO_EXTENSIONS = ["MOV", "MKV", "MP4", "AVI", "M4V"]
 
@@ -123,11 +123,6 @@ class Video(models.Model):
         help_text="Thumbnail frame for list views",
         editable=False
     )
-    water_level = models.FloatField(
-        blank=True,
-        null=True,
-        help_text="Water level occurring within time range close to timestamp of video"
-    )
     status = models.PositiveSmallIntegerField(
         choices=VideoStatus.choices,
         default=VideoStatus.NEW,
@@ -135,6 +130,7 @@ class Video(models.Model):
         help_text="Status of processing"
     )
     camera_config = models.ForeignKey(CameraConfig, on_delete=models.CASCADE)
+    time_series = models.ForeignKey(TimeSeries, on_delete=models.SET_NULL, null=True, blank=True)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
@@ -189,6 +185,12 @@ class Video(models.Model):
                 )
             )
         return ""
+
+
+    class Meta:
+        # organize tables along the camera config id and then per time stamp
+        indexes = [models.Index(fields=['camera_config', 'timestamp'])]
+
 
     # TODO: Organize settings.py for choice local or S3.
     # TODO: when timestamp not provided, assume it must be harvested from the file time stamp
