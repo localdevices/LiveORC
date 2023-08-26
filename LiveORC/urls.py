@@ -27,15 +27,16 @@ from rest_framework_simplejwt.views import (
 from api.views import SiteViewSet, ProfileViewSet, RecipeViewSet, CameraConfigViewSet, VideoViewSet, TimeSeriesViewSet, TaskViewSet
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
-router = routers.DefaultRouter()
-router.register(r'site', SiteViewSet)
-router.register(r'cameraconfig', CameraConfigViewSet)
-router.register(r'profile', ProfileViewSet)
-router.register(r'recipe', RecipeViewSet)
-router.register(r'video', VideoViewSet)
-router.register(r'timeseries', TimeSeriesViewSet)
-router.register(r'task', TaskViewSet)
-
+#
+# router = routers.DefaultRouter()
+# router.register(r'site', SiteViewSet)
+# router.register(r'cameraconfig', CameraConfigViewSet)
+# router.register(r'profile', ProfileViewSet)
+# router.register(r'recipe', RecipeViewSet)
+# router.register(r'video', VideoViewSet)
+# router.register(r'timeseries', TimeSeriesViewSet)
+# router.register(r'task', TaskViewSet)
+#
 ## CODE BELOW IS TO REORDER MENU ITEMS, CAN BE FINISHED WHEN ADMIN VIEW IS DONE
 # def get_app_list(self, request):
 #     """
@@ -68,12 +69,7 @@ router.register(r'task', TaskViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/', include(router.urls)),
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs_swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/docs/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('api/', include('api.urls', namespace='api'))
 ]
 
 if settings.DEBUG:
