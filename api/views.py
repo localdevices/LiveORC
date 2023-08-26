@@ -1,10 +1,13 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, request
+from django.shortcuts import redirect
+from django.urls import reverse
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework import renderers
 from .models import Site, Profile, Recipe, CameraConfig, Video, TimeSeries, Task
 from .serializers import SiteSerializer, ProfileSerializer, RecipeSerializer, CameraConfigSerializer, VideoSerializer, TimeSeriesSerializer, TaskSerializer
 import mimetypes
+
 
 class SiteViewSet(viewsets.ModelViewSet):
     """
@@ -73,6 +76,13 @@ class VideoViewSet(viewsets.ModelViewSet):
         video = self.get_object().file
         mimetype, _ = mimetypes.guess_type(video.file.name)
         return HttpResponse(video, content_type=mimetype)
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def create_task(self, request, *args, **kwargs):
+        instance = self.get_object()
+        task = instance.make_task()
+        print(f"URL: {request.build_absolute_uri(reverse('api'))}")
+        return redirect('video-list')
 
 # Create your views here.
 # @api_view(["GET"])

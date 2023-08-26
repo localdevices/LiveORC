@@ -13,6 +13,7 @@ import numpy as np
 from django.conf import settings
 
 from ..models import CameraConfig, Project, TimeSeries
+import api.task_utils
 
 VIDEO_EXTENSIONS = ["MOV", "MKV", "MP4", "AVI", "M4V"]
 
@@ -172,6 +173,21 @@ class Video(models.Model):
                 self.time_series = ts_closest
         super(Video, self).save(*(), **{})
 
+    def make_task(self):
+        task = api.task_utils.get_task(self)
+
+        # TODO: determine if there are profiles. If not only 2D processing
+        # if has_profile:
+        #     ...
+        # else:
+
+        # time = datetime.now()
+        # callback_url =
+
+        # input_files = [
+        # storage =
+
+        return task
 
 
     def make_frames(self):
