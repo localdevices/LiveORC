@@ -57,6 +57,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     """
     API endpoints that allows recipes to be viewed or edited.
     """
+
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -81,8 +82,8 @@ class VideoViewSet(viewsets.ModelViewSet):
     def create_task(self, request, *args, **kwargs):
         instance = self.get_object()
         task = instance.make_task()
-        print(f"URL: {request.build_absolute_uri(reverse('api'))}")
-        return redirect('video-list')
+        # print(f"URL: {request.build_absolute_uri(reverse('video'))}")
+        return redirect('api:video-list')
 
 # Create your views here.
 # @api_view(["GET"])
