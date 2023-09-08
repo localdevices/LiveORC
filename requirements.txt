@@ -1,3 +1,4 @@
+cryptography
 django
 djangorestframework
 djangorestframework-simplejwt

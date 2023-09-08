@@ -23,9 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "True").lower() == "True".lower()
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
+# ALLOWED_HOSTS = []  # default django project code
 
 
 # Application definition
@@ -93,6 +94,17 @@ WSGI_APPLICATION = 'LiveORC.wsgi.application'
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+if os.getenv("DATABASE_HOST"):
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('DATABASE_ENGINE', 'django.contrib.gis.db.backends.postgis'),
+            'NAME': os.getenv('DATABASE_NAME', 'liveorc_db'),
+            'USER': os.getenv('DATABASE_USER'),
+            'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+            'HOST': os.getenv('DATABASE_HOST', 'db'),
+            'PORT': os.getenv('DATABASE_PORT', '5432'),
+        }
+    }
 
 DATABASES = {
     'default': {
