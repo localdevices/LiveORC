@@ -69,7 +69,11 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('api/', include('api.urls', namespace='api'))
+    path('api/', include('api.urls', namespace='api')),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs_swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/docs/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
 ]
 
 if settings.DEBUG:
