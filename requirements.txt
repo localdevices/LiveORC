@@ -1,0 +1,7 @@
+django
+djangorestframework
+djangorestframework-simplejwt
+pytest-django
+django-debug-toolbar
+drf-spectacular
+nodeopenrivercam @ https://github.com/localdevices/nodeorc.git
