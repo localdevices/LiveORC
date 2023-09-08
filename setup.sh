@@ -48,7 +48,7 @@ install_dependencies () {
 
 install_liveorc () {
     echo '################################'
-    echo 'INSTALLING NODEOPENRIVERCAM'
+    echo 'INSTALLING LIVEOPENRIVERCAM'
     echo '################################'
         pip3 install virtualenv
         python3 -m venv $HOME/venv/liveorc
@@ -121,7 +121,10 @@ After=network.target
 User=$USER
 Group=www-data
 WorkingDirectory=$PWD
-ExecStart=$HOME/venv/liveorc/bin/gunicorn --access-logfile - --workers 3 --bind unix:/tmp/liveorc.sock liveorc.wsgi:application
+Environment="PATH=${HOME}/venv/liveorc/bin"
+Environment="DEBUG=False"
+EnvironmentFile=${PWD}/.env
+ExecStart=$HOME/venv/liveorc/bin/gunicorn --access-logfile - --workers 3 --bind unix:/tmp/liveorc.sock LiveORC.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
@@ -147,7 +150,7 @@ server {
     }
     location / {
         include proxy_params;
-        proxy_pass unix:/tmp/liveorc.sock;
+        proxy_pass http://unix:/tmp/liveorc.sock;
     }
 }
 EOF
