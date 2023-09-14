@@ -9,11 +9,12 @@ class VideoInline(admin.TabularInline):
 
 class VideoAdmin(admin.ModelAdmin):
     list_display = ["get_site_name", "created_at", "timestamp", "thumbnail_preview", "time_series"]
-    readonly_fields = ('video_preview', 'get_site_name', 'thumbnail_preview', 'get_timestamp', 'get_water_level', 'get_discharge',)
+    non_editable_fields = ["file", "camera_config"]
+    readonly_fields = ('video_preview', 'get_site_name', 'thumbnail_preview', 'image_preview', 'get_timestamp', 'get_water_level', 'get_discharge',)
     list_filter = ["created_at", "timestamp"]
 
     fieldsets = [
-        ('Video details', {"fields": ["get_site_name", "timestamp", "thumbnail_preview"]}),
+        ('Video details', {"fields": ["get_site_name", "file", "camera_config", "timestamp", "thumbnail_preview", "image_preview"]}),
         ("Time series instance linked to the video", {
             "fields": [
                 "get_timestamp",
@@ -22,6 +23,12 @@ class VideoAdmin(admin.ModelAdmin):
             ]}
          )
     ]
+    # hide certain fields in edit mode, only show for new videos (not working yet)
+    # def get_exclude(self, request, obj=None):
+    #     exclude = super().get_exclude(request, obj) or ()
+    #     if obj:
+    #         exclude = (*exclude, *self.non_editable_fields)
+    #     return exclude or None
 
 
     @admin.display(ordering='camera_config__site__name', description="Site")
@@ -52,3 +59,7 @@ class VideoAdmin(admin.ModelAdmin):
     video_preview.short_description = 'video preview'
     video_preview.allow_tags = True
 
+    def image_preview(self, obj):
+        return obj.image_preview
+    image_preview.short_description = 'Results'
+    image_preview.allow_tags = True

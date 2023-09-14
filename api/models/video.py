@@ -129,6 +129,12 @@ class Video(models.Model):
         editable=False,
         max_length=254
     )
+    image = models.ImageField(
+        upload_to=get_video_path,
+        help_text="Image showing the results of a velocimetry analysis",
+        null=True,
+        # max_length=254
+    )
     thumbnail = models.ImageField(
         upload_to=get_thumb_path,
         help_text="Thumbnail frame for list views",
@@ -228,6 +234,15 @@ class Video(models.Model):
                 )
             )
         return ""
+
+    @property
+    def image_preview(self):
+        height = int(300)
+        if self.image:
+            width = int((self.image.width / self.image.height) * height)
+            return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.image.url, width, height))
+        return ""
+
 
 
     class Meta:
