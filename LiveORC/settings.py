@@ -79,7 +79,7 @@ ROOT_URLCONF = 'LiveORC.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates/')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -117,13 +117,13 @@ if os.getenv("DATABASE_HOST"):
             'PORT': os.getenv('DATABASE_PORT', '5432'),
         }
     }
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
-        'NAME': BASE_DIR / 'db.sqlite3',
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.contrib.gis.db.backends.spatialite',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
 
 
 SPECTACULAR_SETTINGS = {
@@ -176,5 +176,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 STATIC_ROOT = os.path.join(BASE_DIR, STATIC_URL)
-
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static/admin"),
+]
 

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.translation import gettext_lazy
 from ..models import Site, CameraConfig, Video, Task, Server, Profile, Recipe, TimeSeries
 
 from .time_series import TimeSeriesAdmin
@@ -7,6 +8,13 @@ from .video import VideoInline, VideoAdmin
 from .site import SiteAdmin
 from .task import TaskAdmin
 from .server import ServerAdmin
+
+# initiate orc admin site with specific titles and logos
+
+admin.site.site_title = gettext_lazy("LiveOpenRiverCam")
+admin.site.site_header = gettext_lazy("LiveOpenRiverCam")
+admin.site.index_title = gettext_lazy("Admin dashboard")
+
 
 admin.site.register(Site, SiteAdmin)
 admin.site.register(CameraConfig, CameraConfigAdmin)
