@@ -4,6 +4,7 @@ from django.urls import reverse
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework import renderers
+from typing import Optional
 from .models import Site, Profile, Recipe, CameraConfig, Video, TimeSeries, Task
 from .serializers import SiteSerializer, ProfileSerializer, RecipeSerializer, CameraConfigSerializer, VideoSerializer, TimeSeriesSerializer, TaskSerializer
 import mimetypes
@@ -52,6 +53,9 @@ class TimeSeriesViewSet(viewsets.ModelViewSet):
     serializer_class = TimeSeriesSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        # video can also be retrieved nested per site, by filtering on the site of the cameraconfig property.
+        return TimeSeries.objects.filter(site=self.kwargs['site_pk'])
 
 class TaskViewSet(viewsets.ModelViewSet):
     """
@@ -68,9 +72,14 @@ class VideoViewSet(viewsets.ModelViewSet):
     """
     API endpoints that allows recipes to be viewed or edited.
     """
-    queryset = Video.objects.all()
+    # lookup_field = "camera_config__site"
+    queryset = Video.objects.all().order_by('-timestamp')
     serializer_class = VideoSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # video can also be retrieved nested per site, by filtering on the site of the cameraconfig property.
+        return Video.objects.filter(camera_config__site__id=self.kwargs['site_pk'])
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def playback(self, request, *args, **kwargs):
@@ -85,9 +94,19 @@ class VideoViewSet(viewsets.ModelViewSet):
         # print(f"URL: {request.build_absolute_uri(reverse('video'))}")
         return redirect('api:video-list')
 
-# Create your views here.
+
+
+# class VideoSiteViewSet(VideoViewSet):
+#     queryset = Video.objects.all()
+#     def get_queryset(self):
+#         site: Optional[int] = self.request.query_params.get("site", None)
+#         if site is not None:
+#             return Video.objects.filter(site=site)
+#         return super().get_queryset()
+#
+
 # @api_view(["GET"])
 # def get_video(request, id):
 #     img = Video.objects.get(pk=id).thumbnail
 #     return HttpResponse(img, content_type="image/jpg")
-#
+

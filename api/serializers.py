@@ -5,13 +5,15 @@ from rest_framework import serializers
 class SiteSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Site
-        fields = ['id', 'url', 'name', 'geom']
+        # fields = "__all__"
+        fields = ['id', 'name']# , 'geom']
 
 
 class CameraConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = CameraConfig
-        fields = ['url', 'name', 'site', 'start_date', 'end_date', 'camera_config']
+        fields = "__all__"
+        # fields = ['url', 'name', 'site', 'start_date', 'end_date', 'camera_config']
 
 
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):

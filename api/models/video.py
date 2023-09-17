@@ -208,6 +208,11 @@ class Video(models.Model):
 
         raise NotImplementedError
 
+    # @property
+    # def site(self):
+    #     return self.camera_config.site
+    #
+
     @property
     def thumbnail_preview(self):
         height = int(settings.THUMBSIZE) / 2

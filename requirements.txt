@@ -2,6 +2,7 @@ cryptography
 django
 djangorestframework
 djangorestframework-simplejwt
+drf-nested-routers
 pytest-django
 django-debug-toolbar
 drf-spectacular

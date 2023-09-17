@@ -8,6 +8,7 @@ class VideoInline(admin.TabularInline):
     extra = 3
 
 class VideoAdmin(admin.ModelAdmin):
+    ordering = ["-timestamp"]
     list_display = ["get_site_name", "timestamp", "created_at" , "thumbnail_preview", "time_series"]
     non_editable_fields = ["file", "camera_config"]
     readonly_fields = ('video_preview', 'get_site_name', 'thumbnail_preview', 'image_preview', 'get_timestamp', 'get_water_level', 'get_discharge', 'get_fraction')

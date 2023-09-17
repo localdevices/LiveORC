@@ -30,7 +30,6 @@ HOSTS = os.getenv("ALLOWED_HOSTS")
 ALLOWED_HOSTS = [] if HOSTS is None else HOSTS.split(",")
 # ALLOWED_HOSTS = []  # default django project code
 
-
 # Application definition
 
 INSTALLED_APPS = [
