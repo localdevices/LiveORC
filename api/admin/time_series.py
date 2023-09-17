@@ -18,6 +18,7 @@ class TimeSeriesAdmin(admin.ModelAdmin):
     list_display = ["get_site_name", "timestamp", "h", "fraction_velocimetry", "q_50", 'thumbnail_preview']
     list_filter = ["site__name"]
     readonly_fields = ('image_preview', )
+    list_filter = ["site", "timestamp"]
 
     @admin.display(ordering='site__name', description="Site")
     def get_site_name(self, obj):

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     'rest_framework',
     'api',
+    'rangefilter',
     'drf_spectacular',
 ]
 

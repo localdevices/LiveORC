@@ -1,5 +1,17 @@
 from django.contrib import admin
+from django.contrib.admin import DateFieldListFilter
+from rangefilter.filters import DateRangeFilterBuilder, DateTimeRangeFilterBuilder
 from ..models import Video
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+default_end = datetime.now()
+default_start = default_end - relativedelta(days=1)
+
+datetimefilter = DateTimeRangeFilterBuilder(
+    default_start=default_start,
+    default_end=default_end
+)
 class VideoInline(admin.TabularInline):
     """
     Display filtered videos for given site or project inside admin view of site and project
@@ -12,7 +24,17 @@ class VideoAdmin(admin.ModelAdmin):
     list_display = ["get_site_name", "timestamp", "created_at" , "thumbnail_preview", "time_series"]
     non_editable_fields = ["file", "camera_config"]
     readonly_fields = ('video_preview', 'get_site_name', 'thumbnail_preview', 'image_preview', 'get_timestamp', 'get_water_level', 'get_discharge', 'get_fraction')
-    list_filter = ["created_at", "timestamp"]
+    list_filter = [
+        "camera_config__site",
+        (
+            "timestamp",
+            datetimefilter,
+        ),
+        (
+            "created_at",
+            datetimefilter,
+        )
+    ]
 
     fieldsets = [
         ('Video details', {"fields": ["get_site_name", "file", "camera_config", "timestamp", "image_preview", "video_preview"]}),
@@ -34,10 +56,9 @@ class VideoAdmin(admin.ModelAdmin):
         return self.readonly_fields
 
 
-    @admin.display(ordering='camera_config__site__name', description="Site")
+    @admin.display(ordering='camera_config__site__name', description="Site name")
     def get_site_name(self, obj):
         return obj.camera_config.site.name
-
 
     @admin.display(ordering='time_series__timestamp', description='Time stamp of related time series')
     def get_timestamp(self, obj):

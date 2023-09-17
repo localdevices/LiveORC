@@ -1,8 +1,9 @@
 from django.http import HttpResponse, request
 from django.shortcuts import redirect
 from django.urls import reverse
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
+from rest_framework.response import Response
 from rest_framework import renderers
 from typing import Optional
 from .models import Site, Profile, Recipe, CameraConfig, Video, TimeSeries, Task
@@ -47,7 +48,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 class TimeSeriesViewSet(viewsets.ModelViewSet):
     """
-    API endpoints that allows recipes to be viewed or edited.
+    API endpoints that allows time series to be viewed or edited.
     """
     queryset = TimeSeries.objects.all()
     serializer_class = TimeSeriesSerializer
@@ -59,7 +60,7 @@ class TimeSeriesViewSet(viewsets.ModelViewSet):
 
 class TaskViewSet(viewsets.ModelViewSet):
     """
-    API endpoints that allows recipes to be viewed or edited.
+    API endpoints that allows tasks to be viewed or edited.
     """
 
     queryset = Task.objects.all()
@@ -70,12 +71,13 @@ class TaskViewSet(viewsets.ModelViewSet):
 
 class VideoViewSet(viewsets.ModelViewSet):
     """
-    API endpoints that allows recipes to be viewed or edited.
+    API endpoints that allows videos to be added
     """
-    # lookup_field = "camera_config__site"
     queryset = Video.objects.all().order_by('-timestamp')
     serializer_class = VideoSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    http_method_names = ["post"]
 
     def get_queryset(self):
         # video can also be retrieved nested per site, by filtering on the site of the cameraconfig property.
@@ -93,6 +95,12 @@ class VideoViewSet(viewsets.ModelViewSet):
         task = instance.make_task()
         # print(f"URL: {request.build_absolute_uri(reverse('video'))}")
         return redirect('api:video-list')
+
+class VideoSiteViewSet(VideoViewSet):
+    """
+    API endpoints that allows videos to be edited
+    """
+    http_method_names = ["get", "put", "patch", "head", "delete"]
 
 
 

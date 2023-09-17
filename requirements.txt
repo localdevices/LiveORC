@@ -2,6 +2,7 @@ cryptography
 django
 djangorestframework
 djangorestframework-simplejwt
+django-admin-rangefilter
 drf-nested-routers
 pytest-django
 django-debug-toolbar
