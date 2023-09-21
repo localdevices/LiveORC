@@ -29,7 +29,8 @@ DEBUG = os.getenv("DEBUG", "True").lower() == "True".lower()
 HOSTS = os.getenv("ALLOWED_HOSTS")
 ALLOWED_HOSTS = [] if HOSTS is None else HOSTS.split(",")
 # ALLOWED_HOSTS = []  # default django project code
-
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
