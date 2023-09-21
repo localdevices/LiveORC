@@ -65,7 +65,7 @@ class CameraConfigAdmin(gisadmin.GISModelAdmin):
     search_fields = ["name"]
     list_filter = ["site"]
     form = CameraConfigForm
-    inlines = [VideoInline]
+    # inlines = [VideoInline]
     readonly_fields = ["bounding_box_view", "height", "width", "resolution", "window_size", "bbox"]
     formfield_overrides = {}
     @admin.display(ordering='site__name', description="Site")

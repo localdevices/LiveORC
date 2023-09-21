@@ -3,12 +3,13 @@ import shapely.wkt
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, MinValueValidator, BaseValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.html import mark_safe
+from django.utils.translation import gettext_lazy
 from pyproj import CRS, Transformer
 from shapely import ops
 
-from ..models import Site, Server, Recipe, Profile, validators
+from ..models import Site, Server, Recipe, Profile
 import pyorc
 
 
@@ -21,19 +22,27 @@ map_template = """
     // add a feature
     
     const wkt = '{}';
+    const wkt_profile = '{}';
     const format = new ol.format.WKT();
     const feature = format.readFeature(wkt);
+    const feature_profile = format.readFeature(wkt_profile);
     const vector = new ol.layer.Vector({{
         source: new ol.source.Vector({{
             features: [feature],
         }}),
     }});
-    
+
+    const vector_profile = new ol.layer.Vector({{
+        source: new ol.source.Vector({{
+            features: [feature_profile],
+        }}),
+    }});
+   
     const map = new ol.Map({{
         layers: [
             new ol.layer.Tile({{
                 source: new ol.source.OSM(),
-            }}), vector
+            }}), vector, vector_profile
         ],
         target: 'map',
         view: new ol.View({{
@@ -94,11 +103,15 @@ class CameraConfig(models.Model):
 
     def clean(self):
         super().clean()
-        try:
-            pyorc.CameraConfig(**self.data)
-            # see if you can make a camera config object
-        except BaseException as e:
-            raise ValidationError(f"Problem with Camera Configuration: {e}")
+        # try:
+        #     pyorc.CameraConfig(**self.camera_config)
+        #     # see if you can make a camera config object
+        # except BaseException as e:
+        #     raise ValidationError(f"Problem with Camera Configuration: {e}")
+        if self.profile:
+            if self.profile.site != self.site:
+                raise ValidationError(gettext_lazy("Profile site and Camera config site are not the same. Select a "
+                                                   "profile with the same site as the camera configuration"))
 
     @property
     def crs(self):
@@ -121,6 +134,16 @@ class CameraConfig(models.Model):
     bbox.fget.short_description = "Polygon bounding box (wkt) for area of interest"
 
     @property
+    def x(self):
+        return self.bbox.centroid.x
+
+
+    @property
+    def y(self):
+        return self.bbox.centroid.y
+
+
+    @property
     def height(self):
         if self.camera_config is not None:
             return self.camera_config["height"]
@@ -136,9 +159,19 @@ class CameraConfig(models.Model):
 
     @property
     def bbox_view(self):
+        if self.profile:
+            return mark_safe(
+                map_template.format(self.bbox.wkt, self.profile.multipoint.wkt, self.x, self.y)
+            )
         return mark_safe(
-            map_template.format(self.bbox.wkt, self.site.geom.x, self.site.geom.y)
+            map_template.format(
+                self.bbox.wkt,
+                'MULTIPOINT Z ()',
+                self.x,
+                self.y
+            )
         )
+
 
     @property
     def resolution(self):
