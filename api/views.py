@@ -131,6 +131,19 @@ class TimeSeriesViewSet(viewsets.ModelViewSet):
         # video can also be retrieved nested per site, by filtering on the site of the cameraconfig property.
         return TimeSeries.objects.filter(site=self.kwargs['site_pk'])
 
+    # def create(self, request, *args, **kwargs):
+
+
+class TaskViewSet(viewsets.ModelViewSet):
+    """
+    API endpoints that allows tasks to be viewed or edited.
+    """
+
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ["get", "post", "delete", "patch"]
+
     def get_serializer_class(self):
         if self.action == 'create':
             return TaskCreateSerializer
@@ -151,21 +164,6 @@ class TimeSeriesViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-
-    # def create(self, request, *args, **kwargs):
-
-
-class TaskViewSet(viewsets.ModelViewSet):
-    """
-    API endpoints that allows tasks to be viewed or edited.
-    """
-
-    queryset = Task.objects.all()
-    serializer_class = TaskSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    http_method_names = ["get", "post", "delete", "patch"]
-
 
 
 class VideoViewSet(viewsets.ModelViewSet):
