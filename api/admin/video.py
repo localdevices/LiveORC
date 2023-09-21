@@ -21,7 +21,7 @@ class VideoInline(admin.TabularInline):
 
 class VideoAdmin(admin.ModelAdmin):
     ordering = ["-timestamp"]
-    list_display = ["get_site_name", "timestamp", "created_at" , "thumbnail_preview", "time_series"]
+    list_display = ["thumbnail_preview", "get_site_name", "timestamp", "get_water_level", "get_discharge", "time_series", "created_at"]
     non_editable_fields = ["file", "camera_config"]
     readonly_fields = ('video_preview', 'get_site_name', 'thumbnail_preview', 'image_preview', 'get_timestamp', 'get_water_level', 'get_discharge', 'get_fraction')
     list_filter = [
@@ -66,11 +66,13 @@ class VideoAdmin(admin.ModelAdmin):
 
     @admin.display(ordering='time_series__q_50', description='Discharge median [m3/s]')
     def get_discharge(self, obj):
-        return obj.time_series.q_50
+        if obj.time_series:
+            return obj.time_series.q_50
 
     @admin.display(ordering='time_series__h', description='Water level [m]')
     def get_water_level(self, obj):
-        return obj.time_series.h
+        if obj.time_series:
+            return obj.time_series.h
 
     @admin.display(ordering='time_series__fraction_velocimetry', description='Fraction velocimetry [-]')
     def get_fraction(self, obj):
