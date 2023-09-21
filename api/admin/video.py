@@ -21,9 +21,25 @@ class VideoInline(admin.TabularInline):
 
 class VideoAdmin(admin.ModelAdmin):
     ordering = ["-timestamp"]
-    list_display = ["thumbnail_preview", "get_site_name", "timestamp", "get_water_level", "get_discharge", "time_series", "created_at"]
+    list_display = [
+        "thumbnail_preview",
+        "get_site_name",
+        "timestamp",
+        "get_water_level",
+        "get_discharge",
+        "created_at"
+    ]
     non_editable_fields = ["file", "camera_config"]
-    readonly_fields = ('video_preview', 'get_site_name', 'thumbnail_preview', 'image_preview', 'get_timestamp', 'get_water_level', 'get_discharge', 'get_fraction')
+    readonly_fields = (
+        'video_preview',
+        'get_site_name',
+        'thumbnail_preview',
+        'image_preview',
+        'get_timestamp',
+        'get_water_level',
+        'get_discharge',
+        'get_fraction'
+    )
     list_filter = [
         "camera_config__site",
         (
@@ -37,7 +53,16 @@ class VideoAdmin(admin.ModelAdmin):
     ]
 
     fieldsets = [
-        ('Video details', {"fields": ["get_site_name", "file", "camera_config", "timestamp", "image_preview", "video_preview"]}),
+        ('Video details', {
+            "fields": [
+                "get_site_name",
+                "file",
+                "camera_config",
+                "timestamp",
+                "image_preview",
+                "video_preview"
+            ]
+        }),
         ("Time series instance linked to the video", {
             "fields": [
                 "get_timestamp",

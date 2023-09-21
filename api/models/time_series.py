@@ -2,6 +2,11 @@ from django.db import models
 
 from ..models import Site
 
+def get_str(value, dec=1):
+    if value is None:
+        return "-"
+    else:
+        return str(round(value, dec))
 
 class TimeSeries(models.Model):
     """
@@ -25,3 +30,6 @@ class TimeSeries(models.Model):
     class Meta:
         indexes = [models.Index(fields=['site', 'timestamp'])]
         verbose_name_plural = "time series"
+
+    def __str__(self):
+        return "{:s} h [m]: {:s}, Q [m3/s]: {:s}, f [-]: {:s}".format(self.timestamp.strftime("%Y-%m-%dT%H:%M:%S"), get_str(self.h, 3), get_str(self.q_50, 2), get_str(self.fraction_velocimetry, 1))
