@@ -129,6 +129,12 @@ class Video(models.Model):
         editable=False,
         max_length=254
     )
+    image = models.ImageField(
+        upload_to=get_video_path,
+        help_text="Image showing the results of a velocimetry analysis",
+        null=True,
+        # max_length=254
+    )
     thumbnail = models.ImageField(
         upload_to=get_thumb_path,
         help_text="Thumbnail frame for list views",
@@ -141,7 +147,7 @@ class Video(models.Model):
         help_text="Status of processing"
     )
     camera_config = models.ForeignKey(CameraConfig, on_delete=models.CASCADE)
-    time_series = models.ForeignKey(TimeSeries, on_delete=models.SET_NULL, null=True, blank=True)
+    time_series = models.OneToOneField(TimeSeries, on_delete=models.SET_NULL, null=True, blank=True)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
@@ -202,9 +208,14 @@ class Video(models.Model):
 
         raise NotImplementedError
 
+    # @property
+    # def site(self):
+    #     return self.camera_config.site
+    #
+
     @property
     def thumbnail_preview(self):
-        height = int(settings.THUMBSIZE)
+        height = int(settings.THUMBSIZE) / 2
         width = int((self.thumbnail.width / self.thumbnail.height) * height)
         if self.thumbnail:
             return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.thumbnail.url, width, height))
@@ -214,20 +225,28 @@ class Video(models.Model):
     def video_preview(self):
         height = int(300)
         width = int((self.keyframe.width / self.keyframe.height) * height)
-        uri = reverse('video-playback', args=(str(self.id)))
+        uri = reverse('api:video-playback', args=([str(self.id)]))
         mimetype, _ = mimetypes.guess_type(self.file.name)
 
         if self.file:
             return mark_safe(
                 '<video src="{}" width="{}" height="{}" type={} controls preload="none"/>'.format(
                     uri,
-                    # self.file.url,
                     width,
                     height,
                     mimetype
                 )
             )
         return ""
+
+    @property
+    def image_preview(self):
+        height = int(300)
+        if self.image:
+            width = int((self.image.width / self.image.height) * height)
+            return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.image.url, width, height))
+        return ""
+
 
 
     class Meta:

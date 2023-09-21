@@ -103,6 +103,6 @@ def video_process(sender, instance, **kwargs):
         # apparently this is a new video and it has a water level, but no flow yet.
         # create a new task, associated with the video
         # assemble a task context
-        #
+        pass
 
-        raise NotImplementedError
+        # raise NotImplementedError

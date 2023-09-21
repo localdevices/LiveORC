@@ -19,24 +19,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 # from django.contrib.admin import AdminSite
 from django.urls import path, include
-from rest_framework import routers
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView
-)
-from api.views import SiteViewSet, ProfileViewSet, RecipeViewSet, CameraConfigViewSet, VideoViewSet, TimeSeriesViewSet, TaskViewSet
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from django.views.generic.base import RedirectView
+from django.urls import reverse_lazy
 
-#
-# router = routers.DefaultRouter()
-# router.register(r'site', SiteViewSet)
-# router.register(r'cameraconfig', CameraConfigViewSet)
-# router.register(r'profile', ProfileViewSet)
-# router.register(r'recipe', RecipeViewSet)
-# router.register(r'video', VideoViewSet)
-# router.register(r'timeseries', TimeSeriesViewSet)
-# router.register(r'task', TaskViewSet)
-#
 ## CODE BELOW IS TO REORDER MENU ITEMS, CAN BE FINISHED WHEN ADMIN VIEW IS DONE
 # def get_app_list(self, request):
 #     """
@@ -67,6 +53,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 # admin.AdminSite.get_app_list = get_app_list
 
 urlpatterns = [
+    path('', RedirectView.as_view(url=reverse_lazy('admin:index'))),
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/', include('api.urls', namespace='api')),

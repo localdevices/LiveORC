@@ -1,5 +1,17 @@
 from django.contrib import admin
+from django.contrib.admin import DateFieldListFilter
+from rangefilter.filters import DateRangeFilterBuilder, DateTimeRangeFilterBuilder
 from ..models import Video
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+default_end = datetime.now()
+default_start = default_end - relativedelta(days=1)
+
+datetimefilter = DateTimeRangeFilterBuilder(
+    default_start=default_start,
+    default_end=default_end
+)
 class VideoInline(admin.TabularInline):
     """
     Display filtered videos for given site or project inside admin view of site and project
@@ -8,26 +20,45 @@ class VideoInline(admin.TabularInline):
     extra = 3
 
 class VideoAdmin(admin.ModelAdmin):
-    list_display = ["get_site_name", "created_at", "timestamp", "thumbnail_preview", "time_series"]
-    readonly_fields = ('video_preview', 'get_site_name', 'thumbnail_preview', 'get_timestamp', 'get_water_level', 'get_discharge',)
-    list_filter = ["created_at", "timestamp"]
+    ordering = ["-timestamp"]
+    list_display = ["thumbnail_preview", "get_site_name", "timestamp", "get_water_level", "get_discharge", "time_series", "created_at"]
+    non_editable_fields = ["file", "camera_config"]
+    readonly_fields = ('video_preview', 'get_site_name', 'thumbnail_preview', 'image_preview', 'get_timestamp', 'get_water_level', 'get_discharge', 'get_fraction')
+    list_filter = [
+        "camera_config__site",
+        (
+            "timestamp",
+            datetimefilter,
+        ),
+        (
+            "created_at",
+            datetimefilter,
+        )
+    ]
 
     fieldsets = [
-        ('Video details', {"fields": ["get_site_name", "timestamp", "thumbnail_preview"]}),
+        ('Video details', {"fields": ["get_site_name", "file", "camera_config", "timestamp", "image_preview", "video_preview"]}),
         ("Time series instance linked to the video", {
             "fields": [
                 "get_timestamp",
                 "get_water_level",
                 "get_discharge",
+                "get_fraction"
             ]}
          )
     ]
 
+    def get_readonly_fields(self, request, obj=None):
+        # prevent that the file or camera config can be changed afterwards. That is very risky and can lead to inconsistent
+        # model records
+        if obj:
+            return (*self.readonly_fields, "file", "camera_config")
+        return self.readonly_fields
 
-    @admin.display(ordering='camera_config__site__name', description="Site")
+
+    @admin.display(ordering='camera_config__site__name', description="Site name")
     def get_site_name(self, obj):
         return obj.camera_config.site.name
-
 
     @admin.display(ordering='time_series__timestamp', description='Time stamp of related time series')
     def get_timestamp(self, obj):
@@ -35,11 +66,17 @@ class VideoAdmin(admin.ModelAdmin):
 
     @admin.display(ordering='time_series__q_50', description='Discharge median [m3/s]')
     def get_discharge(self, obj):
-        return obj.time_series.q_50
+        if obj.time_series:
+            return obj.time_series.q_50
 
     @admin.display(ordering='time_series__h', description='Water level [m]')
     def get_water_level(self, obj):
-        return obj.time_series.h
+        if obj.time_series:
+            return obj.time_series.h
+
+    @admin.display(ordering='time_series__fraction_velocimetry', description='Fraction velocimetry [-]')
+    def get_fraction(self, obj):
+        return obj.time_series.fraction_velocimetry
 
 
     def thumbnail_preview(self, obj):
@@ -52,3 +89,7 @@ class VideoAdmin(admin.ModelAdmin):
     video_preview.short_description = 'video preview'
     video_preview.allow_tags = True
 
+    def image_preview(self, obj):
+        return obj.image_preview
+    image_preview.short_description = 'Results'
+    image_preview.allow_tags = True

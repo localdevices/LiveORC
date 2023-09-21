@@ -92,13 +92,13 @@ class CameraConfig(models.Model):
     # TODO also connect to server
     # TODO connect to recipe and profile (where necessary)
 
-    # def clean(self):
-    #     super().clean()
-    #     try:
-    #         pyorc.CameraConfig(**self.data)
-    #         # see if you can make a camera config object
-    #     except BaseException as e:
-    #         raise ValidationError(f"Problem with Camera Configuration: {e}")
+    def clean(self):
+        super().clean()
+        try:
+            pyorc.CameraConfig(**self.data)
+            # see if you can make a camera config object
+        except BaseException as e:
+            raise ValidationError(f"Problem with Camera Configuration: {e}")
 
     @property
     def crs(self):
