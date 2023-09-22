@@ -225,7 +225,7 @@ class Video(models.Model):
     def video_preview(self):
         height = int(300)
         width = int((self.keyframe.width / self.keyframe.height) * height)
-        uri = reverse('api:video-playback', args=([str(self.id)]))
+        uri = reverse('api:site-video-playback', args=([str(self.camera_config.site.id), str(self.id)]))
         mimetype, _ = mimetypes.guess_type(self.file.name)
 
         if self.file:
