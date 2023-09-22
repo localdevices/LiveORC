@@ -46,13 +46,14 @@ class CameraConfigViewSet(viewsets.ModelViewSet):
 
     def create(self, request, site_pk=None, *args, **kwargs):
         # insert the site
-        if not(request.data.get("site")):
-            request.data["site"] = site_pk
+        data = request.data.copy()
+        if not(data.get("site")):
+            data["site"] = site_pk
         # replace the serializer
         serializer_class = CameraConfigSerializer
         # run create in the usual manner
         kwargs.setdefault('context', self.get_serializer_context())
-        serializer = serializer_class(data=request.data)
+        serializer = serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -75,13 +76,14 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
     def create(self, request, site_pk=None, *args, **kwargs):
         # insert the site
-        if not(request.data.get("site")):
-            request.data["site"] = site_pk
+        data = request.data.copy()
+        if not(data.get("site")):
+            data["site"] = site_pk
         # replace the serializer
         serializer_class = ProfileSerializer
         # run create in the usual manner
         kwargs.setdefault('context', self.get_serializer_context())
-        serializer = serializer_class(data=request.data)
+        serializer = serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -115,8 +117,8 @@ class TimeSeriesViewSet(viewsets.ModelViewSet):
 
     def create(self, request, site_pk=None, *args, **kwargs):
         # insert the site
+        data = request.data.copy()
         if not(request.data.get("site")):
-            data = request.data.copy()
             data["site"] = site_pk
         # replace the serializer
         serializer_class = TimeSeriesSerializer
@@ -131,8 +133,6 @@ class TimeSeriesViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # video can also be retrieved nested per site, by filtering on the site of the cameraconfig property.
         return TimeSeries.objects.filter(site=self.kwargs['site_pk'])
-
-    # def create(self, request, *args, **kwargs):
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -152,15 +152,16 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def create(self, request, site_pk=None, video_pk=None, *args, **kwargs):
         # insert the site
-        if not(request.data.get("site")):
-            request.data["site"] = site_pk
-        if not(request.data.get("video")):
-            request.data["video"] = video_pk
+        data = request.data.copy()
+        if not(data.get("site")):
+            data["site"] = site_pk
+        if not(data.get("video")):
+            data["video"] = video_pk
         # replace the serializer
         serializer_class = TaskSerializer
         # run create in the usual manner
         kwargs.setdefault('context', self.get_serializer_context())
-        serializer = serializer_class(data=request.data)
+        serializer = serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
