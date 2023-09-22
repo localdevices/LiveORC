@@ -32,6 +32,7 @@ class TimeSeriesAdmin(admin.ModelAdmin):
                 *self.readonly_fields,
                 "site",
                 "timestamp",
+                "link_video",
                 "h",
                 "q_05",
                 "q_25",
@@ -44,6 +45,8 @@ class TimeSeriesAdmin(admin.ModelAdmin):
             )
         return self.readonly_fields
 
+    def link_video(self, obj):
+        return obj.link_video
 
     def thumbnail_preview(self, obj):
         return obj.video.thumbnail_preview

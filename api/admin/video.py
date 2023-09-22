@@ -92,16 +92,20 @@ class VideoAdmin(admin.ModelAdmin):
     @admin.display(ordering='time_series__q_50', description='Discharge median [m3/s]')
     def get_discharge(self, obj):
         if obj.time_series:
-            return obj.time_series.q_50
+            if obj.time_series.q_50:
+                return round(obj.time_series.q_50, 2)
 
     @admin.display(ordering='time_series__h', description='Water level [m]')
     def get_water_level(self, obj):
         if obj.time_series:
-            return obj.time_series.h
+            if obj.time_series.h:
+                return round(obj.time_series.h, 3)
 
     @admin.display(ordering='time_series__fraction_velocimetry', description='Fraction velocimetry [-]')
     def get_fraction(self, obj):
-        return obj.time_series.fraction_velocimetry
+        if obj.time_series:
+            if obj.time_series.fraction_velocimetry:
+                return round(obj.time_series.fraction_velocimetry, 1)
 
 
     def thumbnail_preview(self, obj):
