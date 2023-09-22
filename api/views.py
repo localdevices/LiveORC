@@ -116,12 +116,13 @@ class TimeSeriesViewSet(viewsets.ModelViewSet):
     def create(self, request, site_pk=None, *args, **kwargs):
         # insert the site
         if not(request.data.get("site")):
-            request.data["site"] = site_pk
+            data = request.data.copy()
+            data["site"] = site_pk
         # replace the serializer
         serializer_class = TimeSeriesSerializer
         # run create in the usual manner
         kwargs.setdefault('context', self.get_serializer_context())
-        serializer = serializer_class(data=request.data)
+        serializer = serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
