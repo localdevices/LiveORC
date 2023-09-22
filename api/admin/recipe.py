@@ -18,14 +18,6 @@ class RecipeForm(forms.ModelForm):
         fields = ["name"]
         widgets = {"data": JSONEditorWidget}
 
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     if "initial" in kwargs:
-    #         # we are creating a new recipe, hence remove the "data" field from form
-    #         self.Meta.fields.remove("data")
-    #         self.fields.pop("data")
-    #         print("check")
-
 
     def clean(self):
         super().clean()
@@ -52,8 +44,6 @@ class RecipeCreateForm(forms.ModelForm):
         model = Recipe
         fields = ["name"]
 
-        # widgets = {"data": JSONEditorWidget}
-
 class RecipeAdmin(admin.ModelAdmin):
     fieldsets = [
         ("User input", {"fields": ["name", "recipe_file"]}),
@@ -66,9 +56,6 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display = ["name"]
     search_fields = ["name"]
     list_filter = ["name"]
-    # form = RecipeForm
-    # readonly_fields = ["data"]
-    # formfield_overrides = {}
 
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
@@ -86,14 +73,6 @@ class RecipeAdmin(admin.ModelAdmin):
         self.readonly_fields = ["data"]
         return super(RecipeAdmin, self).add_view(request)
 
-    # def get_form(self, request, obj=None, change=False, **kwargs):
-    #     defaults = {}
-    #     if obj is None:
-    #         defaults["form"] = self.add_form
-    #         defaults["fields"] = ["name", "recipe_file", "data"]
-    #     # defaults.update(kwargs)
-    #     return super().get_form(request, obj, change, **defaults)
-
     @admin.display(ordering='site__name', description="Site")
     def get_site_name(self, obj):
         return obj.site.name
@@ -108,8 +87,4 @@ class RecipeAdmin(admin.ModelAdmin):
         recipe = pyorc.cli.cli_utils.validate_recipe(recipe)
         form.instance.data = recipe
         super().save_model(request, obj, form, change)
-
-
-
-    # verify that geojson contains the right data
 
