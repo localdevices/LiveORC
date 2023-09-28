@@ -10,7 +10,6 @@ class SiteAdmin(gisadmin.GISModelAdmin):
     ]
     search_fields = ["name"]
     list_display = ["name", "geom"]
-    inlines = [TimeSeriesInline]
     search_fields = ["name"]
 
     def save_model(self, request, obj, form, change):

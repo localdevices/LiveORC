@@ -15,10 +15,16 @@ class TimeSeriesInline(admin.TabularInline):
 
 
 class TimeSeriesAdmin(admin.ModelAdmin):
-    list_display = ["get_site_name", "timestamp", "h", "fraction_velocimetry", "q_50", 'thumbnail_preview']
+    list_display = ["get_site_name", "timestamp", "str_h", "str_fraction_velocimetry", "str_q_50", 'thumbnail_preview']
     list_filter = ["site__name"]
-    readonly_fields = ('image_preview', )
+    readonly_fields = ('image_preview',)
     list_filter = ["site", "timestamp"]
+    fieldsets = [
+        (None, {"fields": ["image_preview", "site", "timestamp", "link_video"]}),
+        ("Values", {"fields": ["h", "str_q_05", "str_q_25", "str_q_50", "str_q_75", "str_q_95", "wetted_surface", "wetted_perimeter", "str_fraction_velocimetry"]})
+    ]
+
+
 
     @admin.display(ordering='site__name', description="Site")
     def get_site_name(self, obj):
@@ -34,14 +40,14 @@ class TimeSeriesAdmin(admin.ModelAdmin):
                 "timestamp",
                 "link_video",
                 "h",
-                "q_05",
-                "q_25",
-                "q_50",
-                "q_75",
-                "q_95",
+                "str_q_05",
+                "str_q_25",
+                "str_q_50",
+                "str_q_75",
+                "str_q_95",
                 "wetted_surface",
                 "wetted_perimeter",
-                "fraction_velocimetry"
+                "str_fraction_velocimetry"
             )
         return self.readonly_fields
 
@@ -57,3 +63,46 @@ class TimeSeriesAdmin(admin.ModelAdmin):
         return obj.video.image_preview
     image_preview.short_description = 'Video result (if available)'
     image_preview.allow_tags = True
+
+    def str_h(self, obj):
+        if obj.h:
+            return round(obj.h, 3)
+    str_h.short_description = 'Water level [m]'
+    str_h.allow_tags = True
+
+    def str_q_05(self, obj):
+        if obj.q_05:
+            return round(obj.q_05, 2)
+    str_q_05.short_description = 'Discharge 5% [m3/s]'
+    str_q_05.allow_tags = True
+
+    def str_q_25(self, obj):
+        if obj.q_25:
+            return round(obj.q_25, 2)
+    str_q_25.short_description = 'Discharge 25% [m3/s]'
+    str_q_25.allow_tags = True
+
+    def str_q_50(self, obj):
+        if obj.q_50:
+            return round(obj.q_50, 2)
+    str_q_50.short_description = 'Discharge 50% [m3/s]'
+    str_q_50.allow_tags = True
+
+    def str_q_75(self, obj):
+        if obj.q_75:
+            return round(obj.q_75, 2)
+    str_q_75.short_description = 'Discharge 75% [m3/s]'
+    str_q_75.allow_tags = True
+
+    def str_q_95(self, obj):
+        if obj.q_95:
+            return round(obj.q_95, 2)
+    str_q_95.short_description = 'Discharge 95% [m3/s]'
+    str_q_95.allow_tags = True
+
+
+    def str_fraction_velocimetry(self, obj):
+        if obj.fraction_velocimetry:
+            return round(obj.fraction_velocimetry, 2)
+    str_fraction_velocimetry.short_description = 'Fraction velocimetry [%]'
+    str_fraction_velocimetry.allow_tags = True

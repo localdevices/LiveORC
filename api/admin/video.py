@@ -26,6 +26,7 @@ class VideoAdmin(admin.ModelAdmin):
         "get_site_name",
         "timestamp",
         "get_water_level",
+        "get_fraction",
         "get_discharge",
         "created_at"
     ]
@@ -101,7 +102,7 @@ class VideoAdmin(admin.ModelAdmin):
             if obj.time_series.h:
                 return round(obj.time_series.h, 3)
 
-    @admin.display(ordering='time_series__fraction_velocimetry', description='Fraction velocimetry [-]')
+    @admin.display(ordering='time_series__fraction_velocimetry', description='Fraction velocimetry [%]')
     def get_fraction(self, obj):
         if obj.time_series:
             if obj.time_series.fraction_velocimetry:
