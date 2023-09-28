@@ -247,7 +247,10 @@ class Video(models.Model):
             return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.image.url, width, height))
         return ""
 
-
+    @property
+    def link_video(self):
+        return self
+        # return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.image.url, width, height))
 
     class Meta:
         # organize tables along the camera config id and then per time stamp
