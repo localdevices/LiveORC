@@ -64,6 +64,7 @@ class RecipeAdmin(admin.ModelAdmin):
         self.fieldsets = [
             ("User input", {"fields": ["name", "data"]}),
         ]
+        # self.readonly_fields = None
         return super(RecipeAdmin, self).change_view(request, object_id)
 
     def add_view(self, request, form_url="", extra_context=None):

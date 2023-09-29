@@ -56,6 +56,7 @@ class SiteListViewTests(InitTestCase):
         )
         self.assertEquals(r.status_code, status.HTTP_201_CREATED)
         r = client.get('/api/site/', follow=True, headers=headers)
+        print(r.json())
         self.assertEquals(r.status_code, status.HTTP_200_OK)
         r = client.get('/api/site/1', follow=True, headers=headers)
         self.assertEquals(r.status_code, status.HTTP_200_OK)
