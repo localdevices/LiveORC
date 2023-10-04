@@ -1,17 +1,24 @@
 from django.contrib.gis import admin as gisadmin
 from .time_series import TimeSeriesInline
+from api.models.institution import Institution, TeamMember
 
 
 # Register your models here.
 class SiteAdmin(gisadmin.GISModelAdmin):
     fieldsets = [
-        (None, {"fields": ["name"]}),
+        (None, {"fields": ["name", "institution"]}),
         ("Coordinates", {"fields": ["geom"]})
     ]
     search_fields = ["name"]
-    list_display = ["name", "geom"]
+    list_display = ["name", "geom", "institution"]
     inlines = [TimeSeriesInline]
-    search_fields = ["name"]
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        institutions = [team.institution for team in TeamMember.objects.filter(member=request.user)]
+        return qs.filter(institution__in=institutions)
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
