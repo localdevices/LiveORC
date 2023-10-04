@@ -17,7 +17,16 @@ class TimeSeriesInline(admin.TabularInline):
 class TimeSeriesAdmin(admin.ModelAdmin):
     list_display = ["get_site_name", "timestamp", "str_h", "str_fraction_velocimetry", "str_q_50", 'thumbnail_preview']
     list_filter = ["site__name"]
-    readonly_fields = ('image_preview',)
+    readonly_fields = (
+        "image_preview",
+        "str_q_05",
+        "str_q_25",
+        "str_q_50",
+        "str_q_75",
+        "str_q_95",
+        "str_fraction_velocimetry",
+        "link_video"
+    )
     list_filter = ["site", "timestamp"]
     fieldsets = [
         (None, {"fields": ["image_preview", "site", "timestamp", "link_video"]}),
