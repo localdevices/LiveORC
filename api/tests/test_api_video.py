@@ -44,6 +44,16 @@ def camconfig(camconfig_url):
 
 
 camera_config = camconfig(camconfig_url)
+video_sample = prep_video_sample(video_sample_url)
+
+camera_config_form = {
+    "name": "ngwerere_cam",
+    "site": 1,
+    "end_date": "2099-01-01",
+    "camera_config": json.dumps(camera_config),
+    "recipe": 1,
+    "profile": 1
+}
 
 
 class VideoListViewTests(InitTestCase):
@@ -78,22 +88,14 @@ class VideoListViewTests(InitTestCase):
         # create a camera config on site
         r = client.post(
             '/api/site/1/cameraconfig/',
-            {
-                "name": "ngwerere_cam",
-                "site": 1,
-                "end_date": "2099-01-01",
-                "camera_config": json.dumps(camera_config),
-                "recipe": 1,
-                "profile": 1
-            }
+            camera_config_form
         )
         # print(r.json())
-        data = prep_video_sample(video_sample_url)
         # print(json.dumps(data))
         # post a video
         r = client.post(
             "/api/video/",
-            data=data
+            data=video_sample
         )
         self.assertEquals(r.status_code, status.HTTP_201_CREATED)
         r = client.get("/api/site/1/video/1/")

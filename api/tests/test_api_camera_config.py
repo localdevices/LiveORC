@@ -122,7 +122,7 @@ class CameraConfigListViewTests(InitTestCase):
     def tearDown(self):
         pass
 
-    def test_camera_config_not_allowed(self):
+    def test_camera_config(self):
         """
         If no questions exist, an appropriate message is displayed.
         """
@@ -136,7 +136,15 @@ class CameraConfigListViewTests(InitTestCase):
             {"name": "geul", "geom": "SRID=4326;POINT (5.914115954402695 50.80678292086996)"}
         )
         import json
-        r = client.post('/api/cameraconfig/',{"name": "geul_cam","site": 1,"end_date": "2024-01-01","camera_config": json.dumps(cam_config)})
+        r = client.post(
+            '/api/cameraconfig/',
+            {
+                "name": "geul_cam",
+                "site": 1,
+                "end_date": "2024-01-01",
+                "camera_config": json.dumps(cam_config)
+            }
+        )
 
         # create a camera config on site
 
