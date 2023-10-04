@@ -9,3 +9,4 @@ from .time_series import TimeSeries
 from .video import *
 from .task import Task
 from .validators import *
+from .institution import *
