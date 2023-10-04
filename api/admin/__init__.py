@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy
-from ..models import Site, CameraConfig, Video, Task, Server, Profile, Recipe, TimeSeries
+from ..models import Site, CameraConfig, Video, Task, Server, Profile, Recipe, TimeSeries, Institution, TeamMember
 
 from .time_series import TimeSeriesAdmin
 from .camera_config import CameraConfigAdmin
@@ -26,3 +26,5 @@ admin.site.register(Video, VideoAdmin)
 admin.site.register(Server, ServerAdmin)
 admin.site.register(Task, TaskAdmin)
 admin.site.register(TimeSeries, TimeSeriesAdmin)
+admin.site.register(Institution)
+admin.site.register(TeamMember)
