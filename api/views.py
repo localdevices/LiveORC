@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import Site, Profile, Recipe, CameraConfig, Video, TimeSeries, Task
+from .task_utils import get_task
 from .serializers import (
     SiteSerializer,
     ProfileSerializer,
@@ -158,6 +159,11 @@ class TaskViewSet(viewsets.ModelViewSet):
         if not(data.get("video")):
             data["video"] = video_pk
         # replace the serializer
+        # instance = self.get_object()
+        # task = instance.get_task(request, *args, **kwargs)
+        # get the video
+        video_instance = Video.objects.get(id=video_pk)
+        get_task(video_instance, request, *args, **kwargs)
         serializer_class = TaskSerializer
         # run create in the usual manner
         kwargs.setdefault('context', self.get_serializer_context())
@@ -187,12 +193,13 @@ class VideoViewSet(viewsets.ModelViewSet):
         mimetype, _ = mimetypes.guess_type(video.file.name)
         return HttpResponse(video, content_type=mimetype)
 
-    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    @action(detail=True, methods=['post'], renderer_classes=[renderers.StaticHTMLRenderer])
     def create_task(self, request, *args, **kwargs):
         instance = self.get_object()
-        task = instance.make_task()
+        task = instance.get_task(request, *args, **kwargs)
         # print(f"URL: {request.build_absolute_uri(reverse('video'))}")
         return redirect('api:video-list')
+
 
 class VideoSiteViewSet(VideoViewSet):
     """

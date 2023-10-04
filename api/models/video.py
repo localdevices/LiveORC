@@ -179,8 +179,8 @@ class Video(models.Model):
                 self.time_series = ts_closest
         super(Video, self).save(*(), **{})
 
-    def make_task(self):
-        task = api.task_utils.get_task(self)
+    def get_task(self, request, *args, **kwargs):
+        task = api.task_utils.get_task(self, request, *args, **kwargs)
 
         # TODO: determine if there are profiles. If not only 2D processing
         # if has_profile:
