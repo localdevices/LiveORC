@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.gis.db import models as gismodels
+from .institution import Institution
+
 
 class Site(gismodels.Model):
     """
@@ -10,4 +12,5 @@ class Site(gismodels.Model):
 
     name = models.CharField(max_length=100, help_text="Recognizable unique name for your site")
     geom = gismodels.PointField("Location", srid=4326, help_text="Approximate location of the site")
+    institution = models.ForeignKey(Institution, blank=True, null=True, on_delete=models.CASCADE)
 
