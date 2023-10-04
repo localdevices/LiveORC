@@ -1,12 +1,15 @@
 from django.db import models
 from django.dispatch import receiver
+from django.db.models.signals import post_save
 from .models import TimeSeries, Video
 import numpy as np
 from datetime import timedelta
 from .models.video import get_closest_to_dt, VideoStatus
-from .models import Task
+from .models import Task, Institution, TeamMember
+from LiveORC.utils import choices
 
-@receiver(models.signals.post_save, sender=TimeSeries)
+
+@receiver(post_save, sender=TimeSeries)
 def timeseries_foreignkey_video(sender, instance, **kwargs):
     """
     Signal processing triggered when a time series instance is added. If the time series contains a water level
@@ -77,7 +80,7 @@ def timeseries_foreignkey_video(sender, instance, **kwargs):
             video.save()
 #
 
-@receiver(models.signals.post_save, sender=Video)
+@receiver(post_save, sender=Video)
 def video_process(sender, instance, **kwargs):
     """
     Signal processing triggered when Video is altered. Only when a water level is present, and status is NEW then
@@ -106,3 +109,9 @@ def video_process(sender, instance, **kwargs):
         pass
 
         # raise NotImplementedError
+
+
+@receiver(post_save, sender=Institution)
+def create_team(sender, instance=None, created=False, **kwargs):
+    if created:
+        TeamMember.objects.create(institution=instance, member=instance.owner, role=choices.TeamRole.OWNER)
