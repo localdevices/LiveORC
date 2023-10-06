@@ -29,7 +29,6 @@ class RecipeTests(InitTestCase):
         client.login(username='testuser', password='test1234')
         # create a camera config on site
         r = client.post('/api/site/1/profile/',{"name": "some_profile", "data": json.dumps(profile)})
-        print(r.json())
         # check the request
         self.assertEquals(r.status_code, status.HTTP_201_CREATED)
 

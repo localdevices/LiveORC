@@ -90,8 +90,6 @@ class VideoListViewTests(InitTestCase):
             '/api/site/1/cameraconfig/',
             camera_config_form
         )
-        # print(r.json())
-        # print(json.dumps(data))
         # post a video
         r = client.post(
             "/api/video/",

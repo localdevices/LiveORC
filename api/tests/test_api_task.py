@@ -7,10 +7,11 @@ from rest_framework import status
 from .test_setup_db import InitTestCase
 from .test_api_recipe import recipe
 from .test_api_profile import profile
-from .test_api_video import video_sample, camera_config_form
+from .test_api_video import camera_config_form, prep_video_sample, video_sample_url
 
 from ..models import Site, Recipe, Profile, Video, VideoStatus
 
+video_sample = prep_video_sample(video_sample_url)
 class VideoListViewTests(InitTestCase):
     def setUp(self):
         site = Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151))
