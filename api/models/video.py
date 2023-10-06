@@ -99,7 +99,7 @@ def get_keyframe_path(instance, filename):
 
 class VideoStatus(models.IntegerChoices):
     NEW = 1, "New video"
-    QUEUE = 2, "Send for processing"
+    QUEUE = 2, "Waiting for processing"
     TASK = 3, "Being processed"
     DONE = 4, "Finished"
     ERROR = 5, "Error occurred"
@@ -154,30 +154,32 @@ class Video(models.Model):
         # move the file field to a separate variable temporaily.
         # This is in order to first get an ID on the video instance (otherwise video would be stored in a
         # folder called 'None'
-        file = self.file
-        self.file = None
+        if self.status == VideoStatus.NEW:
+            file = self.file
+            self.file = None
         super(Video, self).save(*args, **kwargs)
-        # now store the video
-        self.file = file
-        super(Video, self).save(*(), **{})
-        if not(self.make_frames()):
-            raise Exception('Could not create keyframe - is the file type valid?')
-        # now check for a water level series
-        if self.time_series is not None:
-            return
-        # look for time series instances that are for the same site and not yet associated with a video
-        ts_at_site = TimeSeries.objects.filter(
-            site=self.camera_config.site
-        ) # TODO: exclude time series records that are already used by another video ....filter(
-        #     video__time_series__ne=...
-        if len(ts_at_site) != 0:
-            # apparently there is a candidate time series record
-            ts_closest = get_closest_to_dt(ts_at_site, self.timestamp)
-            # check if time diff is acceptable
-            dt = np.abs(self.timestamp - ts_closest.timestamp)
-            if dt < self.camera_config.allowed_dt:
-                self.time_series = ts_closest
-        super(Video, self).save(*(), **{})
+        if self.status == VideoStatus.NEW:
+            # now store the video
+            self.file = file
+            super(Video, self).save(*(), **{})
+            if not(self.make_frames()):
+                raise Exception('Could not create keyframe - is the file type valid?')
+            # now check for a water level series
+            if self.time_series is not None:
+                return
+            # look for time series instances that are for the same site and not yet associated with a video
+            ts_at_site = TimeSeries.objects.filter(
+                site=self.camera_config.site
+            ) # TODO: exclude time series records that are already used by another video ....filter(
+            #     video__time_series__ne=...
+            if len(ts_at_site) != 0:
+                # apparently there is a candidate time series record
+                ts_closest = get_closest_to_dt(ts_at_site, self.timestamp)
+                # check if time diff is acceptable
+                dt = np.abs(self.timestamp - ts_closest.timestamp)
+                if dt < self.camera_config.allowed_dt:
+                    self.time_series = ts_closest
+            super(Video, self).save(*(), **{})
 
     def get_task(self, request, *args, **kwargs):
         task = api.task_utils.get_task(self, request, *args, **kwargs)

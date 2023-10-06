@@ -1,5 +1,7 @@
 from django.contrib.gis.geos import Point
+from django.urls import reverse
 from rest_framework.test import APIClient
+from rest_framework import status
 
 # fixtures
 from .test_setup_db import InitTestCase
@@ -7,9 +9,7 @@ from .test_api_recipe import recipe
 from .test_api_profile import profile
 from .test_api_video import video_sample, camera_config_form
 
-from ..models import Site, Recipe, Profile, Video
-
-
+from ..models import Site, Recipe, Profile, Video, VideoStatus
 
 class VideoListViewTests(InitTestCase):
     def setUp(self):
@@ -38,3 +38,25 @@ class VideoListViewTests(InitTestCase):
         r = client.post(
             f'/api/site/1/video/{video_id}/task/'
         )
+        # as there is no water level yet, this should give a 400 error
+        self.assertEquals(r.status_code, status.HTTP_400_BAD_REQUEST)
+        timestamp = video_sample["timestamp"]
+        # some fake water level
+        h = 1182.3
+        # now add the water level
+        uri = reverse("api:site-timeseries-list", args=(["1"]))
+        r = client.post(
+            uri,
+            data={
+                "timestamp": timestamp,
+                "h": h
+            }
+        )
+        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+        # Upon creation of a time series close in time to the video, the two should be automatically linked.
+        # check if the video now has a time series associated and if the status is QUEUE
+        video = Video.objects.get(id=1)
+        self.assertEquals(video.time_series is not None, True)
+        self.assertEquals(video.status, VideoStatus.QUEUE)
+
+

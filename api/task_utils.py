@@ -1,9 +1,8 @@
-import nodeorc.models
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.conf import settings
 from django.urls import reverse
 # helper functions to develop tasks from models
 from nodeorc import models
-import requests
 
 OUTPUT_FILES_ALL = {
     "piv": {
@@ -26,7 +25,7 @@ OUTPUT_FILES_ALL = {
 }
 
 
-def get_task(instance, request, *args, **kwargs):
+def get_task(instance, request, serialize=True, *args, **kwargs):
     """
     Make a full task dict from the current video
 
@@ -39,35 +38,18 @@ def get_task(instance, request, *args, **kwargs):
 
     """
     callback_url = get_callback_url(request)
-    storage = get_storage()
-    storage = models.Storage()
+    # TODO connect storage once agnostic storage solutions implemented
+    storage = get_storage(instance)
     subtasks = get_subtasks(instance)
-    output_files=OUTPUT_FILES_ALL
+    output_files = OUTPUT_FILES_ALL
     task = models.Task(
         callback_url=callback_url,
         storage=storage,
         subtasks=subtasks,
         output_files=output_files
     )
-    return task.to_json()
-    # callback_url
-    #
-    # storage
-    #
-    # subtasks
-    #
-    # "subtasks": [
-    #     {
-    #         "name": "velocity_flow_subprocess",
-    #         "kwargs": {
-    #             "videofile": "video.mp4",
-    #             "h_a": 0.0,
-    #             "cameraconfig": {
-    #                 "height": 360,
-    #                 "width": 640,
-    #
-    # "output_files"
-    # # prepare callback
+    return task.to_json(serialize=serialize)
+
 
 def get_recipe(instance):
     """
@@ -83,7 +65,7 @@ def get_recipe(instance):
 
     """
 
-def get_storage():
+def get_storage(instance):
     """
     translates storage parameters into nodeodm Storage object
 
@@ -95,10 +77,17 @@ def get_storage():
     -------
 
     """
-    # TODO: make a complete storage model once completed. Return error when no remote storage is available
-    return {}
-    raise NotImplementedError
-    # return models.Storage(**kwargs)
+    url = settings.MEDIA_ROOT
+    bucket_name = reverse(
+        "api:site-video-detail",
+        args=([str(instance.camera_config.site.id), str(instance.id)])
+    )
+
+    return models.Storage(
+        url=url,
+        bucket_name=bucket_name
+    )
+    # TODO: make storage agnostic for cloud storage options
 
 def get_subtasks(instance):
     """
@@ -165,6 +154,7 @@ def get_subtask_all(instance):
         get_callback_discharge_patch(instance),
         get_callback_video_patch(instance)
     ]
+    # TODO: input_files should refer to name of file only (now full subpath to MEDIA_ROOT). Location is arranged by the Storage
     input_files = {
         "videofile": {
            "remote_name": str(instance.file),
@@ -312,8 +302,9 @@ def get_callback_video_patch(instance):
             "camera_config": instance.camera_config.id
         },
         endpoint=reverse(
-            "api:video-detail",
+            "api:site-video-detail",
             args=([
+                str(instance.camera_config.site.id),
                 str(instance.id)
             ])
         )

@@ -24,7 +24,7 @@ site_router.register(r'profile', ProfileViewSet, basename='site-profile')
 site_router.register(r'cameraconfig', CameraConfigViewSet, basename='site-cameraconfig')
 
 video_router = routers.NestedSimpleRouter(site_router, r'video', lookup='video')
-video_router.register(r'task', TaskViewSet, basename='cameraconfig-task')
+video_router.register(r'task', TaskViewSet, basename='video-task')
 
 urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
