@@ -190,22 +190,6 @@ class Video(models.Model):
                     self.time_series = ts_closest
             super(Video, self).save(*(), **{})
 
-    def get_task(self, request, *args, **kwargs):
-        task = api.task_utils.get_task(self, request, *args, **kwargs)
-
-        # TODO: determine if there are profiles. If not only 2D processing
-        # if has_profile:
-        #     ...
-        # else:
-
-        # time = datetime.now()
-        # callback_url =
-
-        # input_files = [
-        # storage =
-
-        return task
-
 
     def make_frames(self):
         """
@@ -219,10 +203,6 @@ class Video(models.Model):
 
         raise NotImplementedError
 
-    # @property
-    # def site(self):
-    #     return self.camera_config.site
-    #
 
     @property
     def thumbnail_preview(self):
@@ -301,5 +281,4 @@ class Video(models.Model):
 
     # TODO: Organize settings.py for choice local or S3.
     # TODO: when timestamp not provided, assume it must be harvested from the file time stamp
-    # TODO: when water level provided, change status and start a task
     # TODO: when task complete, status change to ERROR or FINISHED
