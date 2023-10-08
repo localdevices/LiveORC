@@ -33,8 +33,6 @@ class TimeSeriesAdmin(admin.ModelAdmin):
         ("Values", {"fields": ["h", "str_q_05", "str_q_25", "str_q_50", "str_q_75", "str_q_95", "wetted_surface", "wetted_perimeter", "str_fraction_velocimetry"]})
     ]
 
-
-
     @admin.display(ordering='site__name', description="Site")
     def get_site_name(self, obj):
         return obj.site.name

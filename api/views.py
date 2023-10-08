@@ -217,19 +217,18 @@ class VideoViewSet(viewsets.ModelViewSet):
         # self.get_object does not work because a new video is posted on a open end point, without association to a site
         instance = Video.objects.get(id=serializer.data["id"])
         # check if a time series instance was found during creation
-        if instance.time_series:
-            if instance.status == VideoStatus.NEW and instance.time_series.q_50 is None and instance.time_series.h is not None:
-                # launch creation of a new task
-                task_body = get_task(instance, request, serialize=False,*args, **kwargs)
-                task = {
-                    "id": task_body["id"],
-                    "task_body": task_body,
-                    "video": instance
-                }
-                Task.objects.create(**task)
-                # update the Video instance
-                instance.status = VideoStatus.QUEUE
-                instance.save()
+        if instance.is_ready_for_task:
+            # launch creation of a new task
+            task_body = get_task(instance, request, serialize=False,*args, **kwargs)
+            task = {
+                "id": task_body["id"],
+                "task_body": task_body,
+                "video": instance
+            }
+            Task.objects.create(**task)
+            # update the Video instance
+            instance.status = VideoStatus.QUEUE
+            instance.save()
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 

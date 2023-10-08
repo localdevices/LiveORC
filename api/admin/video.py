@@ -1,9 +1,14 @@
 from django.contrib import admin
 from django.contrib.admin import DateFieldListFilter
+from django_object_actions import DjangoObjectActions, action
+from django.shortcuts import redirect
 from rangefilter.filters import DateRangeFilterBuilder, DateTimeRangeFilterBuilder
-from ..models import Video
+from ..models import Video, VideoStatus, Task
+from ..task_utils import get_task
+
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+
 
 default_end = datetime.now()
 default_start = default_end - relativedelta(days=1)
@@ -19,7 +24,35 @@ class VideoInline(admin.TabularInline):
     model = Video
     extra = 3
 
-class VideoAdmin(admin.ModelAdmin):
+class VideoAdmin(DjangoObjectActions, admin.ModelAdmin):
+    @action(
+        label="This will be the label of the button",  # optional
+        description="This will be the tooltip of the button" # optional
+    )
+    def toolfunc(self, request, obj):
+        # create a new task for this video
+        if obj.is_ready_for_task:
+            # launch creation of a new task
+            task_body = get_task(obj, request, serialize=False)
+            task = {
+                "id": task_body["id"],
+                "task_body": task_body,
+                "video": obj
+            }
+            Task.objects.create(**task)
+        # once the task is set, change the status of the video
+        obj.status = VideoStatus.QUEUE
+        obj.save()
+        # TODO: ensure that task and video statusses are updated using AMQP status
+        return redirect('/admin/api/video')
+
+    def queue_task(modeladmin, request, queryset):
+        queryset.update(status=VideoStatus.QUEUE)
+
+    change_actions = ('toolfunc', )
+    changelist_actions = ('queue_task', )
+
+
     ordering = ["-timestamp"]
     list_display = [
         "thumbnail_preview",
@@ -28,7 +61,8 @@ class VideoAdmin(admin.ModelAdmin):
         "get_water_level",
         "get_fraction",
         "get_discharge",
-        "created_at"
+        "created_at",
+        "play_button",
     ]
     non_editable_fields = ["file", "camera_config"]
     readonly_fields = (
@@ -39,7 +73,8 @@ class VideoAdmin(admin.ModelAdmin):
         'get_timestamp',
         'get_water_level',
         'get_discharge',
-        'get_fraction'
+        'get_fraction',
+        'play_button'
     )
     list_filter = [
         "camera_config__site",
@@ -123,3 +158,8 @@ class VideoAdmin(admin.ModelAdmin):
         return obj.image_preview
     image_preview.short_description = 'Results'
     image_preview.allow_tags = True
+
+    def play_button(self, obj):
+        return obj.play_button
+    play_button.short_description = "Run/Status"
+    play_button.allow_tags = True
