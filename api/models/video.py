@@ -1,4 +1,5 @@
 from django.core.validators import FileExtensionValidator
+from django.utils.html import format_html
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -96,10 +97,18 @@ def get_keyframe_path(instance, filename):
         filename
     )
     return end_point
+"http://0.0.0.0:8000/admin/api/video/31/actions/toolfunc/"
+def get_task_run(id):
+    uri = reverse('admin:api_video_actions', args=([str(id), "toolfunc"]))
+    return mark_safe(
+        f"""<a href="{uri}"><i class="fa-solid fa-circle-play"></i></button>
+"""
+    )
+
 
 class VideoStatus(models.IntegerChoices):
     NEW = 1, "New video"
-    QUEUE = 2, "Send for processing"
+    QUEUE = 2, "Waiting for processing"
     TASK = 3, "Being processed"
     DONE = 4, "Finished"
     ERROR = 5, "Error occurred"
@@ -154,33 +163,35 @@ class Video(models.Model):
         # move the file field to a separate variable temporaily.
         # This is in order to first get an ID on the video instance (otherwise video would be stored in a
         # folder called 'None'
-        file = self.file
-        self.file = None
+        if self.status == VideoStatus.NEW:
+            file = self.file
+            self.file = None
         super(Video, self).save(*args, **kwargs)
-        # now store the video
-        self.file = file
-        super(Video, self).save(*(), **{})
-        if not(self.make_frames()):
-            raise Exception('Could not create keyframe - is the file type valid?')
-        # now check for a water level series
-        if self.time_series is not None:
-            return
-        # look for time series instances that are for the same site and not yet associated with a video
-        ts_at_site = TimeSeries.objects.filter(
-            site=self.camera_config.site
-        ) # TODO: exclude time series records that are already used by another video ....filter(
-        #     video__time_series__ne=...
-        if len(ts_at_site) != 0:
-            # apparently there is a candidate time series record
-            ts_closest = get_closest_to_dt(ts_at_site, self.timestamp)
-            # check if time diff is acceptable
-            dt = np.abs(self.timestamp - ts_closest.timestamp)
-            if dt < self.camera_config.allowed_dt:
-                self.time_series = ts_closest
-        super(Video, self).save(*(), **{})
+        if self.status == VideoStatus.NEW:
+            # now store the video
+            self.file = file
+            super(Video, self).save(*(), **{})
+            if not(self.make_frames()):
+                raise Exception('Could not create keyframe - is the file type valid?')
+            # now check for a water level series
+            if self.time_series is not None:
+                return
+            # look for time series instances that are for the same site and not yet associated with a video
+            ts_at_site = TimeSeries.objects.filter(
+                site=self.camera_config.site
+            ) # TODO: exclude time series records that are already used by another video ....filter(
+            #     video__time_series__ne=...
+            if len(ts_at_site) != 0:
+                # apparently there is a candidate time series record
+                ts_closest = get_closest_to_dt(ts_at_site, self.timestamp)
+                # check if time diff is acceptable
+                dt = np.abs(self.timestamp - ts_closest.timestamp)
+                if dt < self.camera_config.allowed_dt:
+                    self.time_series = ts_closest
+            super(Video, self).save(*(), **{})
 
-    def make_task(self):
-        task = api.task_utils.get_task(self)
+    def get_task(self, request, *args, **kwargs):
+        task = api.task_utils.get_task(self, request, *args, **kwargs)
 
         # TODO: determine if there are profiles. If not only 2D processing
         # if has_profile:
@@ -222,6 +233,12 @@ class Video(models.Model):
         return ""
 
     @property
+    def is_ready_for_task(self):
+        if not(self.time_series):
+            return False
+        return self.status == VideoStatus.NEW and self.time_series.q_50 is None and self.time_series.h is not None
+
+    @property
     def video_preview(self):
         height = int(300)
         width = int((self.keyframe.width / self.keyframe.height) * height)
@@ -251,6 +268,27 @@ class Video(models.Model):
     def link_video(self):
         return self
         # return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.image.url, width, height))
+
+    @property
+    def play_button(self):
+        if self.status == VideoStatus.NEW:
+            return get_task_run(self.id)
+        elif self.status == VideoStatus.QUEUE:
+            return mark_safe(
+                f"""<i class="fa-solid fa-stopwatch"></i> Queued"""
+            )
+        elif self.status == VideoStatus.TASK:
+            return mark_safe(
+                f"""<i class="fa-solid fa-spinner fa-spin"></i> Processing"""
+            )
+        elif self.status == VideoStatus.DONE:
+            return mark_safe(
+                f"""<img src="/static/admin/img/icon-yes.svg" alt="True"> Done"""
+            )
+        else:
+            return mark_safe(
+                f"""<img src="/static/admin/img/icon-no.svg" alt="True"> Error"""
+            )
 
     class Meta:
         # organize tables along the camera config id and then per time stamp

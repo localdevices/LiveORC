@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'api',
     'rangefilter',
     'drf_spectacular',
+    'fontawesomefree',
+    'django_object_actions'
 ]
 
 MIDDLEWARE = [
