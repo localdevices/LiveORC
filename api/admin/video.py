@@ -46,11 +46,11 @@ class VideoAdmin(DjangoObjectActions, admin.ModelAdmin):
         # TODO: ensure that task and video statusses are updated using AMQP status
         return redirect('/admin/api/video')
 
-    def queue_task(modeladmin, request, queryset):
-        queryset.update(status=VideoStatus.QUEUE)
-
+    # def queue_task(modeladmin, request, queryset):
+    #     queryset.update(status=VideoStatus.QUEUE)
+    #
     change_actions = ('toolfunc', )
-    changelist_actions = ('queue_task', )
+    # changelist_actions = ('queue_task', )
 
 
     ordering = ["-timestamp"]
