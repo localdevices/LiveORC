@@ -101,7 +101,7 @@ def get_keyframe_path(instance, filename):
 def get_task_run(id):
     uri = reverse('admin:api_video_actions', args=([str(id), "toolfunc"]))
     return mark_safe(
-        f"""<a href="{uri}"><i class="fa-solid fa-circle-play"></i></button>
+        f"""<a href="{uri}"><i class="fa-solid fa-circle-play"></i></button> Click to queue
 """
     )
 
@@ -272,7 +272,11 @@ class Video(models.Model):
     @property
     def play_button(self):
         if self.status == VideoStatus.NEW:
-            return get_task_run(self.id)
+            if self.is_ready_for_task:
+                return get_task_run(self.id)
+            else:
+                return mark_safe('<i class="fa-solid fa-circle-play" style="color: #a1a1a1;"></i> Water level missing')
+
         elif self.status == VideoStatus.QUEUE:
             return mark_safe(
                 f"""<i class="fa-solid fa-stopwatch"></i> Queued"""
