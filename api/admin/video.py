@@ -26,8 +26,8 @@ class VideoInline(admin.TabularInline):
 
 class VideoAdmin(DjangoObjectActions, admin.ModelAdmin):
     @action(
-        label="This will be the label of the button",  # optional
-        description="This will be the tooltip of the button" # optional
+        label="Queue task",  # optional
+        description="Click to queue a task" # optional
     )
     def toolfunc(self, request, obj):
         # create a new task for this video
@@ -50,8 +50,6 @@ class VideoAdmin(DjangoObjectActions, admin.ModelAdmin):
     #     queryset.update(status=VideoStatus.QUEUE)
     #
     change_actions = ('toolfunc', )
-    # changelist_actions = ('queue_task', )
-
 
     ordering = ["-timestamp"]
     list_display = [

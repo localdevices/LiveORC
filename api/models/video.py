@@ -160,14 +160,14 @@ class Video(models.Model):
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        # move the file field to a separate variable temporaily.
+        # move the file field to a separate variable temporarily.
         # This is in order to first get an ID on the video instance (otherwise video would be stored in a
         # folder called 'None'
-        if self.status == VideoStatus.NEW:
+        if not(self.pk):
             file = self.file
             self.file = None
         super(Video, self).save(*args, **kwargs)
-        if self.status == VideoStatus.NEW:
+        if not(self.pk):
             # now store the video
             self.file = file
             super(Video, self).save(*(), **{})
@@ -259,11 +259,11 @@ class Video(models.Model):
 
         elif self.status == VideoStatus.QUEUE:
             return mark_safe(
-                f"""<i class="fa-solid fa-stopwatch"></i> Queued"""
+                f"""<i class="fa-solid fa-stopwatch" style="color: #417893;"></i> Queued"""
             )
         elif self.status == VideoStatus.TASK:
             return mark_safe(
-                f"""<i class="fa-solid fa-spinner fa-spin"></i> Processing"""
+                f"""<i class="fa-solid fa-spinner fa-spin" style="color: #417893;"></i> Processing"""
             )
         elif self.status == VideoStatus.DONE:
             return mark_safe(
