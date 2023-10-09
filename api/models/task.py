@@ -1,6 +1,8 @@
 from django.db import models
+from django.utils.html import mark_safe
+
 import uuid
-from ..models import Video
+from ..models import Video, VideoStatus
 
 class TaskAction(models.IntegerChoices):
     START = 0, "Start"
@@ -13,6 +15,7 @@ class Task(models.Model):
     """
     Task run on video
     """
+    # ordering = ["-video__timestamp"]
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
@@ -28,4 +31,18 @@ class Task(models.Model):
     task_body = models.JSONField(help_text="task body used to perform task by available node.", default=dict)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
 
+
+    def save(self, *args, **kwargs):
+        super(Task, self).save(*args, **kwargs)
+        # once the task is saved, take the video instance and update the status
+        video = self.video
+        if video.status == VideoStatus.NEW:
+            video.status = VideoStatus.QUEUE
+            video.save()
+
+    def progress_bar(self):
+        percentage = round(self.progress * 100)
+        return mark_safe("""
+<progress value="{perc}" max="100"></progress>
+<span style="font-weight:bold">{perc}%</span>""".format(perc=percentage))
 

@@ -9,7 +9,7 @@ from .test_api_recipe import recipe
 from .test_api_profile import profile
 from .test_api_video import camera_config_form, prep_video_sample, video_sample_url
 
-from ..models import Site, Recipe, Profile, Video, VideoStatus
+from ..models import Site, Recipe, Profile, Video, VideoStatus, Task
 
 video_sample = prep_video_sample(video_sample_url)
 class VideoListViewTests(InitTestCase):
@@ -55,9 +55,13 @@ class VideoListViewTests(InitTestCase):
         )
         self.assertEquals(r.status_code, status.HTTP_201_CREATED)
         # Upon creation of a time series close in time to the video, the two should be automatically linked.
-        # check if the video now has a time series associated and if the status is QUEUE
+        # check if the video now has a time series associated with it. At this stage, the status should still be NEW
+        # because no task is initiated yet.
         video = Video.objects.get(id=1)
         self.assertEquals(video.time_series is not None, True)
         self.assertEquals(video.status, VideoStatus.QUEUE)
+        # One task should be made, check if there is indeed a total of one tasks in the full queryset
+        self.assertEquals(len(Task.objects.all()), 1)
+
 
 

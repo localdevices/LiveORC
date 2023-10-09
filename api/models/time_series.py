@@ -46,7 +46,7 @@ class TimeSeries(models.Model):
         from ..models import VideoStatus
         videos_at_site = Video.objects.filter(
             camera_config__site__id=self.site.id
-        )
+        ).filter(status=VideoStatus.NEW)
         if len(videos_at_site) != 0:
             # apparently there is a candidate time series record
             video_closest = get_closest_to_dt(videos_at_site, self.timestamp)
@@ -54,7 +54,7 @@ class TimeSeries(models.Model):
             dt = np.abs(self.timestamp - video_closest.timestamp)
             if dt < video_closest.camera_config.allowed_dt:
                 video_closest.time_series = self
-                video_closest.status = VideoStatus.QUEUE
+                # video_closest.status = VideoStatus.QUEUE
                 video_closest.save()
 
 
