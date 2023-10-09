@@ -3,6 +3,8 @@ from django.shortcuts import redirect
 from rest_framework import viewsets, permissions, renderers, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from LiveORC.utils.api.permissions import IsOwnerOrReadOnly
+from LiveORC.utils.api.viewsets import InstitutionMixin
 
 from .models import Site, Profile, Recipe, CameraConfig, Video, TimeSeries, Task
 from .serializers import (
@@ -21,15 +23,15 @@ from .serializers import (
 import mimetypes
 
 
-class SiteViewSet(viewsets.ModelViewSet):
+class SiteViewSet(InstitutionMixin, viewsets.ModelViewSet):
     """
     API endpoints that allows sites to be viewed or edited.
     """
     queryset = Site.objects.all().order_by('name')
     serializer_class = SiteSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
     http_method_names = ["post", "get", "patch", "delete"]
+
 
 class CameraConfigViewSet(viewsets.ModelViewSet):
     """
