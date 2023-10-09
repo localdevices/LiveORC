@@ -14,12 +14,12 @@ class Institution(models.Model):
         return self.name
 
 
-class TeamMember(models.Model):
+class InstitutionMember(models.Model):
     institution = models.ForeignKey(
-        "Institution", related_name="teams", on_delete=models.CASCADE
+        "Institution", related_name="members", on_delete=models.CASCADE
     )
     member = models.ForeignKey(
-        get_user_model(), related_name="teams", on_delete=models.CASCADE
+        get_user_model(), related_name="members", on_delete=models.CASCADE
     )
     role = models.CharField(
         choices=choices.TeamRole.choices, default=choices.TeamRole.MEMBER, max_length=32

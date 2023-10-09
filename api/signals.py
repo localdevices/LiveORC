@@ -5,7 +5,7 @@ from .models import TimeSeries, Video
 import numpy as np
 from datetime import timedelta
 from .models.video import get_closest_to_dt, VideoStatus
-from .models import Task, Institution, TeamMember
+from .models import Task, Institution, InstitutionMember
 from LiveORC.utils import choices
 
 
@@ -114,4 +114,4 @@ def video_process(sender, instance, **kwargs):
 @receiver(post_save, sender=Institution)
 def create_team(sender, instance=None, created=False, **kwargs):
     if created:
-        TeamMember.objects.create(institution=instance, member=instance.owner, role=choices.TeamRole.OWNER)
+        InstitutionMember.objects.create(institution=instance, member=instance.owner, role=choices.TeamRole.OWNER)
