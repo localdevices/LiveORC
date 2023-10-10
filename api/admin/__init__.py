@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy
-from ..models import Site, CameraConfig, Video, Task, Server, Profile, Recipe, TimeSeries, Institution, InstitutionMember
+from ..models import Site, CameraConfig, Video, Task, Server, Profile, Recipe, TimeSeries, Institution, InstitutionMember, User
 
 from .time_series import TimeSeriesAdmin
 from .camera_config import CameraConfigAdmin
@@ -9,6 +9,7 @@ from .video import VideoInline, VideoAdmin
 from .site import SiteAdmin
 from .task import TaskAdmin
 from .server import ServerAdmin
+from .user import UserAdmin
 
 # initiate orc admin site with specific titles and logos
 
@@ -28,3 +29,4 @@ admin.site.register(Task, TaskAdmin)
 admin.site.register(TimeSeries, TimeSeriesAdmin)
 admin.site.register(Institution)
 admin.site.register(InstitutionMember)
+admin.site.register(User, UserAdmin)
