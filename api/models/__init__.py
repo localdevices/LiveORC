@@ -1,3 +1,4 @@
+from .user import User
 from .site import Site
 from .server import Server
 from .profile import Profile
