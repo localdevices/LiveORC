@@ -33,7 +33,7 @@ class SiteViewSet(InstitutionMixin, viewsets.ModelViewSet):
     http_method_names = ["post", "get", "patch", "delete"]
 
 
-class CameraConfigViewSet(viewsets.ModelViewSet):
+class CameraConfigViewSet(InstitutionMixin, viewsets.ModelViewSet):
     """
     API endpoints that allows camera configurations to be viewed or edited.
     """
@@ -100,7 +100,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "post", "delete", "patch"]
 
 
-class TimeSeriesViewSet(viewsets.ModelViewSet):
+class TimeSeriesViewSet(InstitutionMixin, viewsets.ModelViewSet):
     """
     API endpoints that allows time series to be viewed or edited.
     """
