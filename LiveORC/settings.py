@@ -181,3 +181,5 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static/admin"),
 ]
 
+AUTH_USER_MODEL = "api.User"
+
