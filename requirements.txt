@@ -7,4 +7,6 @@ drf-nested-routers
 pytest-django
 django-debug-toolbar
 drf-spectacular
+django-extensions
+shortuuid
 nodeopenrivercam @ https://github.com/localdevices/nodeorc.git
