@@ -164,10 +164,15 @@ class Video(models.Model):
         # This is in order to first get an ID on the video instance (otherwise video would be stored in a
         # folder called 'None'
         if not(self.pk):
+            new_file = True
+        else:
+            new_file = False
+        if new_file:
             file = self.file
             self.file = None
+
         super(Video, self).save(*args, **kwargs)
-        if not(self.pk):
+        if new_file:
             # now store the video
             self.file = file
             super(Video, self).save(*(), **{})
