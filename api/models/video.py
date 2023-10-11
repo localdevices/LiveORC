@@ -152,7 +152,7 @@ class Video(models.Model):
     status = models.PositiveSmallIntegerField(
         choices=VideoStatus.choices,
         default=VideoStatus.NEW,
-        editable=False,
+        # editable=False,
         help_text="Status of processing"
     )
     camera_config = models.ForeignKey(CameraConfig, on_delete=models.CASCADE)

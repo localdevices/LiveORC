@@ -130,19 +130,20 @@ class TimeSeriesViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         # look for a video instance linked to the time series
         instance = TimeSeries.objects.get(id=serializer.data["id"])
-        video_instance = instance.video
-        if video_instance.is_ready_for_task:
-            # launch creation of a new task
-            task_body = get_task(video_instance, request, serialize=False,*args, **kwargs)
-            task = {
-                "id": task_body["id"],
-                "task_body": task_body,
-                "video": video_instance
-            }
-            Task.objects.create(**task)
-            # update the Video instance
-            video_instance.status = VideoStatus.QUEUE
-            video_instance.save()
+        if hasattr(instance, "video"):
+            video_instance = instance.video
+            if video_instance.is_ready_for_task:
+                # launch creation of a new task
+                task_body = get_task(video_instance, request, serialize=False,*args, **kwargs)
+                task = {
+                    "id": task_body["id"],
+                    "task_body": task_body,
+                    "video": video_instance
+                }
+                Task.objects.create(**task)
+                # update the Video instance
+                video_instance.status = VideoStatus.QUEUE
+                video_instance.save()
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
