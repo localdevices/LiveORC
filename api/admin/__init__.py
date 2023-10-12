@@ -1,10 +1,23 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy
-from ..models import Site, CameraConfig, Video, Task, Server, Profile, Recipe, TimeSeries, Institution, InstitutionMember, User
+from ..models import (
+    Site,
+    CameraConfig,
+    Video,
+    Task,
+    Server,
+    Profile,
+    Recipe,
+    TimeSeries,
+    Institution,
+    InstitutionMember,
+    User
+)
 
 from .time_series import TimeSeriesAdmin
 from .camera_config import CameraConfigAdmin
 from .profile import ProfileAdmin
+from .recipe import RecipeAdmin
 from .video import VideoInline, VideoAdmin
 from .site import SiteAdmin
 from .task import TaskAdmin
@@ -21,7 +34,7 @@ admin.site.index_title = gettext_lazy("Admin dashboard")
 admin.site.register(Site, SiteAdmin)
 admin.site.register(CameraConfig, CameraConfigAdmin)
 admin.site.register(Profile, ProfileAdmin)
-admin.site.register(Recipe)
+admin.site.register(Recipe, RecipeAdmin)
 # admin.site.register(Project, ProjectAdmin)  # leave out for now, may become relevant for future geospatial applications
 admin.site.register(Video, VideoAdmin)
 admin.site.register(Server, ServerAdmin)

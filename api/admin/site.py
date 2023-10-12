@@ -1,5 +1,4 @@
 from django.contrib.gis import admin as gisadmin
-from .time_series import TimeSeriesInline
 from api.models.institution import Institution, InstitutionMember
 
 
@@ -11,7 +10,6 @@ class SiteAdmin(gisadmin.GISModelAdmin):
     ]
     search_fields = ["name"]
     list_display = ["name", "geom", "institution"]
-    inlines = [TimeSeriesInline]
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

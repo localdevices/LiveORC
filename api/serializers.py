@@ -6,7 +6,7 @@ class SiteSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Site
         # fields = "__all__"
-        fields = ['id', 'name']# , 'geom']
+        fields = ['id', 'name', 'geom']
 
 
 class CameraConfigSerializer(serializers.ModelSerializer):
@@ -19,7 +19,7 @@ class CameraConfigSerializer(serializers.ModelSerializer):
 
 class CameraConfigCreateSerializer(CameraConfigSerializer):
     class Meta:
-        model = Profile
+        model = CameraConfig
         exclude = ("site", )
 
 
@@ -40,7 +40,7 @@ class ProfileCreateSerializer(ProfileSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
-        fields = ['data']
+        fields = ['name', 'data']
 
 
 class VideoSerializer(serializers.ModelSerializer):

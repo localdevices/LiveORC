@@ -41,10 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    'django_json_widget',
     'rest_framework',
     'api',
     'rangefilter',
     'drf_spectacular',
+    'fontawesomefree',
+    'django_object_actions'
 ]
 
 MIDDLEWARE = [

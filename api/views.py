@@ -6,7 +6,8 @@ from rest_framework.response import Response
 from LiveORC.utils.api.permissions import IsOwnerOrReadOnly
 from LiveORC.utils.api.viewsets import InstitutionMixin
 
-from .models import Site, Profile, Recipe, CameraConfig, Video, TimeSeries, Task
+from .models import Site, Profile, Recipe, CameraConfig, Video, TimeSeries, Task, VideoStatus
+from .task_utils import get_task
 from .serializers import (
     SiteSerializer,
     ProfileSerializer,
@@ -48,13 +49,14 @@ class CameraConfigViewSet(InstitutionMixin, viewsets.ModelViewSet):
 
     def create(self, request, site_pk=None, *args, **kwargs):
         # insert the site
-        if not(request.data.get("site")):
-            request.data["site"] = site_pk
+        data = request.data.copy()
+        if not(data.get("site")):
+            data["site"] = site_pk
         # replace the serializer
         serializer_class = CameraConfigSerializer
         # run create in the usual manner
         kwargs.setdefault('context', self.get_serializer_context())
-        serializer = serializer_class(data=request.data)
+        serializer = serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -77,13 +79,14 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
     def create(self, request, site_pk=None, *args, **kwargs):
         # insert the site
-        if not(request.data.get("site")):
-            request.data["site"] = site_pk
+        data = request.data.copy()
+        if not(data.get("site")):
+            data["site"] = site_pk
         # replace the serializer
         serializer_class = ProfileSerializer
         # run create in the usual manner
         kwargs.setdefault('context', self.get_serializer_context())
-        serializer = serializer_class(data=request.data)
+        serializer = serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -117,23 +120,39 @@ class TimeSeriesViewSet(InstitutionMixin, viewsets.ModelViewSet):
 
     def create(self, request, site_pk=None, *args, **kwargs):
         # insert the site
+        data = request.data.copy()
         if not(request.data.get("site")):
-            request.data["site"] = site_pk
+            data["site"] = site_pk
         # replace the serializer
         serializer_class = TimeSeriesSerializer
         # run create in the usual manner
         kwargs.setdefault('context', self.get_serializer_context())
-        serializer = serializer_class(data=request.data)
+        serializer = serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
+        # look for a video instance linked to the time series
+        instance = TimeSeries.objects.get(id=serializer.data["id"])
+        if hasattr(instance, "video"):
+            video_instance = instance.video
+            if video_instance.is_ready_for_task:
+                # launch creation of a new task
+                task_body = get_task(video_instance, request, serialize=False,*args, **kwargs)
+                task = {
+                    "id": task_body["id"],
+                    "task_body": task_body,
+                    "video": video_instance
+                }
+                Task.objects.create(**task)
+                # update the Video instance
+                video_instance.status = VideoStatus.QUEUE
+                video_instance.save()
+
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def get_queryset(self):
         # video can also be retrieved nested per site, by filtering on the site of the cameraconfig property.
         return TimeSeries.objects.filter(site=self.kwargs['site_pk'])
-
-    # def create(self, request, *args, **kwargs):
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -153,18 +172,26 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def create(self, request, site_pk=None, video_pk=None, *args, **kwargs):
         # insert the site
-        if not(request.data.get("site")):
-            request.data["site"] = site_pk
-        if not(request.data.get("video")):
-            request.data["video"] = video_pk
-        # replace the serializer
-        serializer_class = TaskSerializer
-        # run create in the usual manner
-        kwargs.setdefault('context', self.get_serializer_context())
-        serializer = serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
+        data = request.data.copy()
+        if not(data.get("site")):
+            data["site"] = site_pk
+        if not(data.get("video")):
+            data["video"] = video_pk
+        # get the video
+        try:
+            video_instance = Video.objects.get(id=video_pk)
+
+            data["task_body"] = get_task(video_instance, request, *args, **kwargs)
+            # replace the serializer
+            serializer_class = TaskSerializer
+            # run create in the usual manner
+            kwargs.setdefault('context', self.get_serializer_context())
+            serializer = serializer_class(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
@@ -187,12 +214,51 @@ class VideoViewSet(viewsets.ModelViewSet):
         mimetype, _ = mimetypes.guess_type(video.file.name)
         return HttpResponse(video, content_type=mimetype)
 
-    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+
+    def create(self, request, *args, **kwargs):
+        """
+        Override create to make sure that if a tiume series with a water level is found, a new task is launched to
+        process the video
+
+        Parameters
+        ----------
+        request
+        args
+        kwargs
+
+        Returns
+        -------
+
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        # self.get_object does not work because a new video is posted on a open end point, without association to a site
+        instance = Video.objects.get(id=serializer.data["id"])
+        # check if a time series instance was found during creation
+        if instance.is_ready_for_task:
+            # launch creation of a new task
+            task_body = get_task(instance, request, serialize=False,*args, **kwargs)
+            task = {
+                "id": task_body["id"],
+                "task_body": task_body,
+                "video": instance
+            }
+            Task.objects.create(**task)
+            # update the Video instance
+            instance.status = VideoStatus.QUEUE
+            instance.save()
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+    @action(detail=True, methods=['post'], renderer_classes=[renderers.StaticHTMLRenderer])
     def create_task(self, request, *args, **kwargs):
         instance = self.get_object()
-        task = instance.make_task()
+        task = get_task(instance, request, *args, **kwargs)
         # print(f"URL: {request.build_absolute_uri(reverse('video'))}")
         return redirect('api:video-list')
+
 
 class VideoSiteViewSet(VideoViewSet):
     """

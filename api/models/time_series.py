@@ -1,6 +1,18 @@
-from django.db import models
+import numpy as np
 
+from django.db import models
+from django.apps import apps
 from ..models import Site
+
+
+def get_closest_to_dt(queryset, timestamp):
+    greater = queryset.filter(timestamp__gte=timestamp).order_by("timestamp").first()
+    less = queryset.filter(timestamp__lte=timestamp).order_by("-timestamp").first()
+
+    if greater and less:
+        return greater if abs(greater.timestamp - timestamp) < abs(less.timestamp - timestamp) else less
+    else:
+        return greater or less
 
 def get_str(value, dec=1):
     if value is None:
@@ -25,7 +37,26 @@ class TimeSeries(models.Model):
     wetted_surface = models.FloatField(help_text="Wetted surface area with given water level [m2]", null=True, blank=True)
     wetted_perimeter = models.FloatField(help_text="Wetted perimeter with given water level [m]", null=True, blank=True)
     fraction_velocimetry = models.FloatField(help_text="Fraction of discharge resolved using velocimetry [-]", null=True, blank=True)
+
     # TODO: create link with videos, filtered on site, to add water level to those videos.
+    def save(self, *args, **kwargs):
+        super(TimeSeries, self).save(*args, **kwargs)
+        # try to associate a video with the time series
+        Video = apps.get_model('api.Video')
+        from ..models import VideoStatus
+        videos_at_site = Video.objects.filter(
+            camera_config__site__id=self.site.id
+        ).filter(status=VideoStatus.NEW)
+        if len(videos_at_site) != 0:
+            # apparently there is a candidate time series record
+            video_closest = get_closest_to_dt(videos_at_site, self.timestamp)
+            # check if time diff is acceptable
+            dt = np.abs(self.timestamp - video_closest.timestamp)
+            if dt < video_closest.camera_config.allowed_dt:
+                video_closest.time_series = self
+                # video_closest.status = VideoStatus.QUEUE
+                video_closest.save()
+
 
     class Meta:
         indexes = [models.Index(fields=['site', 'timestamp'])]

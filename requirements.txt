@@ -6,7 +6,11 @@ django-admin-rangefilter
 drf-nested-routers
 pytest-django
 django-debug-toolbar
+django-object-actions
 drf-spectacular
 django-extensions
 shortuuid
+fontawesomefree
+pytest-django
+
 nodeopenrivercam @ https://github.com/localdevices/nodeorc.git

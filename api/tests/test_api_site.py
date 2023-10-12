@@ -1,7 +1,4 @@
-from django.test import TestCase
-from django.contrib.auth.models import User
-from django.urls import reverse
-from rest_framework.test import APIRequestFactory, APIClient
+from rest_framework.test import APIClient
 from rest_framework import status
 from .test_setup_db import InitTestCase
 # Create your tests here.
@@ -56,6 +53,7 @@ class SiteListViewTests(InitTestCase):
         )
         self.assertEquals(r.status_code, status.HTTP_201_CREATED)
         r = client.get('/api/site/', follow=True, headers=headers)
+        print(r.json())
         self.assertEquals(r.status_code, status.HTTP_200_OK)
         r = client.get('/api/site/1', follow=True, headers=headers)
         self.assertEquals(r.status_code, status.HTTP_200_OK)

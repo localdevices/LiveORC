@@ -166,7 +166,7 @@ class CameraConfig(models.Model):
         return mark_safe(
             map_template.format(
                 self.bbox.wkt,
-                'MULTIPOINT Z ()',
+                'MULTIPOINT EMPTY',
                 self.x,
                 self.y
             )
