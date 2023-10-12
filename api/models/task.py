@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.html import mark_safe
 
@@ -30,6 +31,7 @@ class Task(models.Model):
                                  blank=True)
     task_body = models.JSONField(help_text="task body used to perform task by available node.", default=dict)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
 
 
     def save(self, *args, **kwargs):

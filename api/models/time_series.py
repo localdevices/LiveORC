@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 import numpy as np
 
 from django.db import models
@@ -37,6 +38,7 @@ class TimeSeries(models.Model):
     wetted_surface = models.FloatField(help_text="Wetted surface area with given water level [m2]", null=True, blank=True)
     wetted_perimeter = models.FloatField(help_text="Wetted perimeter with given water level [m]", null=True, blank=True)
     fraction_velocimetry = models.FloatField(help_text="Fraction of discharge resolved using velocimetry [-]", null=True, blank=True)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
 
     # TODO: create link with videos, filtered on site, to add water level to those videos.
     def save(self, *args, **kwargs):

@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class ServerType(models.IntegerChoices):
     FTP = 1, "FTP"
     ODK = 2, "ODK Collect"

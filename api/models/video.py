@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.core.validators import FileExtensionValidator
 from django.utils.html import format_html
 from django.db import models
@@ -158,6 +159,7 @@ class Video(models.Model):
     camera_config = models.ForeignKey(CameraConfig, on_delete=models.CASCADE)
     time_series = models.OneToOneField(TimeSeries, on_delete=models.SET_NULL, null=True, blank=True)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # move the file field to a separate variable temporarily.
