@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.html import mark_safe
 
 import uuid
-from ..models import Video, VideoStatus
+from ..models import BaseModel, Video, VideoStatus
 
 class TaskAction(models.IntegerChoices):
     START = 0, "Start"
@@ -12,7 +12,7 @@ class TaskAction(models.IntegerChoices):
     RESTART = 3, "Restart"
 
 
-class Task(models.Model):
+class Task(BaseModel):
     """
     Task run on video
     """
@@ -31,7 +31,7 @@ class Task(models.Model):
                                  blank=True)
     task_body = models.JSONField(help_text="task body used to perform task by available node.", default=dict)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
+    # user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
 
 
     def save(self, *args, **kwargs):

@@ -1,10 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.contrib.gis.db import models as gismodels
-from .institution import Institution
+# from .institution import Institution
+# from users.models import Institute
+from ..models import BaseModel
 
-
-class Site(gismodels.Model):
+class Site(BaseModel):
     """
     Location of one or more videos
     """
@@ -13,6 +14,6 @@ class Site(gismodels.Model):
 
     name = models.CharField(max_length=100, help_text="Recognizable unique name for your site")
     geom = gismodels.PointField("Location", srid=4326, help_text="Approximate location of the site")
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
+    # user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
 
 

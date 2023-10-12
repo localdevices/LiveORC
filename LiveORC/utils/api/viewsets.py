@@ -14,9 +14,9 @@ class InstitutionMixin(object):
         queryset = super(InstitutionMixin, self).get_queryset()
         institutions = [institution_member.institution for institution_member in self.request.user.members.all()]
         try:
-            queryset = queryset.filter(institution__in=institutions)
+            queryset = queryset.filter(institute__in=institutions)
         except FieldError:
-            queryset = queryset.filter(site__institution__in=institutions)
+            queryset = queryset.filter(site__institute__in=institutions)
         except Exception:
             pass
         return queryset

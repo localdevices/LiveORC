@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy
 from ..models import (
     Site,
@@ -9,9 +10,9 @@ from ..models import (
     Profile,
     Recipe,
     TimeSeries,
-    Institution,
-    InstitutionMember,
-    User
+    # Institution,
+    # InstitutionMember,
+    # User
 )
 
 from .time_series import TimeSeriesAdmin
@@ -22,7 +23,7 @@ from .video import VideoInline, VideoAdmin
 from .site import SiteAdmin
 from .task import TaskAdmin
 from .server import ServerAdmin
-from .user import UserAdmin
+# from .user import UserAdmin
 
 # initiate orc admin site with specific titles and logos
 
@@ -40,6 +41,10 @@ admin.site.register(Video, VideoAdmin)
 admin.site.register(Server, ServerAdmin)
 admin.site.register(Task, TaskAdmin)
 admin.site.register(TimeSeries, TimeSeriesAdmin)
-admin.site.register(Institution)
-admin.site.register(InstitutionMember)
-admin.site.register(User, UserAdmin)
+# admin.site.register(Institution)
+# admin.site.register(InstitutionMember)
+# we are not using groups, hence remove (we will have institutes)
+# TODO: move user/institute to a separate app called Users and Institutes
+admin.site.unregister(Group)
+# admin.site.register(User, UserAdmin)
+

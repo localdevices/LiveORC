@@ -1,11 +1,11 @@
 from django.contrib.gis import admin as gisadmin
-from api.models.institution import Institution, InstitutionMember
+# from users.models.institute import Institute, InstituteMember
 
 
 # Register your models here.
 class SiteAdmin(gisadmin.GISModelAdmin):
     fieldsets = [
-        (None, {"fields": ["name", "institution"]}),
+        (None, {"fields": ["name", "institute"]}),
         ("Coordinates", {"fields": ["geom"]})
     ]
     search_fields = ["name"]

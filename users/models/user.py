@@ -17,8 +17,8 @@ class UserManager(BaseUserManager):
         user.save()
         return user
 
-    def create_superuser(self, **kwargs):
-        user = self.create_user(**kwargs)
+    def create_superuser(self, email, password, **kwargs):
+        user = self.create_user(email, password, **kwargs)
         user.is_superuser = True
         user.is_staff = True
         user.save()
@@ -26,6 +26,7 @@ class UserManager(BaseUserManager):
 
 
 class User(BaseModel, AbstractBaseUser, PermissionsMixin):
+    username = None
     name = models.CharField(_("Full Name"), max_length=100, blank=True, null=True)
     email = models.EmailField(_("Email Address"), max_length=255, unique=True)
 
@@ -39,7 +40,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     class Meta:
-        app_label = 'api'
+        app_label = 'users'
 
     def __str__(self):
         return self.get_fullname()
@@ -47,6 +48,6 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     def get_fullname(self):
         return self.name if self.name else self.email
 
-    def is_company_member(self, institution):
-        return self.members.filter(institution=institution).exists()
+    def is_company_member(self, institute):
+        return self.members.filter(institute=institute).exists()
 

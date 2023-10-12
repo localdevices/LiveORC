@@ -3,7 +3,7 @@ import numpy as np
 
 from django.db import models
 from django.apps import apps
-from ..models import Site
+from ..models import BaseModel, Site
 
 
 def get_closest_to_dt(queryset, timestamp):
@@ -21,7 +21,7 @@ def get_str(value, dec=1):
     else:
         return str(round(value, dec))
 
-class TimeSeries(models.Model):
+class TimeSeries(BaseModel):
     """
     temporary water level for sites used to provide water levels to uploaded videos
     """
@@ -38,7 +38,7 @@ class TimeSeries(models.Model):
     wetted_surface = models.FloatField(help_text="Wetted surface area with given water level [m2]", null=True, blank=True)
     wetted_perimeter = models.FloatField(help_text="Wetted perimeter with given water level [m]", null=True, blank=True)
     fraction_velocimetry = models.FloatField(help_text="Fraction of discharge resolved using velocimetry [-]", null=True, blank=True)
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
+    # user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
 
     # TODO: create link with videos, filtered on site, to add water level to those videos.
     def save(self, *args, **kwargs):

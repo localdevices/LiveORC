@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy
 from pyproj import CRS, Transformer
 from shapely import ops
 
-from ..models import Site, Server, Recipe, Profile
+from ..models import BaseModel, Site, Server, Recipe, Profile
 import pyorc
 
 
@@ -69,7 +69,7 @@ lens_position_schema = {
     'required': ['x', 'y', 'z']
 }
 
-class CameraConfig(models.Model):
+class CameraConfig(BaseModel):
     """
     Contains JSON with a full camera configuration
     """
@@ -99,7 +99,7 @@ class CameraConfig(models.Model):
     server = models.ForeignKey(Server, on_delete=models.SET_NULL, null=True, blank=True)
     recipe = models.ForeignKey(Recipe, on_delete=models.SET_NULL, null=True, blank=True)
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True)
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
+    # user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
     # TODO also connect to server
     # TODO connect to recipe and profile (where necessary)
 

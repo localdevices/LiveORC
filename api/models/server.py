@@ -1,4 +1,5 @@
 from django.db import models
+from ..models import BaseModel
 
 
 class ServerType(models.IntegerChoices):
@@ -7,7 +8,7 @@ class ServerType(models.IntegerChoices):
     # ("SFTP", "SFTP")
 
 
-class Server(models.Model):
+class Server(BaseModel):
     """
     Server configuration with specific end points and
     file wildcards for frequent retrieval of videos

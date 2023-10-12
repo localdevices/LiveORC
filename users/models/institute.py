@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from LiveORC.utils import choices
 
 
-class Institution(models.Model):
+class Institute(models.Model):
     owner = models.OneToOneField(
         get_user_model(), on_delete=models.CASCADE, related_name="institution"
     )
@@ -14,9 +14,9 @@ class Institution(models.Model):
         return self.name
 
 
-class InstitutionMember(models.Model):
-    institution = models.ForeignKey(
-        "Institution", related_name="members", on_delete=models.CASCADE
+class InstituteMember(models.Model):
+    institute = models.ForeignKey(
+        "Institute", related_name="members", on_delete=models.CASCADE
     )
     member = models.ForeignKey(
         get_user_model(), related_name="members", on_delete=models.CASCADE

@@ -14,7 +14,7 @@ import cv2
 import numpy as np
 from django.conf import settings
 
-from ..models import CameraConfig, Project, TimeSeries
+from ..models import BaseModel, CameraConfig, Project, TimeSeries
 import api.task_utils
 
 VIDEO_EXTENSIONS = ["MOV", "MKV", "MP4", "AVI", "M4V"]
@@ -115,7 +115,7 @@ class VideoStatus(models.IntegerChoices):
     ERROR = 5, "Error occurred"
 
 
-class Video(models.Model):
+class Video(BaseModel):
     """
     Video object with water level and flow information
     """
@@ -159,7 +159,7 @@ class Video(models.Model):
     camera_config = models.ForeignKey(CameraConfig, on_delete=models.CASCADE)
     time_series = models.OneToOneField(TimeSeries, on_delete=models.SET_NULL, null=True, blank=True)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
+    # user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # move the file field to a separate variable temporarily.

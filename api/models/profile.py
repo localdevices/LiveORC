@@ -11,7 +11,7 @@ from django.utils.html import mark_safe
 
 from pyproj import CRS, Transformer
 
-from ..models import Site
+from ..models import BaseModel, Site
 
 map_template = """
 <div id="id_geom_div_map" class="dj_map_wrapper">
@@ -47,7 +47,7 @@ map_template = """
 """
 
 
-class Profile(models.Model):
+class Profile(BaseModel):
     """
     Contains the river profile as a geojson
     """
@@ -55,7 +55,7 @@ class Profile(models.Model):
     data = models.JSONField(help_text="GeoJSON fields containing Point (x,y,z) geometries that encompass a cross section")
     timestamp = models.DateTimeField("survey date", default=timezone.now)
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
+    # user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
 
     # def clean(self):
     #     super().clean()

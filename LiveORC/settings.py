@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     'django_json_widget',
     'rest_framework',
+    'users',
     'api',
     'rangefilter',
     'drf_spectacular',
@@ -184,5 +185,5 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static/admin"),
 ]
 
-AUTH_USER_MODEL = "api.User"
+AUTH_USER_MODEL = "users.User"
 
