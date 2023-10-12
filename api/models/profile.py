@@ -2,6 +2,7 @@ import pyorc
 import shapely
 import shapely.geometry
 
+from django.contrib.auth import get_user_model
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -54,6 +55,7 @@ class Profile(models.Model):
     data = models.JSONField(help_text="GeoJSON fields containing Point (x,y,z) geometries that encompass a cross section")
     timestamp = models.DateTimeField("survey date", default=timezone.now)
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
 
     # def clean(self):
     #     super().clean()

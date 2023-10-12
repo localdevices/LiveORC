@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 
 from ..models import Video
@@ -22,4 +23,5 @@ class Task(models.Model):
                                  blank=True)
 
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
 

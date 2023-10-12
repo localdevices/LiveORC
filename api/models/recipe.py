@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.exceptions import ValidationError
 import pyorc
@@ -9,6 +10,7 @@ class Recipe(models.Model):
     """
     data = models.JSONField(help_text="JSON formatted recipe for processing videos. See https://localdevices.github.io/pyorc/user-guide/cli.html")
     version = models.CharField(max_length=15, blank=True, default=pyorc.__version__, editable=False)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
 
     def clean(self):
         super().clean()

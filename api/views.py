@@ -39,7 +39,6 @@ class CameraConfigViewSet(InstitutionMixin, viewsets.ModelViewSet):
     """
     queryset = CameraConfig.objects.all().order_by('name')
     serializer_class = CameraConfigSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -61,13 +60,12 @@ class CameraConfigViewSet(InstitutionMixin, viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-class ProfileViewSet(viewsets.ModelViewSet):
+class ProfileViewSet(InstitutionMixin, viewsets.ModelViewSet):
     """
     API endpoints that allows profiles to be viewed or edited.
     """
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
     http_method_names = ["get", "post", "delete", "patch"]
 
     def get_serializer_class(self):
