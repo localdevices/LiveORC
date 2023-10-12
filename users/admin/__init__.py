@@ -1,10 +1,13 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
+from django.contrib.auth.admin import GroupAdmin
+
 from django.utils.translation import gettext_lazy
 from users.models import (
     Institute,
     InstituteMember,
-    User
+    User,
+    Group
 )
 
 from .user import UserAdmin
@@ -17,6 +20,7 @@ from .user import UserAdmin
 
 
 admin.site.register(User, UserAdmin)
+admin.site.register(Group, GroupAdmin)
 admin.site.register(Institute)
 admin.site.register(InstituteMember)
 

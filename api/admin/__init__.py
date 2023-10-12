@@ -46,5 +46,7 @@ admin.site.register(TimeSeries, TimeSeriesAdmin)
 # we are not using groups, hence remove (we will have institutes)
 # TODO: move user/institute to a separate app called Users and Institutes
 admin.site.unregister(Group)
+# admin.site.unregister(User)
+
 # admin.site.register(User, UserAdmin)
 
