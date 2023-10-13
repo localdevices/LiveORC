@@ -11,7 +11,7 @@ class SiteAdmin(BaseAdmin):
         ("Coordinates", {"fields": ["geom"]})
     ]
     search_fields = ["name"]
-    list_display = ["name", "geom", "creator"]
+    list_display = ["name", "geom"]
 
     # def get_queryset(self, request):
     #     qs = super().get_queryset(request)
@@ -26,10 +26,12 @@ class SiteAdmin(BaseAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.is_superuser:
+            # super users can see everything. Return all
             return qs
-        qs_institute = qs.filter(user__institute=request.user.institute)
-        qs_user = qs.filter(creator=request.user)
+        # Non-super users can only see their own models, and the models from other users within their institute
+        qs_institute = qs.filter(creator__institute=request.user.institute) | qs.filter(creator=request.user)
         return qs_institute# + qs_user
+        # return qs_user
 
 
     # def get_queryset(self):
