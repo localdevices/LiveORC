@@ -1,4 +1,4 @@
-from django.contrib import admin
+from api.admin import BaseAdmin
 
-class ServerAdmin(admin.ModelAdmin):
+class ServerAdmin(BaseAdmin):
     list_display = ["type", "url", "end_point", "wildcard", "frequency"]

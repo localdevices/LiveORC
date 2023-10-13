@@ -1,8 +1,7 @@
 from django.contrib import admin
 
-from django.contrib.gis import admin as gisadmin
-from ..models import TimeSeries
-
+from api.models import TimeSeries
+from api.admin import BaseAdmin
 
 
 class TimeSeriesInline(admin.TabularInline):
@@ -13,8 +12,7 @@ class TimeSeriesInline(admin.TabularInline):
     extra = 5
 
 
-
-class TimeSeriesAdmin(admin.ModelAdmin):
+class TimeSeriesAdmin(BaseAdmin):
     list_display = ["get_site_name", "timestamp", "str_h", "str_fraction_velocimetry", "str_q_50", 'thumbnail_preview']
     list_filter = ["site__name"]
     readonly_fields = (

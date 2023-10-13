@@ -1,6 +1,4 @@
-from django.contrib.auth import get_user_model
 from django.core.validators import FileExtensionValidator
-from django.utils.html import format_html
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -14,10 +12,10 @@ import cv2
 import numpy as np
 from django.conf import settings
 
-from ..models import BaseModel, CameraConfig, Project, TimeSeries
-import api.task_utils
+from api.models import BaseModel, CameraConfig, Project, TimeSeries
 
 VIDEO_EXTENSIONS = ["MOV", "MKV", "MP4", "AVI", "M4V"]
+
 
 def add_frame_to_model(video_field, img_field, frame_nr=0, suffix="", thumb=False):
     """

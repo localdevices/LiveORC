@@ -4,7 +4,10 @@ class BaseAdmin(admin.GISModelAdmin):
     def has_change_permission(self, request, obj=None):
         if request.user.is_superuser:
             return True
-        if obj is not None and request.user == obj.creator:
+        if obj is None:
+            # a new object, so change is allowed
+            return True
+        if request.user == obj.creator:
             return True
         return False
         # return super().has_change_permission(request, obj)
@@ -38,16 +41,13 @@ class BaseAdmin(admin.GISModelAdmin):
     is_owner.boolean = True
     is_owner.allow_tags = True
 
-
-    #
-    #
-    # def get_exclude(self, request, obj=None):
-    #     fields = super().get_exclude(request)
-    #     if not request.user.is_superuser:
-    #         if fields is None:
-    #             fields = ("creator",)
-    #         else:
-    #             fields = list(fields)
-    #             fields.append("creator")
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            # super users can see everything. Return all
+            return qs
+        # Non-super users can only see their own models, and the models from other users within their institute
+        qs_filter = qs.filter(creator__institute=request.user.institute) | qs.filter(creator=request.user)
+        return qs_filter
 
 

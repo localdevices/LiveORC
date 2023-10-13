@@ -3,9 +3,14 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from LiveORC.utils.api.permissions import IsOwnerOrReadOnlyAsInstitute
 
+
 class BaseModelViewSet(viewsets.ModelViewSet):
+    """
+    This BaseModelViewSet is for all models and model instancesin the API. These all have a 'creator' as non-editable
+    field and should be visible only to people within the same institute or to the user that created them
+    """
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnlyAsInstitute]
 
     def perform_create(self, serializer):
-        # add the creator upon saving
+        # only add the creator upon saving
         serializer.save(creator=self.request.user)

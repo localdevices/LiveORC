@@ -1,6 +1,6 @@
-from django.contrib import admin
-from ..admin import VideoInline
+from api.admin import VideoInline, BaseAdmin
 
-class ProjectAdmin(admin.ModelAdmin):
+
+class ProjectAdmin(BaseAdmin):
     search_fields = ["name", "description"]
     inlines = [VideoInline]

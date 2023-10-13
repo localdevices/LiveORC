@@ -1,11 +1,12 @@
-from rest_framework import viewsets, status, permissions
+from rest_framework import status, permissions
 from rest_framework.response import Response
-from LiveORC.utils.api.viewsets import InstitutionMixin
 from api.serializers import TimeSeriesSerializer, TimeSeriesCreateSerializer
 from api.models import TimeSeries, Task, VideoStatus
 from api.task_utils import get_task
+from api.views import BaseModelViewSet
 
-class TimeSeriesViewSet(InstitutionMixin, viewsets.ModelViewSet):
+
+class TimeSeriesViewSet(BaseModelViewSet):
     """
     API endpoints that allows time series to be viewed or edited.
     """
@@ -42,7 +43,8 @@ class TimeSeriesViewSet(InstitutionMixin, viewsets.ModelViewSet):
                 task = {
                     "id": task_body["id"],
                     "task_body": task_body,
-                    "video": video_instance
+                    "video": video_instance,
+                    "creator": request.user
                 }
                 Task.objects.create(**task)
                 # update the Video instance

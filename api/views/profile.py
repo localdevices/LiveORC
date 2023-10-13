@@ -1,10 +1,11 @@
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.response import Response
-from LiveORC.utils.api.viewsets import InstitutionMixin
 from api.serializers import ProfileSerializer, ProfileCreateSerializer
 from api.models import Profile
+from api.views import BaseModelViewSet
 
-class ProfileViewSet(InstitutionMixin, viewsets.ModelViewSet):
+
+class ProfileViewSet(BaseModelViewSet):
     """
     API endpoints that allows profiles to be viewed or edited.
     """

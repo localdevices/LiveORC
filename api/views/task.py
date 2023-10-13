@@ -1,13 +1,13 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import permissions, status
 from rest_framework.response import Response
 
-from LiveORC.utils.api.viewsets import InstitutionMixin
 from api.serializers import TaskSerializer, TaskCreateSerializer
 from api.models import Task, Video
 from api.task_utils import get_task
+from api.views import BaseModelViewSet
 
 
-class TaskViewSet(viewsets.ModelViewSet):
+class TaskViewSet(BaseModelViewSet):
     """
     API endpoints that allows tasks to be viewed or edited.
     """

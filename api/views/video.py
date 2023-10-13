@@ -2,15 +2,16 @@ import mimetypes
 
 from django.http import HttpResponse
 from django.shortcuts import redirect
-from rest_framework import viewsets, status, permissions, renderers
+from rest_framework import status, permissions, renderers
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from LiveORC.utils.api.viewsets import InstitutionMixin
 from api.serializers import VideoSerializer
 from api.models import Video, Task, VideoStatus
 from api.task_utils import get_task
+from api.views import BaseModelViewSet
 
-class VideoViewSet(viewsets.ModelViewSet):
+
+class VideoViewSet(BaseModelViewSet):
     """
     API endpoints that allows videos to be added
     """

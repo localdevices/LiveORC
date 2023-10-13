@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy
 from pyproj import CRS, Transformer
 from shapely import ops
 
-from ..models import BaseModel, Site, Server, Recipe, Profile
+from api.models import BaseModel, Site, Server, Recipe, Profile
 import pyorc
 
 

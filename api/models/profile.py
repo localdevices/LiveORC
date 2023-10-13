@@ -11,7 +11,7 @@ from django.utils.html import mark_safe
 
 from pyproj import CRS, Transformer
 
-from ..models import BaseModel, Site
+from api.models import BaseModel, Site
 
 map_template = """
 <div id="id_geom_div_map" class="dj_map_wrapper">
@@ -75,7 +75,8 @@ class Profile(BaseModel):
 
     @property
     def crs(self):
-        return CRS.from_user_input(self.data["crs"]["properties"]["name"])
+        if self.data is not None:
+            return CRS.from_user_input(self.data["crs"]["properties"]["name"])
 
     @property
     def multipoint(self):

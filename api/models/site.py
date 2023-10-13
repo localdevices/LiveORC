@@ -3,7 +3,7 @@ from django.db import models
 from django.contrib.gis.db import models as gismodels
 # from .institution import Institution
 # from users.models import Institute
-from ..models import BaseModel
+from api.models import BaseModel
 
 class Site(BaseModel):
     """

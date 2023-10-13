@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from ..models import BaseModel
+from api.models import BaseModel
 
 class Project(BaseModel):
     """

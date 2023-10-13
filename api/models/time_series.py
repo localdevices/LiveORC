@@ -3,7 +3,7 @@ import numpy as np
 
 from django.db import models
 from django.apps import apps
-from ..models import BaseModel, Site
+from api.models import BaseModel, Site
 
 
 def get_closest_to_dt(queryset, timestamp):
@@ -15,11 +15,13 @@ def get_closest_to_dt(queryset, timestamp):
     else:
         return greater or less
 
+
 def get_str(value, dec=1):
     if value is None:
         return "-"
     else:
         return str(round(value, dec))
+
 
 class TimeSeries(BaseModel):
     """

@@ -3,11 +3,13 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django_json_widget.widgets import JSONEditorWidget
 
-from ..models import Recipe
+from api.models import Recipe
+from api.admin import BaseAdmin
 
 import json
 import pyorc
 import yaml
+
 
 # Register your models here.
 
@@ -44,7 +46,7 @@ class RecipeCreateForm(forms.ModelForm):
         model = Recipe
         fields = ["name"]
 
-class RecipeAdmin(admin.ModelAdmin):
+class RecipeAdmin(BaseAdmin):
     fieldsets = [
         ("User input", {"fields": ["name", "recipe_file"]}),
         ("Resulting recipe", {

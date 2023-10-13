@@ -1,10 +1,11 @@
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.response import Response
-from LiveORC.utils.api.viewsets import InstitutionMixin
 from api.serializers import CameraConfigSerializer, CameraConfigCreateSerializer
 from api.models import CameraConfig
+from api.views import BaseModelViewSet
 
-class CameraConfigViewSet(InstitutionMixin, viewsets.ModelViewSet):
+
+class CameraConfigViewSet(BaseModelViewSet):
     """
     API endpoints that allows camera configurations to be viewed or edited.
     """

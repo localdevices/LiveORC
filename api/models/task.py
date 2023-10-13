@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.html import mark_safe
 
 import uuid
-from ..models import BaseModel, Video, VideoStatus
+from api.models import BaseModel, Video, VideoStatus
 
 class TaskAction(models.IntegerChoices):
     START = 0, "Start"

@@ -1,13 +1,13 @@
-from django.contrib import admin
-from django.contrib.admin import DateFieldListFilter
-from django_object_actions import DjangoObjectActions, action
-from django.shortcuts import redirect
-from rangefilter.filters import DateRangeFilterBuilder, DateTimeRangeFilterBuilder
-from ..models import Video, VideoStatus, Task
-from ..task_utils import get_task
-
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from django.contrib import admin
+from django_object_actions import DjangoObjectActions, action
+from django.shortcuts import redirect
+from rangefilter.filters import DateTimeRangeFilterBuilder
+
+from api.models import Video, VideoStatus, Task
+from api.task_utils import get_task
+from api.admin import BaseAdmin
 
 
 default_end = datetime.now()
@@ -17,6 +17,8 @@ datetimefilter = DateTimeRangeFilterBuilder(
     default_start=default_start,
     default_end=default_end
 )
+
+
 class VideoInline(admin.TabularInline):
     """
     Display filtered videos for given site or project inside admin view of site and project
@@ -24,7 +26,8 @@ class VideoInline(admin.TabularInline):
     model = Video
     extra = 3
 
-class VideoAdmin(DjangoObjectActions, admin.ModelAdmin):
+
+class VideoAdmin(DjangoObjectActions, BaseAdmin):
     @action(
         label="Queue task",  # optional
         description="Click to queue a task" # optional
@@ -37,7 +40,8 @@ class VideoAdmin(DjangoObjectActions, admin.ModelAdmin):
             task = {
                 "id": task_body["id"],
                 "task_body": task_body,
-                "video": obj
+                "video": obj,
+                "creator": request.user
             }
             Task.objects.create(**task)
         # once the task is set, change the status of the video
@@ -46,9 +50,6 @@ class VideoAdmin(DjangoObjectActions, admin.ModelAdmin):
         # TODO: ensure that task and video statusses are updated using AMQP status
         return redirect('/admin/api/video')
 
-    # def queue_task(modeladmin, request, queryset):
-    #     queryset.update(status=VideoStatus.QUEUE)
-    #
     change_actions = ('toolfunc', )
 
     ordering = ["-timestamp"]
@@ -108,12 +109,11 @@ class VideoAdmin(DjangoObjectActions, admin.ModelAdmin):
     ]
 
     def get_readonly_fields(self, request, obj=None):
-        # prevent that the file or camera config can be changed afterwards. That is very risky and can lead to inconsistent
-        # model records
+        # prevent that the file or camera config can be changed afterwards.
+        # That is very risky and can lead to inconsistent model records
         if obj:
             return (*self.readonly_fields, "file", "camera_config")
         return self.readonly_fields
-
 
     @admin.display(ordering='camera_config__site__name', description="Site name")
     def get_site_name(self, obj):
@@ -140,7 +140,6 @@ class VideoAdmin(DjangoObjectActions, admin.ModelAdmin):
         if obj.time_series:
             if obj.time_series.fraction_velocimetry:
                 return round(obj.time_series.fraction_velocimetry, 1)
-
 
     def thumbnail_preview(self, obj):
         return obj.thumbnail_preview

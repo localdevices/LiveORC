@@ -3,7 +3,7 @@ from rest_framework import status
 from .test_setup_db import InitTestCase
 # Create your tests here.
 
-class SiteListViewTests(InitTestCase):
+class SiteViewTests(InitTestCase):
     def setUp(self):
         pass
 
