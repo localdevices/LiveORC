@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.contrib.gis.db import models
-from users.middleware.current_user import get_current_user
+
 class BaseModel(models.Model):
-    user = models.ForeignKey(
+    creator = models.ForeignKey(
         get_user_model(),
         on_delete=models.CASCADE,
         # default=get_current_user,

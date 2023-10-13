@@ -11,7 +11,7 @@ class SiteAdmin(BaseAdmin):
         ("Coordinates", {"fields": ["geom"]})
     ]
     search_fields = ["name"]
-    list_display = ["name", "geom", "user"]
+    list_display = ["name", "geom", "creator"]
 
     # def get_queryset(self, request):
     #     qs = super().get_queryset(request)
@@ -28,7 +28,7 @@ class SiteAdmin(BaseAdmin):
         if request.user.is_superuser:
             return qs
         qs_institute = qs.filter(user__institute=request.user.institute)
-        qs_user = qs.filter(user=request.user)
+        qs_user = qs.filter(creator=request.user)
         return qs_institute# + qs_user
 
 

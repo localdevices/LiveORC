@@ -2,11 +2,13 @@ from .models import Site, Profile, Recipe, CameraConfig, Video, Server, Task, Pr
 from rest_framework import serializers
 from rest_framework_nested.serializers import NestedHyperlinkedModelSerializer
 
-class SiteSerializer(serializers.HyperlinkedModelSerializer):
+
+
+class SiteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Site
-        # fields = "__all__"
-        fields = ['id', 'name', 'geom']
+        fields = "__all__"
+        # fields = ['id', 'name', 'geom']
 
 
 class CameraConfigSerializer(serializers.ModelSerializer):
