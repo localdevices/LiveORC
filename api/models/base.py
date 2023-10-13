@@ -1,13 +1,18 @@
 from django.contrib.auth import get_user_model
 from django.contrib.gis.db import models
-
+from users.middleware.current_user import get_current_user
 class BaseModel(models.Model):
     user = models.ForeignKey(
         get_user_model(),
         on_delete=models.CASCADE,
-        null=True,
-        blank=True
+        # default=get_current_user,
+        editable=False
     )
+
+    # def save(self, *args, **kwargs):
+    #     if not(self.pk):
+    #         self.user =
+
 
     class Meta:
         abstract = True
