@@ -49,6 +49,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         app_label = 'users'
+        db_table = "auth_user"
 
     def __str__(self):
         return self.get_fullname()
