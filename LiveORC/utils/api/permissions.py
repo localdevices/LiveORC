@@ -13,7 +13,7 @@ class IsInstitutionMember(permissions.BasePermission):
             return True
 
         # Write permissions are only allowed to the owner of the object.
-        return obj.owner == request.user
+        return obj.creator == request.user
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -24,7 +24,9 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
-        if request.method in permissions.SAFE_METHODS and request.user.members.filter(instution=obj.institution).exists():
+        if request.method in permissions.SAFE_METHODS and request.user.members.filter(
+                instution=obj.institution
+        ).exists():
             return True
 
         # Write permissions are only allowed to the owner of the object.
