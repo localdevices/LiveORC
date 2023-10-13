@@ -1,12 +1,9 @@
-from django.contrib import admin
-from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 # from ..models import User
 from ..models.user import User
 #
-
 
 # User = get_user_model()
 USERNAME_FIELD = User.USERNAME_FIELD
@@ -38,7 +35,7 @@ ADD_FIELDS = (
         "password2",
     )
 )
-EDIT_FIELDS = REQUIRED_FIELDS + EDITABLE_FIELDS + ("groups", "user_permissions",)
+EDIT_FIELDS = REQUIRED_FIELDS + EDITABLE_FIELDS + ("groups", "user_permissions", "institute")
 #
 #
 class UserAdmin(DjangoUserAdmin):

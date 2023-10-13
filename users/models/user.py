@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
 from LiveORC.utils.models.base import BaseModel
+from django.apps import apps
+# from ..models import Institute
 
 
 class UserManager(BaseUserManager):
@@ -27,13 +29,19 @@ class UserManager(BaseUserManager):
 
 class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     username = None
-    name = models.CharField(_("Full Name"), max_length=100, blank=True, null=True)
-    email = models.EmailField(_("Email Address"), max_length=255, unique=True)
+    name = models.CharField(_("full Name"), max_length=100, blank=True, null=True)
+    email = models.EmailField(_("email Address"), max_length=255, unique=True)
 
-    is_staff = models.BooleanField(_('Staff Status'), default=False,
-                                   help_text=_('Designates whether the user can log into this admin '
-                                               'site.'))
-
+    is_staff = models.BooleanField(
+        _("Staff Status"),
+        default=False,
+        help_text=_("Designates whether the user can log into this admin site"))
+    institute = models.ForeignKey(
+        'Institute',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
     objects = UserManager()
 
     USERNAME_FIELD = 'email'

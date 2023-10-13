@@ -34,6 +34,7 @@ if DEBUG:
 # Application definition
 
 INSTALLED_APPS = [
+    'users',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,7 +45,6 @@ INSTALLED_APPS = [
     'django_json_widget',
     'rest_framework',
     'api',
-    'users',
     'rangefilter',
     'drf_spectacular',
     'fontawesomefree',
@@ -187,3 +187,4 @@ STATICFILES_DIRS = [
 
 AUTH_USER_MODEL = "users.User"
 
+GDAL_LIBRARY_PATH = "gdal"
