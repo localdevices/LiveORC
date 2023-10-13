@@ -1,13 +1,13 @@
 from django.core.exceptions import FieldError
 from rest_framework import filters, permissions, viewsets
 from rest_framework.pagination import PageNumberPagination
-from .permissions import IsInstitutionMember
+from .permissions import IsOwnerOrReadOnlyAsInstitute
 
 
 class InstitutionMixin(object):
     permission_classes = (
         permissions.IsAuthenticated,
-        IsInstitutionMember,
+        IsOwnerOrReadOnlyAsInstitute,
     )
 
     def get_queryset(self):

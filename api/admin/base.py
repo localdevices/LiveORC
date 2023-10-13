@@ -2,12 +2,16 @@ from django.contrib.gis import admin
 
 class BaseAdmin(admin.GISModelAdmin):
     def has_change_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
         if obj is not None and request.user == obj.creator:
             return True
         return False
         # return super().has_change_permission(request, obj)
 
     def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
         if obj is not None and request.user == obj.creator:
             return True
         return False
