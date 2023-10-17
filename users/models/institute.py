@@ -26,4 +26,4 @@ class InstituteMember(models.Model):
     )
 
     def __str__(self):
-        return f"{self.member} - {self.institution}"
+        return f"{self.member} - {self.institute}"
