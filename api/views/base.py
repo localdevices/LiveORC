@@ -13,4 +13,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         # only add the creator upon saving
-        serializer.save(creator=self.request.user)
+        model_name = serializer.Meta.model.__name__
+        site_obj = serializer.validated_data.get('site')
+        if model_name == "CameraConfig" and site_obj:
+            serializer.save(creator=site_obj.creator)
+        else:
+            serializer.save(creator=self.request.user)
