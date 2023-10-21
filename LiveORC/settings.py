@@ -34,6 +34,7 @@ if DEBUG:
 # Application definition
 
 INSTALLED_APPS = [
+    'users',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -184,7 +185,6 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static/admin"),
 ]
 
+AUTH_USER_MODEL = "users.User"
 
-# AUTH_USER_MODEL = "api.User"
-
-GDAL_LIBRARY_PATH = "gdal"
+# GDAL_LIBRARY_PATH = "gdal"

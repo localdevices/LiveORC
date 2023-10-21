@@ -9,21 +9,25 @@ from .test_api_recipe import recipe
 from .test_api_profile import profile
 from .test_api_video import camera_config_form, prep_video_sample, video_sample_url
 
-from ..models import Site, Recipe, Profile, Video, VideoStatus, Task
+from api.models import Site, Recipe, Profile, Video, VideoStatus, Task
+from users.models import User
 
 video_sample = prep_video_sample(video_sample_url)
-class VideoListViewTests(InitTestCase):
+
+
+class TaskViewTests(InitTestCase):
     def setUp(self):
-        site = Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151))
-        Recipe.objects.create(name="ngwerere_recipe", data=recipe)
-        Profile.objects.create(name="some_profile", data=profile, site=site)
+        user = User.objects.get(pk=2)
+        site = Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151), creator=user)
+        Recipe.objects.create(name="ngwerere_recipe", data=recipe, creator=user)
+        Profile.objects.create(name="some_profile", data=profile, site=site, creator=user)
         # pass
     def tearDown(self):
         pass
 
     def test_create_task(self):
         client = APIClient()
-        client.login(username='testuser', password='test1234')
+        client.login(username='user@institute1.com', password='test1234')
         # create a camera config on site
         r = client.post(
             '/api/site/1/cameraconfig/',

@@ -4,9 +4,12 @@ djangorestframework
 djangorestframework-simplejwt
 django-admin-rangefilter
 drf-nested-routers
+pytest-django
 django-debug-toolbar
 django-object-actions
 drf-spectacular
+django-extensions
+shortuuid
 fontawesomefree
 pytest-django
 

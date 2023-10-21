@@ -2,9 +2,8 @@ from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 
-from django.contrib.gis import admin as gisadmin
-from ..models import CameraConfig, Video
-
+from api.models import CameraConfig, Video
+from api.admin import BaseAdmin
 import json
 import pyorc
 
@@ -36,7 +35,7 @@ class CameraConfigForm(forms.ModelForm):
             except BaseException as e:
                 raise ValidationError(f"Problem with Camera Configuration: {e}")
 
-class CameraConfigAdmin(gisadmin.GISModelAdmin):
+class CameraConfigAdmin(BaseAdmin):
     class Media:
         js = (
             'https://cdn.jsdelivr.net/npm/ol@v7.2.2/dist/ol.js',

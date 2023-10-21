@@ -3,7 +3,9 @@ from django.contrib.gis.geos import Point
 from .test_setup_db import InitTestCase
 from rest_framework import status
 # Create your tests here.
-from ..models import Site
+from api.models import Site
+from users.models import User
+
 
 import json
 import os
@@ -17,9 +19,10 @@ recipe_file = os.path.join(os.path.split(__file__)[0], "testdata", "ngwerere_rec
 recipe = get_recipe(recipe_file)
 
 
-class RecipeTests(InitTestCase):
+class RecipeViewTests(InitTestCase):
     def setUp(self):
-        Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151))
+        user = User.objects.get(pk=2)
+        Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151), creator=user)
 
         # pass
     def tearDown(self):
@@ -27,7 +30,7 @@ class RecipeTests(InitTestCase):
 
     def test_add_recipe(self):
         client = APIClient()
-        client.login(username='testuser', password='test1234')
+        client.login(username='user@institute1.com', password='test1234')
         # create a camera config on site
         r = client.post('/api/recipe/',{"name": "general_recipe", "data": json.dumps(recipe)})
         # check the request

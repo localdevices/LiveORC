@@ -115,7 +115,7 @@ cam_config = {
 
 
 
-class CameraConfigListViewTests(InitTestCase):
+class CameraConfigViewTests(InitTestCase):
     def setUp(self):
         pass
 
@@ -128,7 +128,7 @@ class CameraConfigListViewTests(InitTestCase):
         """
         # try to create/list records
         client = APIClient()
-        client.login(username='testuser', password='test1234')
+        client.login(username='user@institute1.com', password='test1234')
 
         # create a site
         client.post(

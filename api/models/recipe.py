@@ -1,9 +1,9 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 import pyorc
+from api.models import BaseModel
 
 
-class Recipe(models.Model):
+class Recipe(BaseModel):
     """
     Contains settings to process videos
     """

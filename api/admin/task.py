@@ -1,6 +1,7 @@
 from django.contrib import admin
+from api.admin import BaseAdmin
 
-class TaskAdmin(admin.ModelAdmin):
+class TaskAdmin(BaseAdmin):
     def has_add_permission(self, request):
         return False
 

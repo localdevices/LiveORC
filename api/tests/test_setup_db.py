@@ -1,15 +1,45 @@
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+from users.models import User, Institute, Group
+from users.management.commands.creategroups import add_group_permissions, READ_GROUPS, WRITE_GROUPS, MODELS, READ_PERMISSIONS, WRITE_PERMISSIONS
+
+
+
 from django.test import TestCase
 def setupUsers():
-    User.objects.create_superuser(username='testsuperuser',
+    # make the default groups (as if running manage.py creategroups)
+    add_group_permissions(READ_GROUPS, MODELS, READ_PERMISSIONS)
+    add_group_permissions(WRITE_GROUPS, MODELS, WRITE_PERMISSIONS)
+
+    # make some Users
+    User.objects.create_superuser(name='testsuperuser',
                                   email='superuser@test.com',
                                   password='test1234')
-    User.objects.create_user(username='testuser',
-                             email='user@test.com',
+    testuser1 = User.objects.create_user(name='testuser',
+                             email='user@institute1.com',
                              password='test1234')
-    User.objects.create_user(username='testuser2',
-                             email='user2@test.com',
+    testuser1.groups.add(2)
+    testuser2 = User.objects.create_user(name='testuser2',
+                             email='user2@institute1.com',
                              password='test1234')
+    testuser2.groups.add(1)
+    testuser3 = User.objects.create_user(name='testuser3',
+                             email='user3@institute2.com',
+                             password='test1234')
+    testuser3.groups.add(2)
+    # make some institutes
+    institute1 = Institute.objects.create(name="institute1", owner=testuser1)
+    institute2 = Institute.objects.create(name="institute2", owner=testuser3)
+    # now update the users with the institute
+    testuser1.institute = institute1
+    testuser2.institute = institute1
+    # user 3 belong to another institute, so that we can test if he/she is denied access to instances of test users
+    # of institute1
+    testuser3.institute = institute2
+    testuser1.save()
+    testuser2.save()
+    testuser3.save()
+
+
 
 def cleanup():
     """

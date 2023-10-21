@@ -1,11 +1,11 @@
 from rest_framework import status
-from rest_framework.test import APIRequestFactory, APIClient
+from rest_framework.test import APIClient
 from django.contrib.gis.geos import Point
 from django.core.files.uploadedfile import SimpleUploadedFile
 from .test_setup_db import InitTestCase
 # Create your tests here.
-from ..models import Site, Recipe, Profile
-from io import BytesIO
+from api.models import Site, Recipe, Profile
+from users.models import User
 from datetime import datetime
 import json
 import os
@@ -18,6 +18,7 @@ from .test_api_profile import profile
 
 video_sample_url = "https://raw.githubusercontent.com/localdevices/pyorc/main/examples/ngwerere/ngwerere_20191103.mp4"
 camconfig_url = "https://raw.githubusercontent.com/localdevices/pyorc/main/examples/ngwerere/ngwerere.json"
+
 
 def prep_video_sample(video_sample_url):
     filename = os.path.split(video_sample_url)[-1]
@@ -56,35 +57,19 @@ camera_config_form = {
 }
 
 
-class VideoListViewTests(InitTestCase):
+class VideoViewTests(InitTestCase):
     def setUp(self):
-        site = Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151))
-        Recipe.objects.create(name="ngwerere_recipe", data=recipe)
-        Profile.objects.create(name="some_profile", data=profile, site=site)
-        # pass
+        user = User.objects.get(pk=2)
+        site = Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151), creator=user)
+        Recipe.objects.create(name="ngwerere_recipe", data=recipe, creator=user)
+        Profile.objects.create(name="some_profile", data=profile, site=site, creator=user)
+
     def tearDown(self):
         pass
 
-
-    # def setUpTestData(self):
-    #     # TODO add user/group
-
-    # def test_video_login_basic_auth(self):
-    #     """
-    #     If no questions exist, an appropriate message is displayed.
-    #     """
-    #     # try to create/list records
-    #     client = APIClient()
-    #     client.login(username='testuser', password='test1234')
-    #     # create a site
-    #     client.post(
-    #         '/api/site/',
-    #         {"name": "ngwerere", "geom": "SRID=4326;POINT (28.329686, -15.334151)"}
-    #     )
-
     def test_add_camconfig(self):
         client = APIClient()
-        client.login(username='testuser', password='test1234')
+        client.login(username='user@institute1.com', password='test1234')
         # create a camera config on site
         r = client.post(
             '/api/site/1/cameraconfig/',
