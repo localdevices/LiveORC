@@ -35,7 +35,8 @@ if DEBUG:
 
 INSTALLED_APPS = [
     'users',
-    'django.contrib.admin',
+    # 'django.contrib.admin',
+    'LiveORC.admin.CustomAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'django_json_widget',
+
     'rest_framework',
     'api',
     'rangefilter',
@@ -188,3 +190,5 @@ STATICFILES_DIRS = [
 AUTH_USER_MODEL = "users.User"
 
 # GDAL_LIBRARY_PATH = "gdal"
+
+INSTITUTE_SESSION_KEY = "active_institute"
