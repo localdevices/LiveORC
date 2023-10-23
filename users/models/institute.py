@@ -6,7 +6,7 @@ from LiveORC.utils import choices
 
 class Institute(models.Model):
     owner = models.OneToOneField(
-        get_user_model(), on_delete=models.CASCADE, related_name="institution"
+        get_user_model(), on_delete=models.CASCADE, related_name="institute"
     )
     name = models.CharField(_("Name"), max_length=255, help_text=_("Name of institution"))
 
