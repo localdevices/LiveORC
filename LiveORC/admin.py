@@ -15,8 +15,4 @@ class CustomAdminSite(admin.AdminSite):
     def each_context(self, request):
         context = super(CustomAdminSite, self).each_context(request)
         context['active_institute'] = request.user.get_active_institute(request)
-        print(request.user.get_active_institute(request))
         return context
-
-
-admin_site = CustomAdminSite(name="custom_admin")
