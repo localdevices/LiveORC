@@ -35,12 +35,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
         _("Staff Status"),
         default=False,
         help_text=_("Designates whether the user can log into this admin site"))
-    institute = models.ForeignKey(
-        'Institute',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
+
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
