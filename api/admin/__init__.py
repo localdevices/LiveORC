@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
-from django.utils.translation import gettext_lazy
 from api.models import (
     Site,
     CameraConfig,
@@ -23,9 +22,9 @@ from .task import TaskAdmin
 from .server import ServerAdmin
 
 # initiate orc admin site with specific titles and logos
-admin.site.site_title = gettext_lazy("LiveOpenRiverCam")
-admin.site.site_header = gettext_lazy("LiveOpenRiverCam")
-admin.site.index_title = gettext_lazy("Admin dashboard")
+# admin.site.site_title = gettext_lazy("LiveOpenRiverCam")
+# admin.site.site_header = gettext_lazy("LiveOpenRiverCam")
+# admin.site.index_title = gettext_lazy("Admin dashboard")
 
 
 admin.site.register(Site, SiteAdmin)
