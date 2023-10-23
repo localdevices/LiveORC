@@ -65,7 +65,8 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
                 qs = qs.filter(institute__pk=institute_id)
         qs = qs.select_related("institute")
         member = qs.order_by("-pk").first()
-        if request and key not in request.session:
-            request.session[key] = member.institute.id
-        return member.institute
+        if member:
+            if request and key not in request.session:
+                request.session[key] = member.institute.id
+            return member.institute
 
