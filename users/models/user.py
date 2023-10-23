@@ -1,9 +1,8 @@
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
 from LiveORC.utils.models.base import BaseModel
-from django.apps import apps
-# from ..models import Institute
 
 
 class UserManager(BaseUserManager):
@@ -51,6 +50,22 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     def get_fullname(self):
         return self.name if self.name else self.email
 
-    def is_company_member(self, institute):
+    def is_institute_member(self, institute):
         return self.members.filter(institute=institute).exists()
+
+    def get_institutes(self):
+        return self.members.all()
+
+    def get_active_institute(self, request=None):
+        key = settings.INSTITUTE_SESSION_KEY
+        qs = self.members.all()
+        if request:
+            institute_id = request.session.get(key, None)
+            if institute_id:
+                qs = qs.filter(institute__pk=institute_id)
+        qs = qs.select_related("institute")
+        member = qs.order_by("-pk").first()
+        if request and key not in request.session:
+            request.session[key] = member.institute.id
+        return member.institute
 

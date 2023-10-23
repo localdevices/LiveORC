@@ -5,20 +5,20 @@ from LiveORC.utils import choices
 
 
 class Institute(models.Model):
-    owner = models.OneToOneField(
+    owner = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, related_name="institute"
     )
-    name = models.CharField(_("Name"), max_length=255, help_text=_("Name of institution"))
+    name = models.CharField(_("Name"), max_length=255, help_text=_("Name of institute"))
 
     def __str__(self):
         return self.name
 
 
-class InstituteMember(models.Model):
+class Member(models.Model):
     institute = models.ForeignKey(
         "Institute", related_name="members", on_delete=models.CASCADE
     )
-    member = models.ForeignKey(
+    user = models.ForeignKey(
         get_user_model(), related_name="members", on_delete=models.CASCADE
     )
     role = models.CharField(
@@ -26,4 +26,4 @@ class InstituteMember(models.Model):
     )
 
     def __str__(self):
-        return f"{self.member} - {self.institute}"
+        return f"{self.user} - {self.institute}"
