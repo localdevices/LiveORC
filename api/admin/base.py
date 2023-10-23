@@ -21,7 +21,15 @@ class BaseAdmin(admin.GISModelAdmin):
         # return super().has_delete_permission(request, obj)
 
     def save_model(self, request, obj, form, change):
+        model_name = self.model.__name__
+        if model_name == "CameraConfig":
+            institute = obj.site.institute
+        elif model_name == "Video":
+            institute = obj.camera_config_obj.site.institute
+        else:
+            institute = request.user.get_active_institute(request)
         obj.creator = request.user
+        obj.institute = institute
         obj.save()
 
     def get_list_display(self, request):
@@ -47,7 +55,7 @@ class BaseAdmin(admin.GISModelAdmin):
             # super users can see everything. Return all
             return qs
         # Non-super users can only see their own models, and the models from other users within their institute
-        qs_filter = qs.filter(creator__institute=request.user.institute) | qs.filter(creator=request.user)
+        qs_filter = qs.filter(institute=request.user.get_active_institute(request))
         return qs_filter
 
 
