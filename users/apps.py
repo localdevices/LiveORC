@@ -6,3 +6,6 @@ class UsersConfig(AppConfig):
     name = 'users'
     verbose_name = 'users and institutes'
 
+    def ready(self):
+        import users.signals # noqa
+
