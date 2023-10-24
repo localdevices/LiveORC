@@ -35,7 +35,7 @@ ADD_FIELDS = (
         "password2",
     )
 )
-EDIT_FIELDS = REQUIRED_FIELDS + EDITABLE_FIELDS + ("groups", "user_permissions", "institute")
+EDIT_FIELDS = REQUIRED_FIELDS + EDITABLE_FIELDS + ("groups", "user_permissions") #, "institute")
 #
 #
 class UserAdmin(DjangoUserAdmin):
