@@ -19,6 +19,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         if model_name == "CameraConfig" and site_obj:
             serializer.save(creator=site_obj.creator)
         elif model_name == "Video" and camera_config_obj:
-            serializer.save(creater=camera_config_obj.site.creator)
+            serializer.save(creator=camera_config_obj.site.creator)
         else:
             serializer.save(creator=self.request.user)
