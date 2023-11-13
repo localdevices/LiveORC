@@ -8,7 +8,7 @@ class BaseAdmin(admin.GISModelAdmin):
         if obj is None:
             # a new object, so change is allowed
             return True
-        if request.user == obj.creator:
+        if request.user == obj.institute.owner:
             return True
         return False
         # return super().has_change_permission(request, obj)
@@ -16,7 +16,7 @@ class BaseAdmin(admin.GISModelAdmin):
     def has_delete_permission(self, request, obj=None):
         if request.user.is_superuser:
             return True
-        if obj is not None and request.user == obj.creator:
+        if obj is not None and request.user == obj.institute.owner:
             return True
         return False
         # return super().has_delete_permission(request, obj)
@@ -39,8 +39,10 @@ class BaseAdmin(admin.GISModelAdmin):
         fields.append("is_owner")
         return fields
 
-    def is_owner(self, obj):
-        return obj.creator == self.request.user
+    def is_owner(self, request, obj):
+        model_name = self.model.__name__
+        obj_institute = self._get_institute(model_name, obj, request)
+        return obj.institue == obj_institute
     is_owner.boolean = True
     is_owner.allow_tags = True
 
