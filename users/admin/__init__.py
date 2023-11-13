@@ -11,6 +11,7 @@ from users.models import (
 )
 
 from .user import UserAdmin
+from .institute import MemberAdmin
 
 # initiate orc admin site with specific titles and logos
 
@@ -22,7 +23,7 @@ from .user import UserAdmin
 admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Institute)
-admin.site.register(Member)
+admin.site.register(Member, MemberAdmin)
 
 # we are not using groups, hence remove (we will have institutes)
 # TODO: move user/institute to a separate app called Users and Institutes
