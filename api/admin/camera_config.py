@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 
 from api.models import CameraConfig, Video
-from api.admin import BaseAdmin
+from api.admin import BaseAdmin, SiteUserFilter
 import json
 import pyorc
 
@@ -62,7 +62,7 @@ class CameraConfigAdmin(BaseAdmin):
     ]
     list_display = ["name", "get_site_name"]
     search_fields = ["name"]
-    list_filter = ["site"]
+    list_filter = [SiteUserFilter]
     form = CameraConfigForm
     # inlines = [VideoInline]
     readonly_fields = ["bounding_box_view", "height", "width", "resolution", "window_size", "bbox"]
