@@ -1,23 +1,11 @@
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
 from django.contrib import admin
 from django_object_actions import DjangoObjectActions, action
 from django.shortcuts import redirect
-from rangefilter.filters import DateTimeRangeFilterBuilder
 
-from api.models import Video, VideoStatus, Task
+from api.models import Video, VideoStatus, Task, Site
 from api.task_utils import get_task
 from api.admin import BaseAdmin
-
-
-default_end = datetime.now()
-default_start = default_end - relativedelta(days=1)
-
-datetimefilter = DateTimeRangeFilterBuilder(
-    default_start=default_start,
-    default_end=default_end
-)
-
+from api.admin import VideoSiteUserFilter, datetimefilter
 
 class VideoInline(admin.TabularInline):
     """
@@ -76,7 +64,13 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
         'play_button'
     )
     list_filter = [
-        "camera_config__site",
+        # (
+        #     "camera_config__site",
+        #     Site
+        # ),
+        #
+        # "camera_config__site",
+        VideoSiteUserFilter,
         (
             "timestamp",
             datetimefilter,
@@ -107,6 +101,10 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
             ]}
          )
     ]
+
+    # def get_list_filter(self, request):
+    #     super().get_list_filter(request)
+
 
     def get_readonly_fields(self, request, obj=None):
         # prevent that the file or camera config can be changed afterwards.

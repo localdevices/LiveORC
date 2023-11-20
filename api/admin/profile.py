@@ -2,9 +2,8 @@ from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 
-from django.contrib.gis import admin as gisadmin
 from api.models import Profile
-from api.admin import BaseAdmin
+from api.admin import BaseAdmin, SiteUserFilter
 
 import json
 import pyorc
@@ -54,7 +53,7 @@ class ProfileAdmin(BaseAdmin):
     ]
     list_display = ["name", "timestamp", "get_site_name"]
     search_fields = ["site"]
-    list_filter = ["site"]
+    list_filter = [SiteUserFilter]
     form = ProfileForm
     readonly_fields = ["profile_view", "crs", "multipoint"]
     formfield_overrides = {}

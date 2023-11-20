@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from api.models import TimeSeries
 from api.admin import BaseAdmin
-
+from api.admin import SiteUserFilter
 
 class TimeSeriesInline(admin.TabularInline):
     """
@@ -25,7 +25,7 @@ class TimeSeriesAdmin(BaseAdmin):
         "str_fraction_velocimetry",
         "link_video"
     )
-    list_filter = ["site", "timestamp"]
+    list_filter = [SiteUserFilter, "timestamp"]
     fieldsets = [
         (None, {"fields": ["image_preview", "site", "timestamp", "link_video"]}),
         ("Values", {"fields": ["h", "str_q_05", "str_q_25", "str_q_50", "str_q_75", "str_q_95", "wetted_surface", "wetted_perimeter", "str_fraction_velocimetry"]})
