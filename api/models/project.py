@@ -3,6 +3,7 @@ from django.db import models
 
 from api.models import BaseModel
 
+
 class Project(BaseModel):
     """
     Project that holds together one or several videos at different sites (for surveys)

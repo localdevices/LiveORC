@@ -69,7 +69,8 @@ lens_position_schema = {
     'required': ['x', 'y', 'z']
 }
 
-class CameraConfig(BaseModel):
+
+class CameraConfig(models.Model):
     """
     Contains JSON with a full camera configuration
     """
@@ -99,6 +100,7 @@ class CameraConfig(BaseModel):
     server = models.ForeignKey(Server, on_delete=models.SET_NULL, null=True, blank=True)
     recipe = models.ForeignKey(Recipe, on_delete=models.SET_NULL, null=True, blank=True)
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True)
+    creator = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, editable=False)
     # user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
     # TODO also connect to server
     # TODO connect to recipe and profile (where necessary)
@@ -187,4 +189,8 @@ class CameraConfig(BaseModel):
             return self.camera_config["window_size"]
 
     window_size.fget.short_description = "interrogation window size [pix]"
+
+    @property
+    def institute(self):
+        return self.site.institute
 

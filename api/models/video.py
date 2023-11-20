@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
@@ -113,7 +114,7 @@ class VideoStatus(models.IntegerChoices):
     ERROR = 5, "Error occurred"
 
 
-class Video(BaseModel):
+class Video(models.Model):
     """
     Video object with water level and flow information
     """
@@ -157,7 +158,12 @@ class Video(BaseModel):
     camera_config = models.ForeignKey(CameraConfig, on_delete=models.CASCADE)
     time_series = models.OneToOneField(TimeSeries, on_delete=models.SET_NULL, null=True, blank=True)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
-    # user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
+    creator = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        # default=get_current_user,
+        editable=False
+    )
 
     def save(self, *args, **kwargs):
         # move the file field to a separate variable temporarily.
@@ -278,6 +284,10 @@ class Video(BaseModel):
             return mark_safe(
                 f"""<img src="/static/admin/img/icon-no.svg" alt="True"> Error"""
             )
+
+    @property
+    def institute(self):
+        return self.camera_config.institute
 
     class Meta:
         # organize tables along the camera config id and then per time stamp
