@@ -47,12 +47,21 @@ class BaseAdmin(admin.GISModelAdmin):
     is_owner.allow_tags = True
 
     def get_queryset(self, request):
+        model_name = self.model.__name__
+        user_institute = request.user.get_active_institute(request)
         qs = super().get_queryset(request)
         if request.user.is_superuser:
             # super users can see everything. Return all
             return qs
         # Non-super users can only see their own models, and the models from other users within their institute
-        qs_filter = qs.filter(institute=request.user.get_active_institute(request))
+        if model_name == "CameraConfig":
+            qs_filter = qs.filter(site__institute=user_institute)
+        elif model_name == "Video":
+            qs_filter = qs.filter(camera_config_obj__site__institute=user_institute)
+        elif model_name == "Task":
+            qs_filter = qs.filter(video__camera_config_obj__site__institute=user_institute)
+        else:
+            qs_filter = qs.filter(institute=request.user.get_active_institute(request))
         return qs_filter
 
     def _get_institute(self, model_name, obj, request):
