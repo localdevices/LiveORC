@@ -1,11 +1,14 @@
 from rest_framework import status, permissions
 from rest_framework.response import Response
+from rest_framework.decorators import renderer_classes
 from api.serializers import TimeSeriesSerializer, TimeSeriesCreateSerializer
 from api.models import TimeSeries, Task, VideoStatus
 from api.task_utils import get_task
 from api.views import BaseModelViewSet
+from api.filters import TimeSeriesFilter
+from api.custom_renderers import CSVRenderer
 
-
+@renderer_classes([CSVRenderer])
 class TimeSeriesViewSet(BaseModelViewSet):
     """
     API endpoints that allows time series to be viewed or edited.
@@ -13,8 +16,8 @@ class TimeSeriesViewSet(BaseModelViewSet):
     queryset = TimeSeries.objects.all()
     serializer_class = TimeSeriesSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filterset_class = TimeSeriesFilter
     http_method_names = ["get", "post", "delete", "patch"]
-
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -53,6 +56,16 @@ class TimeSeriesViewSet(BaseModelViewSet):
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    # def list(self, request, format="json", *args, **kwargs):
+    #     super().list(request, format="json", *args, **kwargs)
+    #
+    # def retrieve(self, request, *args, **kwargs):
+    #     # filter
+    #     super().retrieve(request, *args, **kwargs)
+    def get_renderer_context(self):
+        context = super().get_renderer_context()
+        return context
 
     def get_queryset(self):
         # video can also be retrieved nested per site, by filtering on the site of the cameraconfig property.

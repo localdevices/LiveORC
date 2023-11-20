@@ -6,6 +6,7 @@ django-admin-rangefilter
 drf-nested-routers
 pytest-django
 django-debug-toolbar
+django-filter
 django-object-actions
 drf-spectacular
 django-extensions

@@ -1,6 +1,9 @@
+from datetime import datetime
+import pandas as pd
+
+from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIRequestFactory, APIClient
-from datetime import datetime
 
 from .test_setup_db import InitTestCase
 from ..models import Site
@@ -28,3 +31,27 @@ class TimeSeriesViewTests(InitTestCase):
             }
         )
         self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+
+
+    def test_add_longer_timeseries_and_query(self):
+        client = APIClient()
+        client.login(username='user@institute1.com', password='test1234')
+        # create a camera config on site
+        # make a date range
+        dr = pd.date_range("2000-01-01", "2000-01-02", freq="H")
+        for n, ts in enumerate(dr):
+            r = client.post(
+                '/api/site/1/timeseries/',
+                data={
+                    "h": float(n),
+                    "timestamp": ts.strftime("%Y-%m-%dT%H:%M:%SZ")
+                }
+            )
+        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+        uri = reverse("api:site-timeseries-list", args=(["1"]))
+        # now query the assembled data
+        r = client.get(
+            uri + "?startDateTime=2000-01-01T04:00:00:00Z" + "&endDateTime=2000-01-01T07:00:00:00Z" + "&format=csv"
+        )
+        self.assertEquals(len(r.json()), 4)
+        # print(r.json())
