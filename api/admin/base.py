@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib.gis import admin
 
 
@@ -21,6 +22,15 @@ class BaseAdmin(admin.GISModelAdmin):
         return False
         # return super().has_delete_permission(request, obj)
 
+    def get_form(self, request, obj=None, **kwargs):
+        admin_form = super(BaseAdmin, self).get_form(request, obj, **kwargs)
+
+        class RequestAdminForm(admin_form):
+            def __new__(cls, *args, **kwargs):
+                kwargs['request'] = request
+                return admin_form(*args, **kwargs)
+        return RequestAdminForm
+
     def save_model(self, request, obj, form, change):
         model_name = self.model.__name__
         obj.creator = request.user
@@ -39,10 +49,10 @@ class BaseAdmin(admin.GISModelAdmin):
         fields.append("is_owner")
         return fields
 
-    def is_owner(self, request, obj):
+    def is_owner(self, obj):
         model_name = self.model.__name__
-        obj_institute = self._get_institute(model_name, obj, request)
-        return obj.institue == obj_institute
+        obj_institute = self._get_institute(model_name, obj, self.request)
+        return obj.institute == obj_institute
     is_owner.boolean = True
     is_owner.allow_tags = True
 
