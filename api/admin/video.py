@@ -1,3 +1,4 @@
+from django import forms
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.contrib import admin
@@ -17,6 +18,20 @@ datetimefilter = DateTimeRangeFilterBuilder(
     default_start=default_start,
     default_end=default_end
 )
+
+
+class VideoForm(forms.ModelForm):
+    class Meta:
+        model = Video
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(VideoForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        if not self.request.user.get_active_institute():
+            raise forms.ValidationError("You Must have an institute to continue")
 
 
 class VideoInline(admin.TabularInline):
@@ -107,6 +122,7 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
             ]}
          )
     ]
+    form = VideoForm
 
     def get_readonly_fields(self, request, obj=None):
         # prevent that the file or camera config can be changed afterwards.

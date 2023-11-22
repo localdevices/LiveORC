@@ -20,10 +20,16 @@ class RecipeForm(forms.ModelForm):
         fields = ["name"]
         widgets = {"data": JSONEditorWidget}
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(RecipeForm, self).__init__(*args, **kwargs)
+
 
     def clean(self):
         super().clean()
         # open the json file and try to parse
+        if not self.request.user.get_active_institute():
+            raise forms.ValidationError("You Must have an institute to continue")
         if "recipe_file" in self.files:
             try:
                 self.files["recipe_file"].seek(0)
@@ -45,6 +51,16 @@ class RecipeCreateForm(forms.ModelForm):
     class Meta:
         model = Recipe
         fields = ["name"]
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(RecipeCreateForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        super(RecipeCreateForm, self).clean()
+        if not self.request.user.get_active_institute():
+            raise forms.ValidationError("You Must have an institute to continue")
+
 
 class RecipeAdmin(BaseAdmin):
     fieldsets = [

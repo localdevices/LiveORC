@@ -26,3 +26,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             institute = self.request.user.get_active_institute(self.request)
             creator = self.request.user
         serializer.save(creator=creator, institute=institute)
+
+    def get_queryset(self):
+        print(self.request.user.get_active_institute(self.request))
+        queryset = super(BaseModelViewSet, self).get_queryset()
+        institute = self.request.user.get_active_institute(self.request)
+        queryset = queryset.filter(institute=institute)
+        return queryset
+

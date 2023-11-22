@@ -1,7 +1,23 @@
+from django import forms
 from django.contrib import admin
 
 from api.models import TimeSeries
 from api.admin import BaseAdmin
+
+
+class TimeSeriesForm(forms.ModelForm):
+
+    class Meta:
+        model = TimeSeries
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(TimeSeriesForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        if not self.request.user.get_active_institute():
+            raise forms.ValidationError("You Must have an institute to continue")
 
 
 class TimeSeriesInline(admin.TabularInline):
@@ -30,6 +46,7 @@ class TimeSeriesAdmin(BaseAdmin):
         (None, {"fields": ["image_preview", "site", "timestamp", "link_video"]}),
         ("Values", {"fields": ["h", "str_q_05", "str_q_25", "str_q_50", "str_q_75", "str_q_95", "wetted_surface", "wetted_perimeter", "str_fraction_velocimetry"]})
     ]
+    form = TimeSeriesForm
 
     @admin.display(ordering='site__name', description="Site")
     def get_site_name(self, obj):

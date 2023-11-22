@@ -18,8 +18,14 @@ class ProfileForm(forms.ModelForm):
         model = Profile
         fields = "__all__"
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(ProfileForm, self).__init__(*args, **kwargs)
+
     def clean(self):
         super().clean()
+        if not self.request.user.get_active_institute():
+            raise forms.ValidationError("You Must have an institute to continue")
         # open the json file and try to parse
         if "geojson_file" in self.files:
             try:
