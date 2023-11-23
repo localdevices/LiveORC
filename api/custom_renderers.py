@@ -42,7 +42,13 @@ class PIJSONRenderer(JSONRenderer):
             "fraction_velocimetry": "%"
         }
         # use one sample record to fill in headers
+        if len(data) == 0:
+            return json.dumps({})
         sample_rec = data[0]
+        if "site" not in sample_rec:
+            return json.dumps({"error": "you must include site field in query"})
+        if "timestamp" not in sample_rec:
+            return json.dumps({"error": "you must include timestamp field in query"})
         site = Site.objects.get(pk=sample_rec["site"])
         lon = site.geom.x
         lat = site.geom.y

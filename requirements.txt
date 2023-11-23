@@ -8,6 +8,8 @@ pytest-django
 django-debug-toolbar
 django-filter
 django-object-actions
+djangorestframework-csv
+djangorestframework-queryfields
 drf-spectacular
 django-extensions
 shortuuid

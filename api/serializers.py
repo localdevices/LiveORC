@@ -1,6 +1,8 @@
-from .models import Site, Profile, Recipe, CameraConfig, Video, Server, Task, Project, TimeSeries
+from drf_queryfields import QueryFieldsMixin
 from rest_framework import serializers
 from rest_framework_nested.serializers import NestedHyperlinkedModelSerializer
+
+from .models import Site, Profile, Recipe, CameraConfig, Video, Server, Task, Project, TimeSeries
 
 
 
@@ -81,7 +83,7 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
         fields = "__all__"
 
 
-class TimeSeriesSerializer(serializers.ModelSerializer):
+class TimeSeriesSerializer(QueryFieldsMixin, serializers.ModelSerializer):
     # def create(self, validated_data):
     #     pass
     parent_lookup_kwargs = {
