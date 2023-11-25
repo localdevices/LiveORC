@@ -5,7 +5,6 @@ from django.db import models
 from django.apps import apps
 from api.models import BaseModel, Site
 
-
 def get_closest_to_dt(queryset, timestamp):
     greater = queryset.filter(timestamp__gte=timestamp).order_by("timestamp").first()
     less = queryset.filter(timestamp__lte=timestamp).order_by("-timestamp").first()

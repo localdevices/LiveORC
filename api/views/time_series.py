@@ -10,7 +10,7 @@ from api.models import TimeSeries, Task, VideoStatus
 from api.task_utils import get_task
 from api.views import BaseModelViewSet
 from api.filters import TimeSeriesFilter
-from api.custom_renderers import PIJSONRenderer
+from api.custom_renderers import PIJSONRenderer, WebJSONRenderer
 from rest_framework_csv.renderers import CSVRenderer
 
 
@@ -21,7 +21,7 @@ from rest_framework_csv.renderers import CSVRenderer
     ),
     # retrieve=None,  # Disables 'format' parameter for retrieve
 )
-@renderer_classes([BrowsableAPIRenderer, JSONRenderer, CSVRenderer, PIJSONRenderer])
+@renderer_classes([BrowsableAPIRenderer, JSONRenderer, CSVRenderer, PIJSONRenderer, WebJSONRenderer])
 class TimeSeriesViewSet(BaseModelViewSet):
     """
     API endpoints that allows time series to be viewed or edited.

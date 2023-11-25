@@ -5,6 +5,28 @@ import csv
 from io import StringIO
 from api.models import Site
 
+class WebJSONRenderer(JSONRenderer):
+    media_type = 'application/json'
+    format = "webjson"
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        # check variables
+        data_formatted = []
+        if len(data) > 0:
+            sample_rec = data[0]
+            vars = sample_rec.keys()
+            for d in data:
+                rec = {}
+                for k, v in d.items():
+                    if k == "timestamp":
+                        rec["x"] = v[0:10] + v[-9:-1]
+                    else:
+                        rec["y"] = v
+                data_formatted.append(rec)
+        ret = json.dumps(data_formatted)
+        ret = ret.replace('\u2028', '\\u2028').replace('\u2029', '\\u2029')
+        return ret.encode()
+
 class PIJSONRenderer(JSONRenderer):
     media_type = 'application/json'
     # # add additional property
