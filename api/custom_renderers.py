@@ -19,7 +19,7 @@ class WebJSONRenderer(JSONRenderer):
                 rec = {}
                 for k, v in d.items():
                     if k == "timestamp":
-                        rec["x"] = v[0:10] + v[-9:-1]
+                        rec["x"] = v[0:10] + " " + v[-9:-1]
                     else:
                         rec["y"] = v
                 data_formatted.append(rec)

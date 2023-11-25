@@ -7,15 +7,14 @@ from api.models import BaseModel
 
 timeseries_template1 = """
 	<div id="timeseries_chart" style="width: 600px; height: 400px;">
-		<button onclick="resetZoom()">Reset Zoom</button>
 		<canvas id="canvas"></canvas>
 	</div>
 	<script>
 	    function get_xMinMax() {
 	        var xmin = window.myLine.scales["x"].min;
 	        var xmax = window.myLine.scales["x"].max;
-            dateMin = moment.unix(xmin/1000).format("YYYY-MM-DDTHH:MM:SS");
-            dateMax = moment.unix(xmax/1000).format("YYYY-MM-DDTHH:MM:SS");
+            dateMin = moment.unix(xmin/1000).format("YYYY-MM-DDTHH:MM");
+            dateMax = moment.unix(xmax/1000).format("YYYY-MM-DDTHH:MM");
             return [dateMin, dateMax]
 	    }
 
@@ -76,7 +75,7 @@ timeseries_template1 = """
               type: 'line',
               data: {
                 datasets: [{
-                  label: 'My First Dataset',
+                  label: 'Discharge',
                   data: datapoints,
                   fill: false,
                   borderColor: 'rgb(75, 192, 192)',
@@ -93,8 +92,17 @@ timeseries_template1 = """
                        y: {
                         type: 'linear',
                         position: 'left',
-                        min: 0,  // Set the minimum value for the y-axis
-                        max: 100  // Set the maximum value for the y-axis
+                        ticks: {
+                           suggestedMin: 0,    // minimum will be 0, unless there is a lower value.
+                // OR //
+//                            beginAtZero: true   // minimum value will be 0.
+                        },
+                        title: {
+                          text: "Discharge [m3/s]",
+                          display: true
+                        },
+//                        min: 0,  // Set the minimum value for the y-axis
+//                        max: 100  // Set the maximum value for the y-axis
                         }
                       },
                 plugins: {
@@ -137,8 +145,9 @@ timeseries_template2 = """',
                 success: function(data) {
                     // Update only the data in the chart
                     console.log(data);
-                    window.myLine.data.labels = data.x;
-                    window.myLine.data.datasets[0].data = data.y;
+//                    window.myLine.data.labels = data.x;
+//                    window.myLine.data.datasets[0].data = data.y;
+                    window.myLine.data.datasets[0].data = data;
 
                     // Update the chart
                     window.myLine.update();
