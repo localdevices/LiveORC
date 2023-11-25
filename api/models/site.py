@@ -157,15 +157,23 @@ timeseries_template2 = """',
                 }
             });
         }
+        var updateTimeout;
+        function handleWheelEvent() {
+            clearTimeout(updateTimeout);
+            updateTimeout = setTimeout(function() {
+                var ts = get_xMinMax();
+                console.log(ts);
+                updatePlot(ts[0], ts[1]);
+            }, 1000);
+        }
         window.onload = function() {
         var ctx = document.getElementById("canvas").getContext("2d");
         window.myLine = new Chart(ctx, config);
         document.getElementById('canvas').addEventListener('wheel', function(event) {
-            var ts = get_xMinMax();
-            console.log(ts);
+            handleWheelEvent();
             // Handle zoom event (e.g., adjust axis ranges)
             // Then, update only the data in the plot
-            updatePlot(String(ts[0]), String(ts[1]));
+//            updatePlot(String(ts[0]), String(ts[1]));
 
         });
     };

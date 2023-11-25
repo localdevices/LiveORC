@@ -189,4 +189,4 @@ STATICFILES_DIRS = [
 
 AUTH_USER_MODEL = "users.User"
 
-GDAL_LIBRARY_PATH = "gdal"
+# GDAL_LIBRARY_PATH = "gdal"
