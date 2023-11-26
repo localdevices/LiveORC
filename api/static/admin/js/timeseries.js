@@ -34,31 +34,7 @@ function resetZoom() {
     window.myLine.resetZoom()
 }
 var timeFormat = 'YYYY-MM-DD HH:MM:SS';
-var datapoints = [{
-    x: newDateString(-7),
-    y: randomScalingFactor()
-}, {
-    x: newDateString(-6),
-    y: randomScalingFactor()
-}, {
-    x: newDateString(-5),
-    y: randomScalingFactor()
-}, {
-    x: newDateString(-4.5),
-    y: randomScalingFactor()
-}, {
-    x: newDateString(-3),
-    y: randomScalingFactor()
-}, {
-    x: newDateString(-2),
-    y: randomScalingFactor()
-}, {
-    x: newDateString(-1),
-    y: randomScalingFactor()
-}, {
-    x: newDateString(0),
-    y: randomScalingFactor()
-}];
+var datapoints = [];
 var config = {
       type: 'line',
       data: {
@@ -66,7 +42,10 @@ var config = {
           label: 'Discharge',
           data: datapoints,
           fill: false,
+          pointRadius: 2,
+          pointHoverRadius: 5,
           borderColor: 'rgb(75, 192, 192)',
+          borderWidth: 2,
           tension: 0.1
         }]
       },
@@ -94,7 +73,7 @@ var config = {
                   text: "Discharge [m3/s]",
                   display: true
                 },
-//                        min: 0,  // Set the minimum value for the y-axis
+                    min: 0,  // Set the minimum value for the y-axis
 //                        max: 100  // Set the maximum value for the y-axis
                 }
               },
