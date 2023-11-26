@@ -10,7 +10,8 @@ class SiteAdmin(BaseAdmin):
             "https://cdn.jsdelivr.net/npm/chart.js@4.4.0",
             "https://cdn.jsdelivr.net/npm/hammerjs@2.0.8",
             "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.js",
-            "https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-moment/1.0.1/chartjs-adapter-moment.min.js"
+            "https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-moment/1.0.1/chartjs-adapter-moment.min.js",
+            "admin/js/timeseries.js"
         )
 
     fieldsets = [

@@ -16,12 +16,24 @@ class WebJSONRenderer(JSONRenderer):
             sample_rec = data[0]
             vars = sample_rec.keys()
             for d in data:
-                rec = {}
-                for k, v in d.items():
-                    if k == "timestamp":
-                        rec["x"] = v[0:10] + " " + v[-9:-1]
-                    else:
-                        rec["y"] = v
+                frac = d["fraction_velocimetry"]
+                if frac is None:
+                    frac = 0.
+                if frac > 70:
+                    rec = {
+                        "x": d["timestamp"][0:10] + " " + d["timestamp"][-9:-1],
+                        "y": d["q_50"]
+                    }
+                else:
+                    rec = {
+                        "x": d["timestamp"][0:10] + " " + d["timestamp"][-9:-1],
+                        "y": None
+                    }
+                # for k, v in d.items():
+                #     if k == "timestamp":
+                #         rec["x"] = v[0:10] + " " + v[-9:-1]
+                #     else:
+                #         rec["y"] = v
                 data_formatted.append(rec)
         ret = json.dumps(data_formatted)
         ret = ret.replace('\u2028', '\\u2028').replace('\u2029', '\\u2029')
