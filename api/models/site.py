@@ -8,6 +8,10 @@ from django.urls import reverse
 from api.models import BaseModel
 
 timeseries_template1 = """
+	<div class="slidecontainer">
+        <p>Set filter for optically resolved percentage. Higher means only well-illuminated videos are shown</p>
+        <input type="range" min="1" max="100" value="50" class="slider" id="myRange" onchange="updatePlot()">
+    </div>
 	<div id="timeseries_chart" style="width: 600px; height: 400px;">
 		<canvas id="canvas"></canvas>
 	</div>

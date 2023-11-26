@@ -13,6 +13,7 @@ class SiteAdmin(BaseAdmin):
             "https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-moment/1.0.1/chartjs-adapter-moment.min.js",
             "admin/js/timeseries.js"
         )
+        css = {"all": ("admin/css/slider.css", )}
 
     fieldsets = [
         (None, {"fields": ["name", "timeseries_chart"]}),

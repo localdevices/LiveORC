@@ -45,7 +45,7 @@ var config = {
           pointRadius: 2,
           pointHoverRadius: 5,
           borderColor: 'rgb(75, 192, 192)',
-          borderWidth: 2,
+          borderWidth: 1,
           tension: 0.1
         }]
       },
