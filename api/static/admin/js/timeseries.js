@@ -44,15 +44,15 @@ var config = {
 //                type: 'line',
                 data: datapoints,
                 fill: false,
-                pointRadius: 2,
+                pointRadius: 1,
                 backgroundColor: 'rgb(255, 255, 255)',
-                pointHoverRadius: 5,
+                pointHoverRadius: 3,
                 borderColor: 'rgb(75, 192, 192)',
                 borderWidth: 1,
                 tension: 0.1
             },
             {
-                label: 'disMin',
+                label: '5% low',
                 data: datapoints,
                 fill: false,
                 pointRadius: 0,
@@ -62,7 +62,28 @@ var config = {
                 tension: 0.1
             },
             {
-                label: 'confidence',
+                label: '5-95% confidence',
+                data: datapoints,
+                fill: "-1",
+                pointRadius: 0,
+                pointHoverRadius: 0,
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                borderColor: 'rgb(75, 192, 192)',
+                borderWidth: 0,
+                tension: 0.1
+            },
+            {
+                label: '25% low',
+                data: datapoints,
+                fill: false,
+                pointRadius: 0,
+                pointHoverRadius: 0,
+                borderColor: 'rgb(75, 192, 192)',
+                borderWidth: 0,
+                tension: 0.1
+            },
+            {
+                label: '25-75% confidence',
                 data: datapoints,
                 fill: "-1",
                 pointRadius: 0,
@@ -134,18 +155,14 @@ var config = {
                 labels: {
                     filter: function(item, chart) {
                         // Logic to remove a particular legend item goes here
-                        return !item.text == null || !item.text.includes('disMin');
+
+                        return !item.text.includes('25% low') & !item.text.includes('5% low');
                     }
                 }
             }
         },
     }
 };
-dataset = [
-    {"timestamp": "2001-01-01", "q_25": 0.5, "q_50": 1.0, "q_75": 1.5},
-    {"timestamp": "2001-01-02", "q_25": 0.6, "q_50": 1.1, "q_75": 1.6},
-    {"timestamp": "2001-01-03", "q_25": 0.7, "q_50": 1.2, "q_75": 1.7},
-]
 // restructure
 function get_x_y(data, varname) {
     var output = [];
@@ -154,16 +171,8 @@ function get_x_y(data, varname) {
     });
     return output
 }
-//output_low = get_x_y(dataset, "q_25")
-//output_median = get_x_y(dataset, "q_50")
-//output_high = get_x_y(dataset, "q_75")
-//console.log(output_low);
-//console.log(output_median);
-//console.log(output_high);
 
 function updatePlot(t1, t2) {
-    console.log(t1);
-    console.log(t2);
     $.ajax({
         url: endpoint,
         method: 'GET',
@@ -175,14 +184,18 @@ function updatePlot(t1, t2) {
         },
         success: function(data) {
             // Update only the data in the chart
-            console.log(data);
-            data_low = get_x_y(data, "q_25");
-            data_high = get_x_y(data, "q_75");
+            datapoints = data;
+            data_05 = get_x_y(data, "q_05");
+            data_25 = get_x_y(data, "q_25");
+            data_75 = get_x_y(data, "q_75");
+            data_95 = get_x_y(data, "q_95");
             data_median = get_x_y(data, "q_50");
             console.log(data_median);
             window.myLine.data.datasets[0].data = data_median;
-            window.myLine.data.datasets[1].data = data_low;
-            window.myLine.data.datasets[2].data = data_high;
+            window.myLine.data.datasets[1].data = data_05;
+            window.myLine.data.datasets[2].data = data_95;
+            window.myLine.data.datasets[3].data = data_25;
+            window.myLine.data.datasets[4].data = data_75;
             // Update the chart itself
             window.myLine.update();
         },
