@@ -28,9 +28,16 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         serializer.save(creator=creator, institute=institute)
 
     def get_queryset(self):
-        print(self.request.user.get_active_institute(self.request))
         queryset = super(BaseModelViewSet, self).get_queryset()
+        model_name = self.get_serializer().Meta.model.__name__
         institute = self.request.user.get_active_institute(self.request)
-        queryset = queryset.filter(institute=institute)
+        if model_name == "CameraConfig":
+            queryset = queryset.filter(site__institute=institute)
+        elif model_name == "Video":
+            queryset = queryset.filter(camera_config_obj__site__institute=institute)
+        elif model_name == "Task":
+            queryset = queryset.filter(video__camera_config_obj__site__institute=institute)
+        else:
+            queryset = queryset.filter(institute=institute)
         return queryset
 
