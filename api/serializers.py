@@ -92,7 +92,6 @@ class TimeSeriesSerializer(QueryFieldsMixin, serializers.ModelSerializer):
 
     class Meta:
         model = TimeSeries
-        fields = "__all__"
         fields = [
             "id",
             "timestamp",
@@ -109,6 +108,7 @@ class TimeSeriesSerializer(QueryFieldsMixin, serializers.ModelSerializer):
             "site",
             "video"
         ]
+        read_only_fields = ("video", )
 
 class TimeSeriesCreateSerializer(TimeSeriesSerializer):
     # parent_lookup_kwargs = {
