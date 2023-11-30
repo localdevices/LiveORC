@@ -93,6 +93,22 @@ class TimeSeriesSerializer(QueryFieldsMixin, serializers.ModelSerializer):
     class Meta:
         model = TimeSeries
         fields = "__all__"
+        fields = [
+            "id",
+            "timestamp",
+            "h",
+            "q_05",
+            "q_25",
+            "q_50",
+            "q_75",
+            "q_95",
+            "wetted_surface",
+            "wetted_perimeter",
+            "fraction_velocimetry",
+            "creator",
+            "site",
+            "video"
+        ]
 
 class TimeSeriesCreateSerializer(TimeSeriesSerializer):
     # parent_lookup_kwargs = {

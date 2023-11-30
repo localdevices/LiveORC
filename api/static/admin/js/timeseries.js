@@ -35,13 +35,20 @@ function resetZoom() {
 }
 var timeFormat = 'YYYY-MM-DD HH:MM:SS';
 var datapoints = [];
+var data_05 = [];
+var data_25 = [];
+var data_75 = [];
+var data_95 = [];
+var data_median = [];
+var chartInitial = true;
+
 var config = {
     type: 'line',
     data: {
         datasets: [
             {
                 label: 'Discharge',
-//                type: 'line',
+//                type: 'time',
                 data: datapoints,
                 fill: false,
                 pointRadius: 1,
@@ -53,6 +60,7 @@ var config = {
             },
             {
                 label: '5% low',
+//                type: 'time',
                 data: datapoints,
                 fill: false,
                 pointRadius: 0,
@@ -63,17 +71,19 @@ var config = {
             },
             {
                 label: '5-95% confidence',
+//                type: 'time',
                 data: datapoints,
                 fill: "-1",
                 pointRadius: 0,
                 pointHoverRadius: 0,
-                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderColor: 'rgb(75, 192, 192)',
                 borderWidth: 0,
                 tension: 0.1
             },
             {
                 label: '25% low',
+//                type: 'time',
                 data: datapoints,
                 fill: false,
                 pointRadius: 0,
@@ -84,11 +94,12 @@ var config = {
             },
             {
                 label: '25-75% confidence',
+//                type: 'time',
                 data: datapoints,
                 fill: "-1",
                 pointRadius: 0,
                 pointHoverRadius: 0,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                backgroundColor: 'rgba(75, 192, 192, 0.3)',
                 borderColor: 'rgb(75, 192, 192)',
                 borderWidth: 0,
                 tension: 0.1
@@ -99,16 +110,22 @@ var config = {
         animation: {
             // perform the first update of the data in the plot
             onComplete: function(chart) {
-                if (chart.initial){
+                if (chartInitial){
+                    console.log("updating chart")
                     updatePlot(t1, t2);
+                    window.myLine.config.options.scales.x.min = t1;
+                    window.myLine.config.options.scales.x.max = t2;
+                    window.myLine.update();
+                    chartInitial = false
                 }
             }
         },
         scales: {
             x: {
-                type: 'timeseries',
+                type: 'time',
                 time: {
                 }
+//                min: t1
             },
             y: {
                 type: 'linear',
@@ -141,9 +158,9 @@ var config = {
                     },
                     mode: 'x',
                     // Listen to the wheel, update plot once the wheel is done turning (after 0.2 seconds)
-                    onZoomComplete({chart}) {
-                        handleZoomEvent();
-                    }
+//                    onZoomComplete({chart}) {
+//                        handleZoomEvent();
+//                    }
                 },
                 pan: {
                     enabled: true,
@@ -161,43 +178,82 @@ var config = {
                 }
             }
         },
+        onClick: function (event, elements) {
+            if (elements && elements.length > 0) {
+                // Get the index of the clicked point
+                var index = elements[0].index;
+                console.log(index);
+                url = window.myLine.data.datasets[0].data[index]["url"]
+                // Open the URL in a new tab or window
+                window.open(url, '_blank');
+            }
+        }
     }
 };
 // restructure
-function get_x_y(data, varname) {
+function get_x_y(data, varname, fraction, add_link) {
     var output = [];
-    data.forEach(function(d){
-        output.push({x:d["timestamp"],y:d[varname]});
-    });
+    if (add_link){
+        data.forEach(function(d){
+            if (d["fraction_velocimetry"] >= fraction){
+                output.push({
+                    x:d["timestamp"].slice(0,10) + " " + d["timestamp"].slice(11,16),
+                    y:d[varname],
+                    url: video_prefix + d["video"]
+                });
+            } else {
+                output.push({
+                    x:d["timestamp"].slice(0,10) + " " + d["timestamp"].slice(11,16),
+                    y:Number.NaN
+                });
+            }
+        });
+    } else {
+        data.forEach(function(d){
+            if (d["fraction_velocimetry"] >= fraction){
+                output.push({
+                    x:d["timestamp"].slice(0,10) + " " + d["timestamp"].slice(11,16),
+                    y:d[varname]
+                });
+            } else {
+                output.push({
+                    x:d["timestamp"].slice(0,10) + " " + d["timestamp"].slice(11,16),
+                    y:Number.NaN
+                });
+            }
+        });
+    }
     return output
 }
 
-function updatePlot(t1, t2) {
+function updatePlot() {
     $.ajax({
         url: endpoint,
         method: 'GET',
         dataType: 'json',
-        data: {
-          startDateTime: t1,
-          endDateTime: t2,
+//        data: {
+//          startDateTime: t1,
+//          endDateTime: t2,
 //          format: "webjson"
-        },
+//        },
         success: function(data) {
+            console.log("updating plot")
+            fraction = parseInt(document.getElementById("fractionRange").value);
+            console.log(fraction);
             // Update only the data in the chart
             datapoints = data;
-            data_05 = get_x_y(data, "q_05");
-            data_25 = get_x_y(data, "q_25");
-            data_75 = get_x_y(data, "q_75");
-            data_95 = get_x_y(data, "q_95");
-            data_median = get_x_y(data, "q_50");
-            console.log(data_median);
+            data_05 = get_x_y(data, "q_05", fraction, false);
+            data_25 = get_x_y(data, "q_25", fraction, false);
+            data_75 = get_x_y(data, "q_75", fraction, false);
+            data_95 = get_x_y(data, "q_95", fraction, false);
+            data_median = get_x_y(data, "q_50", fraction, true);
             window.myLine.data.datasets[0].data = data_median;
             window.myLine.data.datasets[1].data = data_05;
             window.myLine.data.datasets[2].data = data_95;
             window.myLine.data.datasets[3].data = data_25;
             window.myLine.data.datasets[4].data = data_75;
             // Update the chart itself
-            window.myLine.update();
+            window.myLine.update()
         },
         error: function(error) {
             console.error('Error fetching plot data:', error);
@@ -205,21 +261,23 @@ function updatePlot(t1, t2) {
     });
 }
 var updateTimeout;
-function handleZoomEvent() {
-    clearTimeout(updateTimeout);
-    updateTimeout = setTimeout(function() {
-        var ts = get_xMinMax();
-        console.log(ts);
-        updatePlot(ts[0], ts[1]);
-    }, 200);
-}
-function testZoomEvent() {
-    clearTimeout(updateTimeout);
-    updateTimeout = setTimeout(function() {
-        alert("zoom event detected");
-    }, 500);
-}
+//function handleZoomEvent() {
+//    clearTimeout(updateTimeout);
+//    updateTimeout = setTimeout(function() {
+//        var ts = get_xMinMax();
+//        console.log(ts);
+//        updatePlot(ts[0], ts[1]);
+//    }, 200);
+//}
+//function testZoomEvent() {
+//    clearTimeout(updateTimeout);
+//    updateTimeout = setTimeout(function() {
+//        alert("zoom event detected");
+//    }, 500);
+//}
 window.onload = function() {
     var ctx = document.getElementById("canvas").getContext("2d");
+    canvas = document.getElementById("canvas")
     window.myLine = new Chart(ctx, config);
+
 };
