@@ -10,15 +10,16 @@ from api.models import BaseModel
 timeseries_template1 = """
 	<div class="slidecontainer">
         <p>Set filter for optically resolved percentage. Higher means only well-illuminated videos are shown</p>
-        <input type="range" min="1" max="100" value="80" class="slider" id="fractionRange" onchange="updatePlot()">
+        <input type="range" min="1" max="100" value="80" class="slider" id="fractionRange" onchange="updateLines()">
     </div>
 	<div id="timeseries_chart" style="width: 600px; height: 400px;">
 		<canvas id="canvas"></canvas>
 	</div>
 	<script>
 	    var endpoint = "{}";
-	    var t1 = "{}";
-	    var t2 = "{}";
+	    var t1 = {};
+	    var t2 = {};
+	    var t_last = {};
 	    var video_prefix = "/admin/api/video/"
 	</script>
 """
@@ -39,9 +40,9 @@ class Site(BaseModel):
         from api.models import TimeSeries
         timeseries_last = TimeSeries.objects.filter(site=self.id).last()
         print(timeseries_last.timestamp)
-        t1 = (timeseries_last.timestamp - timedelta(days=1)).strftime("%Y-%m-%d %H:%M")
-        t2 = timeseries_last.timestamp.strftime("%Y-%m-%d %H:%M")
+        t1 = (timeseries_last.timestamp - timedelta(days=1)).timestamp()*1000
+        t2 = timeseries_last.timestamp.timestamp()*1000
 
         uri = reverse("api:site-timeseries-list", args=([f"{self.id}"]))
-        timeseries_html = timeseries_template1.format(uri, t1, t2)
+        timeseries_html = timeseries_template1.format(uri, t1, t2, t2)
         return mark_safe(timeseries_html)

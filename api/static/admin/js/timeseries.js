@@ -1,9 +1,7 @@
 function get_xMinMax() {
     var xmin = window.myLine.scales["x"].min;
     var xmax = window.myLine.scales["x"].max;
-    dateMin = moment.unix(xmin/1000).format("YYYY-MM-DDTHH:MM");
-    dateMax = moment.unix(xmax/1000).format("YYYY-MM-DDTHH:MM");
-    return [dateMin, dateMax]
+    return [xmin, xmax]
 }
 
 function randomScalingFactor() {
@@ -146,7 +144,7 @@ var config = {
             },
             zoom: {
                 limits: {
-                    x: {min: '2023-10-01 00:00:00', max: '2023-11-30 00:00:00'},
+//                    x: {min: '2023-10-01 00:00:00', max: '2023-11-30 00:00:00'},
                     y: {min: -200, max: 200, minRange: 50}
                 },
                 zoom: {
@@ -158,9 +156,9 @@ var config = {
                     },
                     mode: 'x',
                     // Listen to the wheel, update plot once the wheel is done turning (after 0.2 seconds)
-//                    onZoomComplete({chart}) {
-//                        handleZoomEvent();
-//                    }
+                    onZoomComplete({chart}) {
+                        handleZoomEvent();
+                    }
                 },
                 pan: {
                     enabled: true,
@@ -192,6 +190,7 @@ var config = {
 };
 // restructure
 function get_x_y(data, varname, fraction, add_link) {
+    console.log(data);
     var output = [];
     if (add_link){
         data.forEach(function(d){
@@ -226,55 +225,81 @@ function get_x_y(data, varname, fraction, add_link) {
     return output
 }
 
-function updatePlot() {
+function updatePlot(t1, t2) {
+
+    dateMin = moment.unix((t1-10*1000*86400)/1000).format("YYYY-MM-DDTHH:MM");
+    dateMax = moment.unix((t2+10*1000*86400)/1000).format("YYYY-MM-DDTHH:MM");
     $.ajax({
         url: endpoint,
         method: 'GET',
         dataType: 'json',
-//        data: {
-//          startDateTime: t1,
-//          endDateTime: t2,
+        data: {
+          startDateTime: dateMin,
+          endDateTime: dateMax,
 //          format: "webjson"
-//        },
+        },
         success: function(data) {
             console.log("updating plot")
-            fraction = parseInt(document.getElementById("fractionRange").value);
-            console.log(fraction);
             // Update only the data in the chart
             datapoints = data;
-            data_05 = get_x_y(data, "q_05", fraction, false);
-            data_25 = get_x_y(data, "q_25", fraction, false);
-            data_75 = get_x_y(data, "q_75", fraction, false);
-            data_95 = get_x_y(data, "q_95", fraction, false);
-            data_median = get_x_y(data, "q_50", fraction, true);
-            window.myLine.data.datasets[0].data = data_median;
-            window.myLine.data.datasets[1].data = data_05;
-            window.myLine.data.datasets[2].data = data_95;
-            window.myLine.data.datasets[3].data = data_25;
-            window.myLine.data.datasets[4].data = data_75;
-            // Update the chart itself
-            window.myLine.update()
+            updateLines();
+//            data_05 = get_x_y(data, "q_05", fraction, false);
+//            data_25 = get_x_y(data, "q_25", fraction, false);
+//            data_75 = get_x_y(data, "q_75", fraction, false);
+//            data_95 = get_x_y(data, "q_95", fraction, false);
+//            data_median = get_x_y(data, "q_50", fraction, true);
+//            window.myLine.data.datasets[0].data = data_median;
+//            window.myLine.data.datasets[1].data = data_05;
+//            window.myLine.data.datasets[2].data = data_95;
+//            window.myLine.data.datasets[3].data = data_25;
+//            window.myLine.data.datasets[4].data = data_75;
+//            // Update the chart itself
+//            window.myLine.update()
         },
         error: function(error) {
             console.error('Error fetching plot data:', error);
         }
     });
 }
+function updateLines() {
+    fraction = parseInt(document.getElementById("fractionRange").value);
+    data_05 = get_x_y(datapoints, "q_05", fraction, false);
+    data_25 = get_x_y(datapoints, "q_25", fraction, false);
+    data_75 = get_x_y(datapoints, "q_75", fraction, false);
+    data_95 = get_x_y(datapoints, "q_95", fraction, false);
+    data_median = get_x_y(datapoints, "q_50", fraction, true);
+    window.myLine.data.datasets[0].data = data_median;
+    window.myLine.data.datasets[1].data = data_05;
+    window.myLine.data.datasets[2].data = data_95;
+    window.myLine.data.datasets[3].data = data_25;
+    window.myLine.data.datasets[4].data = data_75;
+    // Update the chart itself
+    window.myLine.update()
+}
+
 var updateTimeout;
-//function handleZoomEvent() {
-//    clearTimeout(updateTimeout);
-//    updateTimeout = setTimeout(function() {
-//        var ts = get_xMinMax();
-//        console.log(ts);
-//        updatePlot(ts[0], ts[1]);
-//    }, 200);
-//}
-//function testZoomEvent() {
-//    clearTimeout(updateTimeout);
-//    updateTimeout = setTimeout(function() {
-//        alert("zoom event detected");
-//    }, 500);
-//}
+function handleZoomEvent() {
+    clearTimeout(updateTimeout);
+    updateTimeout = setTimeout(function() {
+        // assume we need to update first
+        var replot = true
+        var ts = get_xMinMax();
+        if (datapoints.length > 0){
+            // check if first date in datapoints is before dateMin or last date is after dateMax
+            t1 = moment(datapoints[0]["timestamp"]).unix()*1000
+            t2 = moment(datapoints[datapoints.length - 1]["timestamp"]).unix()*1000
+            replot = (ts[0] < t1) || ((ts[1] > t2) && (t2 < t_last))
+        }
+        console.log(replot);
+        if (replot) {
+            console.log("zoom is outside limits")
+            console.log(dateMin);
+            console.log(dateMax);
+            updatePlot(ts[0], ts[1]);
+        }
+    }, 200);
+}
+
 window.onload = function() {
     var ctx = document.getElementById("canvas").getContext("2d");
     canvas = document.getElementById("canvas")
