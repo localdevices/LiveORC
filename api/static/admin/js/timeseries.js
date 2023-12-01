@@ -119,7 +119,9 @@ var config = {
         ]
     },
     options: {
+        responsiveAnimationDuration: 0,
         animation: {
+//            duration: 0,
             // perform the first update of the data in the plot
             onComplete: function(chart) {
                 if (chartInitial){
@@ -129,6 +131,8 @@ var config = {
                     window.myLine.config.options.scales.x.max = t2;
                     window.myLine.update();
                     chartInitial = false
+                    window.myLine.config.options.animation.duration = 0;
+
                 }
             }
         },
