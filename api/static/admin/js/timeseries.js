@@ -38,6 +38,7 @@ var data_25 = [];
 var data_75 = [];
 var data_95 = [];
 var data_median = [];
+var data_h = [];
 var chartInitial = true;
 
 var config = {
@@ -102,6 +103,19 @@ var config = {
                 borderWidth: 0,
                 tension: 0.1
             },
+            {
+                label: 'Water level',
+//                type: 'time',
+                data: datapoints,
+                fill: false,
+                pointRadius: 1,
+                pointHoverRadius: 3,
+                backgroundColor: 'rgb(255, 255, 255)',
+                borderColor: 'rgb(255, 50, 50)',
+                borderWidth: 1,
+                tension: 0.1,
+                yAxisID: "y1"
+            },
         ]
     },
     options: {
@@ -136,7 +150,16 @@ var config = {
                     display: true
                 },
                 min: 0,  // Set the minimum value for the y-axis
+            },
+            y1: {
+                type: 'linear',
+                position: 'right',
+                title: {
+                    text: "Water level [m]",
+                    display: true
+                },
             }
+
         },
         plugins: {
             filler: {
@@ -264,12 +287,14 @@ function updateLines() {
     data_25 = get_x_y(datapoints, "q_25", fraction, false);
     data_75 = get_x_y(datapoints, "q_75", fraction, false);
     data_95 = get_x_y(datapoints, "q_95", fraction, false);
+    data_h = get_x_y(datapoints, "h", 0, false);
     data_median = get_x_y(datapoints, "q_50", fraction, true);
     window.myLine.data.datasets[0].data = data_median;
     window.myLine.data.datasets[1].data = data_05;
     window.myLine.data.datasets[2].data = data_95;
     window.myLine.data.datasets[3].data = data_25;
     window.myLine.data.datasets[4].data = data_75;
+    window.myLine.data.datasets[5].data = data_h;
     // Update the chart itself
     window.myLine.update()
 }
@@ -288,6 +313,7 @@ function handleZoomEvent() {
             replot = (ts[0] < t1) || ((ts[1] > t2) && (t2 < t_last))
         }
         if (replot) {
+            console.log("Requested data is beyond current span, reloading...")
             updatePlot(ts[0], ts[1]);
         }
     }, 200);
