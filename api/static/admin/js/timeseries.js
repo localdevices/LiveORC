@@ -180,7 +180,6 @@ var config = {
             if (elements && elements.length > 0) {
                 // Get the index of the clicked point
                 var index = elements[0].index;
-                console.log(index);
                 url = window.myLine.data.datasets[0].data[index]["url"]
                 // Open the URL in a new tab or window
                 window.open(url, '_blank');
@@ -190,7 +189,6 @@ var config = {
 };
 // restructure
 function get_x_y(data, varname, fraction, add_link) {
-    console.log(data);
     var output = [];
     if (add_link){
         data.forEach(function(d){
@@ -239,7 +237,6 @@ function updatePlot(t1, t2) {
 //          format: "webjson"
         },
         success: function(data) {
-            console.log("updating plot")
             // Update only the data in the chart
             datapoints = data;
             updateLines();
@@ -290,11 +287,7 @@ function handleZoomEvent() {
             t2 = moment(datapoints[datapoints.length - 1]["timestamp"]).unix()*1000
             replot = (ts[0] < t1) || ((ts[1] > t2) && (t2 < t_last))
         }
-        console.log(replot);
         if (replot) {
-            console.log("zoom is outside limits")
-            console.log(dateMin);
-            console.log(dateMax);
             updatePlot(ts[0], ts[1]);
         }
     }, 200);
