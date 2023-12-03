@@ -208,8 +208,13 @@ var config = {
                 // Get the index of the clicked point
                 var index = elements[0].index;
                 url = window.myLine.data.datasets[0].data[index]["url"]
+                if (url.slice(url.length-4,url.length) == "null") {
+                    alert("Video analysis not available for this timestamp")
+                }
+                else {
                 // Open the URL in a new tab or window
-                window.open(url, '_blank');
+                    window.open(url, '_blank');
+                }
             }
         }
     }
