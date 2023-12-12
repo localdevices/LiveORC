@@ -10,7 +10,7 @@
     <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
     <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
-<h1 id="site-name"><img src="{% static 'local_devices.png' %}" height="40px" /><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a> {% if request.user.is_authenticated and user.get_institutes|length > 1 %} - <span style="font-size: 15px"><select name="switch_institute"
+<h1 id="site-name"><img src="{% static 'local_devices.png' %}" height="40px" /><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a> {% if not request.user.is_superuser and request.user.is_authenticated and user.get_institutes|length > 1 %} - <span style="font-size: 15px"><select name="switch_institute"
         ><option disabled>Switch Institute</option> {% for member in user.get_institutes %}<option {% if active_institute == member.institute %}selected{% endif %} value="{{ member.institute.pk }}"> {{ member.institute }}</option> {% endfor %}</select></span>{% endif %}</h1>
 {% block extrajs %}
     <script type="text/javascript">
