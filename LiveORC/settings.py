@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'rangefilter',
     'drf_spectacular',
     'fontawesomefree',
-    'django_object_actions'
+    'django_object_actions',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
