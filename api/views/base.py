@@ -17,15 +17,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         site_obj = serializer.validated_data.get('site')
         camera_config_obj = serializer.validated_data.get('camera_config')
         if model_name == "CameraConfig" and site_obj:
-            institute = site_obj.institute
-            creator = site_obj.creator
+            serializer.save(creator=site_obj.creator)
         elif model_name == "Video" and camera_config_obj:
-            institute = camera_config_obj.site.institute
-            creator = camera_config_obj.site.creator
+            serializer.save(creater=camera_config_obj.site.creator)
         else:
-            institute = self.request.user.get_active_institute(self.request)
-            creator = self.request.user
-        serializer.save(creator=creator, institute=institute)
+            serializer.save(creator=self.request.user)
 
     def get_queryset(self):
         queryset = super(BaseModelViewSet, self).get_queryset()
