@@ -10,9 +10,7 @@ class IsOwnerOrReadOnlyAsInstitute(permissions.BasePermission):
         # Read (GET, HEAD, OPTIONS) permissions are allowed if either the user is the creator of the object, or belongs to the same
         # institute as the creator. Institute of course cannot be None!
         if request.method in permissions.SAFE_METHODS:
-            if (
-                    request.user.institute == obj.creator.institute and request.user.institute is not None
-            ) or request.user == obj.creator:
+            if request.user.is_institute_member(obj.institute) or request.user == obj.creator:
                 return True
             return False
         # Write permissions are only allowed to the creator of the object.
