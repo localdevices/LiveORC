@@ -13,6 +13,19 @@ class Institute(models.Model):
     def __str__(self):
         return self.name
 
+    def has_member(self, user):
+        return self.members.filter(user=user).exists()
+
+    def has_members(self):
+        return self.members.exists()
+
+    def add_member(self, user, role):
+        """Add member to institute
+        Args: user User, role RoleTypes
+        """
+        member = self.members.create(user=user, role=role)
+        return member
+
 
 class Member(models.Model):
     institute = models.ForeignKey(
