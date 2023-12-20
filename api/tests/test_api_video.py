@@ -18,6 +18,7 @@ from .test_api_profile import profile
 
 video_sample_url = "https://raw.githubusercontent.com/localdevices/pyorc/main/examples/ngwerere/ngwerere_20191103.mp4"
 camconfig_url = "https://raw.githubusercontent.com/localdevices/pyorc/main/examples/ngwerere/ngwerere.json"
+image_sample_url = "https://raw.githubusercontent.com/localdevices/pyorc/main/docs/ngwerere.jpg"
 
 
 def prep_video_sample(video_sample_url):
@@ -38,6 +39,23 @@ def prep_video_sample(video_sample_url):
     }
     return msg
 
+def prep_image_sample(image_sample_url):
+    filename = os.path.split(image_sample_url)[-1]
+    print(f"Downloading {image_sample_url}")
+    r = requests.get(image_sample_url)
+    obj = r.content
+    image_file = SimpleUploadedFile("ngwerere_result.jpg", obj, content_type="image/jpeg")
+    # files = {
+    #     "file": video_file,
+    # }
+    msg = {
+        "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "camera_config": 1,
+        "image": image_file
+    }
+    return msg
+
+
 
 def camconfig(camconfig_url):
     r = requests.get(camconfig_url)
@@ -46,6 +64,8 @@ def camconfig(camconfig_url):
 
 camera_config = camconfig(camconfig_url)
 video_sample = prep_video_sample(video_sample_url)
+image_sample = prep_image_sample(image_sample_url)
+
 
 camera_config_form = {
     "name": "ngwerere_cam",
@@ -84,6 +104,23 @@ class VideoViewTests(InitTestCase):
         r = client.get("/api/site/1/video/1/")
         self.assertEquals(r.status_code, status.HTTP_200_OK)
 
+
+    def test_add_image(self):
+        client = APIClient()
+        client.login(username='user@institute1.com', password='test1234')
+        # create a camera config on site
+        r = client.post(
+            '/api/site/1/cameraconfig/',
+            camera_config_form
+        )
+        # post a video with only the result image instead of full video
+        r = client.post(
+            "/api/video/",
+            data=image_sample
+        )
+        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+        r = client.get("/api/site/1/video/1/")
+        self.assertEquals(r.status_code, status.HTTP_200_OK)
 
 
 

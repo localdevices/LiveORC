@@ -10,6 +10,7 @@ class BaseModel(models.Model):
         # default=get_current_user,
         editable=False
     )
+
     institute = models.ForeignKey(Institute, blank=True, null=True, on_delete=models.CASCADE)
 
     # def save(self, *args, **kwargs):

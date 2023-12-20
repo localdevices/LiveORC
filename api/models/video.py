@@ -36,10 +36,14 @@ def add_frame_to_model(video_field, img_field, frame_nr=0, suffix="", thumb=Fals
     thumb : boolean
         Set to True to resize the image, settings.THUMBSIZE is used for the size settings
     """
-    cap = cv2.VideoCapture(video_field.path)
-    if frame_nr != 0:
-        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_nr)
-    res, image = cap.read()
+    if "FieldFile" in repr(video_field):
+        # a video is passed, so use opencv to get the key frame
+        cap = cv2.VideoCapture(video_field.path)
+        if frame_nr != 0:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_nr)
+        res, image = cap.read()
+    elif "ImageFieldFile" in repr(video_field):
+        image = cv2.imread(video_field.path)
     # turn into RGB
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     img_name, video_extension = os.path.splitext(os.path.basename(video_field.name))
@@ -130,7 +134,8 @@ class Video(models.Model):
     )
     file = models.FileField(
         upload_to=get_video_path,
-        validators=[FileExtensionValidator(allowed_extensions=VIDEO_EXTENSIONS)]
+        validators=[FileExtensionValidator(allowed_extensions=VIDEO_EXTENSIONS)],
+        null=True,
     )
     keyframe = models.ImageField(
         upload_to=get_keyframe_path,
@@ -206,8 +211,13 @@ class Video(models.Model):
         """
         make frame and thumbnail
         """
-        add_frame_to_model(self.file, self.keyframe)
-        add_frame_to_model(self.file, self.thumbnail, suffix="_thumb", thumb=True)
+        if self.file:
+            # extract one frame and save that as a keyframe
+            add_frame_to_model(self.file, self.keyframe)
+            add_frame_to_model(self.file, self.thumbnail, suffix="_thumb", thumb=True)
+        else:
+            # only add a thumbnail in this case
+            add_frame_to_model(self.image, self.thumbnail, suffix="_thumb", thumb=True)
         return True
 
     def make_thumbnail(self):
