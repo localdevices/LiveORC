@@ -31,7 +31,8 @@ def setupUsers():
     # now update the users with the institute
     # user 3 belong to another institute, so that we can test if he/she is denied access to instances of test users
     # of institute1
-    institute2.add_member(testuser3, "Member")
+    institute1.add_member(testuser2, "member")
+    institute2.add_member(testuser3, "member")
 
     # testuser1.save()
     # testuser2.save()
