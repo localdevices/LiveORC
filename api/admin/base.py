@@ -33,7 +33,8 @@ class BaseAdmin(admin.GISModelAdmin):
     def save_model(self, request, obj, form, change):
         model_name = self.model.__name__
         obj.creator = request.user
-        obj.institute = self._get_institute(model_name, obj, request)
+        if not request.user.is_superuser:
+            obj.institute = self._get_institute(model_name, obj, request)
         obj.save()
 
     def get_list_display(self, request):
