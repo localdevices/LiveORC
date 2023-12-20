@@ -65,7 +65,6 @@ class SiteViewTests(InitTestCase):
         r = self.client.get('/api/site/1/', follow=True)
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
-
     def test_site_tokenized_auth(self):
         client = APIClient()
         r = client.post('/api/token/', {"email": "user@institute1.com", "password": "test1234"})
@@ -74,27 +73,27 @@ class SiteViewTests(InitTestCase):
         # now use token instead of basic auth
         r = client.post(
             '/api/site/',
-            {"name": "geul", "geom": "SRID=4326;POINT (5.914115954402695 50.80678292086996)"},
+            {"name": "geul", "geom": "SRID=4326;POINT (5.914115954402695 50.80678292086996)", "institute": 1},
             follow=True,
             headers=headers
         )
-        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         r = client.get('/api/site/', follow=True, headers=headers)
-        self.assertEquals(r.status_code, status.HTTP_200_OK)
-        r = client.get('/api/site/1', follow=True, headers=headers)
-        self.assertEquals(r.status_code, status.HTTP_200_OK)
-        self.assertEquals(r.json()["name"], "geul")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        r = client.get('/api/site/1/', follow=True, headers=headers)
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(r.json()["name"], "geul")
         # again test if user 2 has access and user 3 not
         r = client.post('/api/token/', {"email": "user2@institute1.com", "password": "test1234"})
         token = r.json()["access"]
         headers = {"Authorization": f"Bearer {token}"}
         r = client.get('/api/site/1', follow=True, headers=headers)
-        self.assertEquals(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
         r = client.post('/api/token/', {"email": "user3@institute2.com", "password": "test1234"})
         token = r.json()["access"]
         headers = {"Authorization": f"Bearer {token}"}
         r = client.get('/api/site/1', follow=True, headers=headers)
-        self.assertEquals(r.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
 
