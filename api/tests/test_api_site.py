@@ -1,11 +1,12 @@
-from rest_framework.test import APIClient
+from rest_framework.test import APIClient, APITestCase
 from rest_framework import status
 from .test_setup_db import InitTestCase
 # Create your tests here.
 
+
 class SiteViewTests(InitTestCase):
     def setUp(self):
-        pass
+        self.client = APIClient()
 
     def tearDown(self):
         pass
@@ -15,54 +16,54 @@ class SiteViewTests(InitTestCase):
         If no questions exist, an appropriate message is displayed.
         """
         # try to create/list records
-        client = APIClient()
-        r = client.post(
+        # client = APIClient()
+        r = self.client.post(
             '/api/site/',
             {"name": "geul", "geom": "SRID=4326;POINT (5.914115954402695 50.80678292086996)"}
         )
-        self.assertEquals(r.status_code, status.HTTP_401_UNAUTHORIZED)
-        r = client.get('/api/site/')
-        self.assertEquals(r.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(r.status_code, status.HTTP_401_UNAUTHORIZED)
+        r = self.client.get('/api/site/')
+        self.assertEqual(r.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_site_login_basic_auth(self):
-        client = APIClient()
-        client.login(username='user@institute1.com', password='test1234')
-        r = client.post(
+        # client = APIClient()
+        self.client.login(username='user@institute1.com', password='test1234')
+        r = self.client.post(
             '/api/site/',
-            {"name": "geul", "geom": "SRID=4326;POINT (5.914115954402695 50.80678292086996)"},
+            {"name": "geul", "geom": "SRID=4326;POINT (5.914115954402695 50.80678292086996)", "institute": 1},
             follow=True
         )
-        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
-        r = client.get('/api/site/', follow=True)
-        self.assertEquals(r.status_code, status.HTTP_200_OK)
-        r = client.get('/api/site/1', follow=True)
-        self.assertEquals(r.status_code, status.HTTP_200_OK)
-        self.assertEquals(r.json()["name"], "geul")
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        r = self.client.get('/api/site/?institute=1', follow=True)
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        r = self.client.get('/api/site/1/', follow=True)
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(r.json()["name"], "geul")
         # now check if the user within the same institute can read, but not modify the site instance
-        client.logout()
-        client.login(username='user2@institute1.com', password='test1234')
-        r = client.get('/api/site/1', follow=True)
-        self.assertEquals(r.status_code, status.HTTP_200_OK)
-        r = client.patch(
+        self.client.logout()
+        self.client.login(username='user2@institute1.com', password='test1234')
+        r = self.client.get('/api/site/1/', follow=True)
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        r = self.client.patch(
             '/api/site/1/',
             data={"name": "Hommerich"},
             follow=True
         )
-        self.assertEquals(r.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
         # now check if the original user is able to do the patch instead
-        client.logout()
-        client.login(username='user@institute1.com', password='test1234')
-        r = client.patch(
+        self.client.logout()
+        self.client.login(username='user@institute1.com', password='test1234')
+        r = self.client.patch(
             '/api/site/1/',
             data={"name": "Hommerich"},
             follow=True
         )
-        self.assertEquals(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
         # now logout again and test if the user from a different institute cannot even read the record
-        client.logout()
-        client.login(username='user3@institute2.com', password='test1234')
-        r = client.get('/api/site/1', follow=True)
-        self.assertEquals(r.status_code, status.HTTP_403_FORBIDDEN)
+        self.client.logout()
+        self.client.login(username='user3@institute2.com', password='test1234')
+        r = self.client.get('/api/site/1/', follow=True)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
     def test_site_tokenized_auth(self):
