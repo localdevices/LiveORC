@@ -1,6 +1,9 @@
 from api.serializers import SiteSerializer
 from api.models import Site
 from api.views import BaseModelViewSet
+from rest_framework.response import Response
+from LiveORC.utils.models.base import get_object_or_none
+from users.models.institute import Institute
 from django_filters.rest_framework import DjangoFilterBackend
 
 
@@ -16,17 +19,24 @@ class SiteViewSet(BaseModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['institute']
 
-    def get_queryset(self):
-        """
-        Optionally restricts the returned sites to a given institute,
-        by filtering against an `institute` query parameter in the URL.
-        """
-        queryset = Site.objects.all()
+    def list(self, request, *args, **kwargs):
         institute = self.request.query_params.get('institute', None)
-        if self.request.user.is_superuser:
-            return queryset
-        if institute:
-            queryset = queryset.filter(institute=institute)
-        return queryset.none()
+        institute_obj = get_object_or_none(Institute, id=institute)
 
+        if request.user.is_superuser:
+            raw_queryset = self.get_queryset()
+        else:
+            if institute_obj and institute_obj.has_member(request.user):
+                raw_queryset = self.get_queryset().filter(institute__id=institute)
+            else:
+                raw_queryset = self.get_queryset().none()
 
+        queryset = self.filter_queryset(raw_queryset)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
