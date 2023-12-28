@@ -12,7 +12,7 @@ class TaskAction(models.IntegerChoices):
     RESTART = 3, "Restart"
 
 
-class Task(models.Model):
+class Task(BaseModel):
     """
     Task run on video
     """
@@ -31,7 +31,6 @@ class Task(models.Model):
                                  blank=True)
     task_body = models.JSONField(help_text="task body used to perform task by available node.", default=dict)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
-    creator = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, editable=False)
 
 
     def save(self, *args, **kwargs):

@@ -1,9 +1,9 @@
 from django.db import models
 import pyorc
-from api.models import BaseModel
+from api.models import BaseInstituteModel
 
 
-class Recipe(BaseModel):
+class Recipe(BaseInstituteModel):
     """
     Contains settings to process videos
     """

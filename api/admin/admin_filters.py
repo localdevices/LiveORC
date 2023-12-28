@@ -45,7 +45,7 @@ class SiteUserFilter(admin.SimpleListFilter):
         if request.user.is_superuser:
             sites = Site.objects.all()
         else:
-            sites = Site.objects.filter(creator=request.user)
+            sites = Site.objects.filter(institute=request.user.get_active_institute())
 
         return sites.values_list("id", "name")
 

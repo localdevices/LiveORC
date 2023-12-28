@@ -1,9 +1,9 @@
 from django.db import models
 from django.contrib.gis.db import models as gismodels
-from api.models import BaseModel
+from api.models import BaseInstituteModel
 
 
-class Site(BaseModel):
+class Site(BaseInstituteModel):
     """
     Location of one or more videos
     """

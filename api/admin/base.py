@@ -2,6 +2,20 @@ from django.contrib.gis import admin
 
 
 class BaseAdmin(admin.GISModelAdmin):
+
+    def has_module_permission(self, request):
+        # if user is not staff and does not have any memberships then user is not entitled to anything, so return False
+        return request.user.is_staff and len(request.user.get_institutes()) > 0
+
+    def has_add_permission(self, request):
+        # if user is owner of the currently active institute, then add permission is granted
+        return request.user.get_active_institute(request=request).owner == request.user
+
+    def has_view_permission(self, request, obj=None):
+        if obj:
+            if obj.institute == request.user.get_active_institute(request=request):
+                return True
+
     def has_change_permission(self, request, obj=None):
         if request.user.is_superuser:
             return True
@@ -51,9 +65,23 @@ class BaseAdmin(admin.GISModelAdmin):
         return fields
 
     def is_owner(self, obj):
-        model_name = self.model.__name__
-        obj_institute = self._get_institute(model_name, obj, self.request)
-        return obj.institute == obj_institute
+        """
+        Check if institute belongs to the same user, and if user is also the owner of given institute
+
+        Parameters
+        ----------
+        obj : model instance under consideration
+
+        Returns
+        -------
+        bool
+
+        """
+
+        # model_name = self.model.__name__
+        return obj.institute == self.request.user.get_active_institute(self.request) and obj.institute.owner == self.request.user
+        # obj_institute = self._get_institute(model_name, obj, self.request)
+        # return obj.institute == obj_institute
     is_owner.boolean = True
     is_owner.allow_tags = True
 
@@ -71,8 +99,11 @@ class BaseAdmin(admin.GISModelAdmin):
             qs_filter = qs.filter(camera_config_obj__site__institute=user_institute)
         elif model_name == "Task":
             qs_filter = qs.filter(video__camera_config_obj__site__institute=user_institute)
+        # elif model_name == "Profile":
+        #     qs_filter = qs.filter(video__camera_config_obj__site__institute=user_institute)
         else:
-            qs_filter = qs.filter(institute=request.user.get_active_institute(request))
+            qs_filter = qs.filter(site__institute=user_institute)
+            # qs_filter = qs.filter(institute=request.user.get_active_institute(request))
         return qs_filter
 
     def _get_institute(self, model_name, obj, request):
