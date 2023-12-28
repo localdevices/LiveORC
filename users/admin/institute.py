@@ -20,6 +20,10 @@ class MemberForm(forms.ModelForm):
 
 
 class MemberAdmin(admin.GISModelAdmin):
+    class Meta:
+        model = Member
+        # fields = "__all__"
+    list_display = ("user", "institute", "role")
 
     form = MemberForm
 

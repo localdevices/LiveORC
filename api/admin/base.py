@@ -24,6 +24,7 @@ class BaseAdmin(admin.GISModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
         admin_form = super(BaseAdmin, self).get_form(request, obj, **kwargs)
 
+        # add the request instance to the Form instance to ensure we have access to the request
         class RequestAdminForm(admin_form):
             def __new__(cls, *args, **kwargs):
                 kwargs['request'] = request

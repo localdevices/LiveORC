@@ -1,7 +1,7 @@
 # define a base ModelViewSet with modifications needed for all api models
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from LiveORC.utils.api.permissions import IsOwnerOrReadOnlyAsInstitute
+from api.permissions import IsOwnerOrReadOnlyAsInstitute
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
