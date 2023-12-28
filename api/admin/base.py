@@ -46,10 +46,10 @@ class BaseAdmin(admin.GISModelAdmin):
         return RequestAdminForm
 
     def save_model(self, request, obj, form, change):
-        model_name = self.model.__name__
+        # model_name = self.model.__name__
         obj.creator = request.user
-        if not request.user.is_superuser:
-            obj.institute = self._get_institute(model_name, obj, request)
+        # if not request.user.is_superuser:
+        #     obj.institute = self._get_institute(model_name, obj, request)
         obj.save()
 
     def get_list_display(self, request):
@@ -99,20 +99,30 @@ class BaseAdmin(admin.GISModelAdmin):
             qs_filter = qs.filter(camera_config_obj__site__institute=user_institute)
         elif model_name == "Task":
             qs_filter = qs.filter(video__camera_config_obj__site__institute=user_institute)
-        # elif model_name == "Profile":
-        #     qs_filter = qs.filter(video__camera_config_obj__site__institute=user_institute)
-        else:
+        elif model_name == "Profile":
             qs_filter = qs.filter(site__institute=user_institute)
-            # qs_filter = qs.filter(institute=request.user.get_active_institute(request))
+        else:
+            qs_filter = qs.filter(institute=user_institute)
         return qs_filter
 
-    def _get_institute(self, model_name, obj, request):
-        if model_name == "CameraConfig":
-            institute = obj.site.institute
-        elif model_name == "Video":
-            institute = obj.camera_config_obj.site.institute
-        else:
-            institute = request.user.get_active_institute(request)
-        return institute
+    # def _get_institute(self, model_name, obj, request):
+    #     if model_name == "CameraConfig":
+    #         institute = obj.site.institute
+    #     elif model_name == "Video":
+    #         institute = obj.camera_config_obj.site.institute
+    #     else:
+    #         institute = request.user.get_active_institute(request)
+    #     return institute
 
 
+class BaseInstituteAdmin(BaseAdmin):
+    """
+    Specific save method in case an institute field is mandatory
+    """
+
+    def save_model(self, request, obj, form, change):
+        model_name = self.model.__name__
+        if not request.user.is_superuser:
+            obj.institute = request.user.get_active_institute(request)
+            # obj.institute = self._get_institute(model_name, obj, request)
+        super().save_model(request, obj, form, change)
