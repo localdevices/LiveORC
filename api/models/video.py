@@ -221,10 +221,13 @@ class Video(BaseModel):
 
     @property
     def thumbnail_preview(self):
-        height = int(settings.THUMBSIZE) / 2
-        width = int((self.thumbnail.width / self.thumbnail.height) * height)
-        if self.thumbnail:
-            return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.thumbnail.url, width, height))
+        try:
+            height = int(settings.THUMBSIZE) / 2
+            width = int((self.thumbnail.width / self.thumbnail.height) * height)
+            if self.thumbnail:
+                    return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.thumbnail.url, width, height))
+        except:
+            return ""
         return ""
 
     @property
@@ -235,28 +238,34 @@ class Video(BaseModel):
 
     @property
     def video_preview(self):
-        height = int(300)
-        width = int((self.keyframe.width / self.keyframe.height) * height)
-        uri = reverse('api:site-video-playback', args=([str(self.camera_config.site.id), str(self.id)]))
-        mimetype, _ = mimetypes.guess_type(self.file.name)
+        try:
+            height = int(300)
+            width = int((self.keyframe.width / self.keyframe.height) * height)
+            uri = reverse('api:site-video-playback', args=([str(self.camera_config.site.id), str(self.id)]))
+            mimetype, _ = mimetypes.guess_type(self.file.name)
 
-        if self.file:
-            return mark_safe(
-                '<video src="{}" width="{}" height="{}" type={} controls preload="none"/>'.format(
-                    uri,
-                    width,
-                    height,
-                    mimetype
+            if self.file:
+                return mark_safe(
+                    '<video src="{}" width="{}" height="{}" type={} controls preload="none"/>'.format(
+                        uri,
+                        width,
+                        height,
+                        mimetype
+                    )
                 )
-            )
+        except:
+            return "video media not available"
         return ""
 
     @property
     def image_preview(self):
-        height = int(300)
-        if self.image:
-            width = int((self.image.width / self.image.height) * height)
-            return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.image.url, width, height))
+        try:
+            height = int(300)
+            if self.image:
+                width = int((self.image.width / self.image.height) * height)
+                return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.image.url, width, height))
+        except:
+            return "media not available"
         return ""
 
     @property

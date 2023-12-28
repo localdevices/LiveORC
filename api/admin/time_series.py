@@ -13,6 +13,7 @@ class TimeSeriesInline(admin.TabularInline):
 
 
 class TimeSeriesAdmin(BaseAdmin):
+
     list_display = ["get_site_name", "timestamp", "str_h", "str_fraction_velocimetry", "str_q_50", 'thumbnail_preview']
     list_filter = ["site__name"]
     readonly_fields = (
