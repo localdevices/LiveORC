@@ -52,7 +52,7 @@ class PIJSONRenderer(JSONRenderer):
             "version": "1.23",
             "timeZone": "0.0"
         }
-        meta_vars = ["id", "timestamp", "creator", "site"]
+        meta_vars = ["id", "timestamp", "creator", "site", "video"]
         var_mapping = {
             "h": "h",
             "q_05": "q.05",
@@ -96,7 +96,7 @@ class PIJSONRenderer(JSONRenderer):
             var: {
                 "type": "instantaneous",
                 # "moduleInstanceId": "ImportObserved",
-                "locationId": data[0]["site"],
+                "locationId": str(data[0]["site"]),
                 "parameterId": var_mapping[var],  # following typical FEWS naming conventions
                 "timeStep": {
                     "unit": "nonequidistant"
@@ -111,8 +111,8 @@ class PIJSONRenderer(JSONRenderer):
                 },
                 "missVal": "-999.0",
                 "stationName": name,
-                "lat": lat,
-                "lon": lon,
+                "lat": str(lat),  # in FEWS the latitude is a string format
+                "lon": str(lon),  # in FEWS the longitude is a string format
                 "units": units[var],
             } for var in variables
         }
@@ -123,7 +123,7 @@ class PIJSONRenderer(JSONRenderer):
                     "date": d["timestamp"][0:10],
                     "time": d["timestamp"][-9:-1],
                     "value": "-999.0" if d[var] is None else "{:f}".format(d[var]),
-                    "flag": "1" if d[var] is None else "0"
+                    "flag": "9" if d[var] is None else "0"
                 } for d in data
 
             ] for var in variables

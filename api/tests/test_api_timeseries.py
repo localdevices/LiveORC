@@ -49,9 +49,15 @@ class TimeSeriesViewTests(InitTestCase):
             )
         self.assertEquals(r.status_code, status.HTTP_201_CREATED)
         uri = reverse("api:site-timeseries-list", args=(["1"]))
-        # now query the assembled data
+        # query in PIJSON format
+        r = client.get(
+            uri + "?startDateTime=2000-01-01T04:00:00:00Z" + "&endDateTime=2000-01-01T07:00:00:00Z" + "&format=pijson"
+        )
+        self.assertEquals(len(r.json()), 3)  # test for number of fields in pijson (always 3)
+        self.assertEquals(len(r.json()["timeSeries"]), 9)  # test for number of variables (currently 9)
+        self.assertEquals(len(r.json()["timeSeries"][0]["events"]), 4)  # test for number of records
+        # query in csv format
         r = client.get(
             uri + "?startDateTime=2000-01-01T04:00:00:00Z" + "&endDateTime=2000-01-01T07:00:00:00Z" + "&format=csv"
         )
-        self.assertEquals(len(r.json()), 4)
-        # print(r.json())
+        self.assertEquals(len(r.content), 277)

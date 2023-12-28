@@ -16,7 +16,7 @@ from rest_framework_csv.renderers import CSVRenderer
 
 @extend_schema_view(
     list=extend_schema(
-        parameters=[OpenApiParameter(name='format', type=str, location=OpenApiParameter.QUERY, description='Specify the output format (e.g., csv)')],
+        parameters=[OpenApiParameter(name='format', type=str, location=OpenApiParameter.QUERY, description='Specify the output format (e.g., csv, pijson)')],
         description='API endpoints that allows time series to be viewed or edited.',
     ),
     # retrieve=None,  # Disables 'format' parameter for retrieve
@@ -71,10 +71,6 @@ class TimeSeriesViewSet(BaseModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-
-    # def get_renderer_context(self):
-    #     context = super().get_renderer_context()
-    #     return context
 
     def get_queryset(self):
         # video can also be retrieved nested per site, by filtering on the site of the cameraconfig property.
