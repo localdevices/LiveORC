@@ -38,6 +38,11 @@ class BaseInstituteModel(models.Model):
         editable=False
     )
 
-    institute = models.ForeignKey(Institute, blank=True, null=True, on_delete=models.CASCADE)
+    institute = models.ForeignKey(
+        Institute,
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE
+    )
     class Meta:
         abstract = True

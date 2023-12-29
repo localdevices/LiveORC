@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django_json_widget.widgets import JSONEditorWidget
 
 from api.models import Recipe
-from api.admin import BaseAdmin
+from api.admin import BaseInstituteAdmin, BaseForm
 
 import json
 import pyorc
@@ -13,22 +13,22 @@ import yaml
 
 # Register your models here.
 
-class RecipeForm(forms.ModelForm):
+class RecipeForm(BaseForm):
     # recipe_file = forms.FileField(required=False)
     class Meta:
         model = Recipe
-        fields = ["name"]
+        fields = ["name", "institute"]
         widgets = {"data": JSONEditorWidget}
 
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super(RecipeForm, self).__init__(*args, **kwargs)
-
+    # def __init__(self, *args, **kwargs):
+    #     self.request = kwargs.pop('request', None)
+    #     super(RecipeForm, self).__init__(*args, **kwargs)
+    #
 
     def clean(self):
         super().clean()
         # open the json file and try to parse
-        if not self.request.user.get_active_institute():
+        if not self.request.user.get_active_membership():
             raise forms.ValidationError("You Must have an institute to continue")
         if "recipe_file" in self.files:
             try:
@@ -46,32 +46,32 @@ class RecipeForm(forms.ModelForm):
             raise ValidationError(f"Problem with recipe file: {e}")
 
 
-class RecipeCreateForm(forms.ModelForm):
+class RecipeCreateForm(BaseForm):
     recipe_file = forms.FileField()
     class Meta:
         model = Recipe
-        fields = ["name"]
+        fields = ["name", "institute"]
+    #
+    # def __init__(self, *args, **kwargs):
+    #     self.request = kwargs.pop('request', None)
+    #     super(RecipeCreateForm, self).__init__(*args, **kwargs)
+    #
+    # def clean(self):
+    #     super(RecipeCreateForm, self).clean()
+    #     if not self.request.user.get_active_membership():
+    #         raise forms.ValidationError("You Must have an institute to continue")
 
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super(RecipeCreateForm, self).__init__(*args, **kwargs)
 
-    def clean(self):
-        super(RecipeCreateForm, self).clean()
-        if not self.request.user.get_active_institute():
-            raise forms.ValidationError("You Must have an institute to continue")
-
-
-class RecipeAdmin(BaseAdmin):
+class RecipeAdmin(BaseInstituteAdmin):
     fieldsets = [
-        ("User input", {"fields": ["name", "recipe_file"]}),
+        ("User input", {"fields": ["name", "institute", "recipe_file"]}),
         ("Resulting recipe", {
             "fields": [
                 "data",
             ]}
          )
     ]
-    list_display = ["name"]
+    list_display = ["name", "institute"]
     search_fields = ["name"]
     list_filter = ["name"]
 
@@ -80,14 +80,14 @@ class RecipeAdmin(BaseAdmin):
         """A separate view for changing models"""
         self.form = RecipeForm
         self.fieldsets = [
-            ("User input", {"fields": ["name", "data"]}),
+            ("User input", {"fields": ["name", "institute", "data"]}),
         ]
         # self.readonly_fields = None
         return super(RecipeAdmin, self).change_view(request, object_id)
 
     def add_view(self, request, form_url="", extra_context=None):
         self.form = RecipeCreateForm
-        self.fieldsets = [("User input", {"fields": ["name", "recipe_file"]})]
+        self.fieldsets = [("User input", {"fields": ["name", "institute", "recipe_file"]})]
         self.exclude = ("data",)
         self.readonly_fields = ["data"]
         return super(RecipeAdmin, self).add_view(request)

@@ -1,19 +1,53 @@
+from django import forms
 from django.contrib.gis import admin
+from api.admin import InstituteFilter
+
+from users.models import Institute
+
+
+class BaseForm(forms.ModelForm):
+    class Meta:
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(BaseForm, self).__init__(*args, **kwargs)
+        if not self.request.user.is_superuser:
+            # ensure that only owned institutes are shown
+            choices = []
+            for n, c in enumerate(self.fields["institute"].choices):
+                if n == 0:
+                    choices.append(c)
+                else:
+                    if Institute.objects.get(name=c[1]).owner == self.request.user:
+                        choices.append(c)
+
+            self.fields["institute"].choices = choices
+
+    def clean(self):
+        if len(self.request.user.get_owned_institute_memberships()) == 0:
+            # the line below should never occur as you are already not capable of creating or changing if you do not own
+            # institutes
+            raise forms.ValidationError("You do not own any institutes, please ensure you are owner first.")
+
 
 
 class BaseAdmin(admin.GISModelAdmin):
 
     def has_module_permission(self, request):
         # if user is not staff and does not have any memberships then user is not entitled to anything, so return False
-        return request.user.is_staff and len(request.user.get_institutes()) > 0
+        return request.user.is_staff and len(request.user.get_memberships()) > 0
 
     def has_add_permission(self, request):
-        # if user is owner of the currently active institute, then add permission is granted
-        return request.user.get_active_institute(request=request).owner == request.user
+        # if user owns any institute, he/she/they is allowed to add new records.
+        if request.user.is_superuser:
+            return True
+        return len(request.user.get_owned_institute_memberships()) > 0
+        # return request.user.get_active_membership(request=request).owner == request.user
 
     def has_view_permission(self, request, obj=None):
         if obj:
-            if obj.institute == request.user.get_active_institute(request=request):
+            if obj.institute == request.user.get_active_membership(request=request):
                 return True
 
     def has_change_permission(self, request, obj=None):
@@ -52,6 +86,8 @@ class BaseAdmin(admin.GISModelAdmin):
         #     obj.institute = self._get_institute(model_name, obj, request)
         obj.save()
 
+    list_filter = [InstituteFilter]
+
     def get_list_display(self, request):
         self.request = request
         fields = super().get_list_display(request)
@@ -61,10 +97,12 @@ class BaseAdmin(admin.GISModelAdmin):
             fields = list(fields)
         if request.user.is_superuser:
             fields.append("creator")
-        fields.append("is_owner")
+        fields.append("i_am_owner")
+        if len(request.user.get_memberships()) > 1:
+            fields.append("institute")
         return fields
 
-    def is_owner(self, obj):
+    def i_am_owner(self, obj):
         """
         Check if institute belongs to the same user, and if user is also the owner of given institute
 
@@ -79,31 +117,27 @@ class BaseAdmin(admin.GISModelAdmin):
         """
 
         # model_name = self.model.__name__
-        return obj.institute == self.request.user.get_active_institute(self.request) and obj.institute.owner == self.request.user
+        return obj.institute.owner == self.request.user
         # obj_institute = self._get_institute(model_name, obj, self.request)
         # return obj.institute == obj_institute
-    is_owner.boolean = True
-    is_owner.allow_tags = True
+    i_am_owner.boolean = True
+    i_am_owner.allow_tags = True
 
     def get_queryset(self, request):
         model_name = self.model.__name__
-        user_institute = request.user.get_active_institute(request)
+        user_institute = request.user.get_active_membership(request)
         qs = super().get_queryset(request)
         if request.user.is_superuser:
             # super users can see everything. Return all
             return qs
         # Non-super users can only see their own models, and the models from other users within their institute
-        if model_name == "CameraConfig":
-            qs_filter = qs.filter(site__institute=user_institute)
-        elif model_name == "Video":
-            qs_filter = qs.filter(camera_config_obj__site__institute=user_institute)
-        elif model_name == "Task":
-            qs_filter = qs.filter(video__camera_config_obj__site__institute=user_institute)
-        elif model_name == "Profile":
-            qs_filter = qs.filter(site__institute=user_institute)
-        else:
-            qs_filter = qs.filter(institute=user_institute)
+        qs_filter = self.filter_institute(request, qs)
         return qs_filter
+
+    def filter_institute(self, request, qs):
+        raise ValueError(
+            "method `filter_institute` is not implemented for this admin view. Please raise an issue in GitHub."
+        )
 
     # def _get_institute(self, model_name, obj, request):
     #     if model_name == "CameraConfig":
@@ -123,6 +157,11 @@ class BaseInstituteAdmin(BaseAdmin):
     def save_model(self, request, obj, form, change):
         model_name = self.model.__name__
         if not request.user.is_superuser:
-            obj.institute = request.user.get_active_institute(request)
+            obj.institute = request.user.get_active_membership(request)
             # obj.institute = self._get_institute(model_name, obj, request)
         super().save_model(request, obj, form, change)
+
+    def filter_institute(self, request, qs):
+        memberships = request.user.get_memberships()
+        institutes = [m.institute for m in memberships]
+        return qs.filter(institute__in=institutes)

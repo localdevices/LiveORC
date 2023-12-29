@@ -26,6 +26,11 @@ class TaskAdmin(BaseAdmin):
     thumbnail_preview.short_description = 'Thumbnail'
     thumbnail_preview.allow_tags = True
 
+    def filter_institute(self, request, qs):
+        memberships = request.user.get_memberships()
+        institutes = [m.institute for m in memberships]
+        return qs.filter(video__camera_config_obj__site__institute__in=institutes)
+
 
     def get_video_timestamp(self, obj):
         return obj.video.timestamp

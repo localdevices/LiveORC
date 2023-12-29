@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
-from LiveORC.utils.models.base import BaseModel
+from users.models.base import BaseModel
 
 
 class UserManager(BaseUserManager):
@@ -53,10 +53,21 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     def is_institute_member(self, institute):
         return self.members.filter(institute=institute).exists()
 
-    def get_institutes(self):
+    def get_memberships(self):
         return self.members.all()
 
-    def get_active_institute(self, request=None):
+    def get_membership_institutes(self):
+        memberships = self.members.all()
+        return [m.institute for m in memberships]
+
+    def get_owned_institute_memberships(self):
+        """Get the memberships with institutes owned by current user"""
+        memberships = self.members.all()
+        return memberships.filter(institute__owner=self)
+
+
+
+    def get_active_membership(self, request=None):
         key = settings.INSTITUTE_SESSION_KEY
         qs = self.members.all()
         if request:

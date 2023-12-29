@@ -1,6 +1,4 @@
 from django import forms
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
 from django.contrib import admin
 from django_object_actions import DjangoObjectActions, action
 from django.shortcuts import redirect
@@ -20,7 +18,7 @@ class VideoForm(forms.ModelForm):
         super(VideoForm, self).__init__(*args, **kwargs)
 
     def clean(self):
-        if not self.request.user.get_active_institute():
+        if not self.request.user.get_active_membership():
             raise forms.ValidationError("You Must have an institute to continue")
 
 
@@ -130,6 +128,11 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
         if obj:
             return (*self.readonly_fields, "file", "camera_config")
         return self.readonly_fields
+
+    def filter_institute(self, request, qs):
+        memberships = request.user.get_memberships()
+        institutes = [m.institute for m in memberships]
+        return qs.filter(camera_config__site__institute__in=institutes)
 
     @admin.display(ordering='camera_config__site__name', description="Site name")
     def get_site_name(self, obj):

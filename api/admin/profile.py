@@ -23,8 +23,8 @@ class ProfileForm(forms.ModelForm):
 
     def clean(self):
         super().clean()
-        if not self.request.user.get_active_institute():
-            raise forms.ValidationError("You Must have an institute to continue")
+        # if not self.request.user.get_active_membership():
+        #     raise forms.ValidationError("You Must have an institute to continue")
         # open the json file and try to parse
         if "geojson_file" in self.files:
             try:
@@ -66,6 +66,12 @@ class ProfileAdmin(BaseAdmin):
     @admin.display(ordering='site__name', description="Site")
     def get_site_name(self, obj):
         return obj.site.name
+
+    def filter_institute(self, request, qs):
+        memberships = request.user.get_memberships()
+        institutes = [m.institute for m in memberships]
+        return qs.filter(site__institute__in=institutes)
+
 
     def save_model(self, request, obj, form, change):
         request._files["geojson_file"].seek(0)

@@ -2,7 +2,7 @@ from api.serializers import SiteSerializer
 from api.models import Site
 from api.views import BaseModelViewSet
 from rest_framework.response import Response
-from LiveORC.utils.models.base import get_object_or_none
+from users.models.base import get_object_or_none
 from users.models.institute import Institute
 from django_filters.rest_framework import DjangoFilterBackend
 

@@ -30,7 +30,7 @@ class CameraConfigForm(forms.ModelForm):
 
     def clean(self):
         super().clean()
-        if not self.request.user.get_active_institute():
+        if not self.request.user.get_active_membership():
             raise forms.ValidationError("You Must have an institute to continue")
         # open the json file and try to parse
         if "json_file" in self.files:
@@ -76,6 +76,12 @@ class CameraConfigAdmin(BaseAdmin):
     @admin.display(ordering='site__name', description="Site")
     def get_site_name(self, obj):
         return obj.site.name
+
+    def filter_institute(self, request, qs):
+        memberships = request.user.get_memberships()
+        institutes = [m.institute for m in memberships]
+        return qs.filter(site__institute=institutes)
+
 
     def save_model(self, request, obj, form, change):
         request._files["json_file"].seek(0)

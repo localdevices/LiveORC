@@ -11,8 +11,15 @@ from api.models import (
     TimeSeries,
 )
 
-from .admin_filters import VideoSiteUserFilter, SiteUserFilter, datetimefilter
-from .base import BaseAdmin
+from .admin_filters import (
+    VideoSiteUserFilter,
+    SiteUserFilter,
+    datetimefilter,
+    InstituteFilter,
+    VideoInstituteFilter,
+    InstituteOwnerFilter
+)
+from .base import BaseAdmin, BaseInstituteAdmin, BaseForm
 from .time_series import TimeSeriesAdmin
 from .camera_config import CameraConfigAdmin
 from .profile import ProfileAdmin

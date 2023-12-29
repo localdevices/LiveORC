@@ -16,7 +16,7 @@ class TimeSeriesForm(forms.ModelForm):
         super(TimeSeriesForm, self).__init__(*args, **kwargs)
 
     def clean(self):
-        if not self.request.user.get_active_institute():
+        if not self.request.user.get_active_membership():
             raise forms.ValidationError("You Must have an institute to continue")
 
 
@@ -72,6 +72,12 @@ class TimeSeriesAdmin(BaseAdmin):
                 "str_fraction_velocimetry"
             )
         return self.readonly_fields
+
+    def filter_institute(self, request, qs):
+        memberships = request.user.get_memberships()
+        institutes = [m.institute for m in memberships]
+        return qs.filter(site__institute__in=institutes)
+
 
     def link_video(self, obj):
         return obj.link_video

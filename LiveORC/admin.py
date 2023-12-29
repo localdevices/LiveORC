@@ -15,7 +15,7 @@ class CustomAdminSite(admin.AdminSite):
     def each_context(self, request):
         context = super(CustomAdminSite, self).each_context(request)
         if request.user.is_authenticated:
-            context['active_institute'] = request.user.get_active_institute(request)
+            context['active_institute'] = request.user.get_active_membership(request)
         else:
             context['active_institute'] = None
         return context
