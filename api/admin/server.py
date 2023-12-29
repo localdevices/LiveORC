@@ -4,11 +4,15 @@ from ..models import Server
 
 
 class ServerForm(BaseForm):
+    # def __init__(self, *args, **kwargs):
+    #     self.request = kwargs.pop('request', None)
+    #     super(ServerForm, self).__init__(*args, **kwargs)
 
     class Meta:
         model = Server
         fields = "__all__"
     #
+
     # def __init__(self, *args, **kwargs):
     #     self.request = kwargs.pop('request', None)
     #     super(ServerForm, self).__init__(*args, **kwargs)

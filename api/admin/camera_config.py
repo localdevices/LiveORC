@@ -78,9 +78,8 @@ class CameraConfigAdmin(BaseAdmin):
         return obj.site.name
 
     def filter_institute(self, request, qs):
-        memberships = request.user.get_memberships()
-        institutes = [m.institute for m in memberships]
-        return qs.filter(site__institute=institutes)
+        institutes = request.user.get_membership_institutes()
+        return qs.filter(site__institute__in=institutes)
 
 
     def save_model(self, request, obj, form, change):

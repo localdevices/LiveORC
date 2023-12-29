@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 
 from api.models import Profile
-from api.admin import BaseAdmin, SiteUserFilter
+from api.admin import BaseAdmin, SiteUserFilter, BaseForm
 
 import json
 import pyorc
@@ -11,15 +11,15 @@ import pyorc
 
 # Register your models here.
 
-class ProfileForm(forms.ModelForm):
+class ProfileForm(BaseForm):
     geojson_file = forms.FileField()
     class Meta:
         model = Profile
         fields = "__all__"
 
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super(ProfileForm, self).__init__(*args, **kwargs)
+    # def __init__(self, *args, **kwargs):
+    #     self.request = kwargs.pop('request', None)
+    #     super(ProfileForm, self).__init__(*args, **kwargs)
 
     def clean(self):
         super().clean()

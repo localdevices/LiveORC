@@ -46,7 +46,7 @@ class RecipeForm(BaseForm):
             raise ValidationError(f"Problem with recipe file: {e}")
 
 
-class RecipeCreateForm(BaseForm):
+class RecipeCreateForm(RecipeForm):
     recipe_file = forms.FileField()
     class Meta:
         model = Recipe
@@ -100,7 +100,10 @@ class RecipeAdmin(BaseInstituteAdmin):
         if "recipe_file" in request._files:
             request._files["recipe_file"].seek(0)
             body = request._files["recipe_file"].read()
-            recipe = yaml.load(body, Loader=yaml.FullLoader)
+            try:
+                recipe = yaml.load(body, Loader=yaml.FullLoader)
+            except:
+                raise ValidationError(f'File {request._files["recipe_file"]} is not a .yaml file')
         else:
             recipe = form.instance.data
         recipe = pyorc.cli.cli_utils.validate_recipe(recipe)

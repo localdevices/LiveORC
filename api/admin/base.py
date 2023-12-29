@@ -12,17 +12,32 @@ class BaseForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(BaseForm, self).__init__(*args, **kwargs)
-        if not self.request.user.is_superuser:
-            # ensure that only owned institutes are shown
-            choices = []
-            for n, c in enumerate(self.fields["institute"].choices):
-                if n == 0:
-                    choices.append(c)
-                else:
-                    if Institute.objects.get(name=c[1]).owner == self.request.user:
+        # only when
+        if "institute" in self.fields:
+            if not self.request.user.is_superuser:
+                # ensure that only owned institutes are shown
+                choices = []
+                for n, c in enumerate(self.fields["institute"].choices):
+                    if n == 0:
                         choices.append(c)
+                    else:
+                        if c[0].instance.owner == self.request.user:
+                        # if Institute.objects.get(name=c[1]).owner == self.request.user:
+                            choices.append(c)
 
-            self.fields["institute"].choices = choices
+                self.fields["institute"].choices = choices
+        if "site" in self.fields:
+            if not self.request.user.is_superuser:
+                # ensure that only owned institutes are shown
+                choices = []
+                for n, c in enumerate(self.fields["site"].choices):
+                    if n == 0:
+                        choices.append(c)
+                    else:
+                        if c[0].instance.institute.owner == self.request.user:
+                            choices.append(c)
+                self.fields["site"].choices = choices
+
 
     def clean(self):
         if len(self.request.user.get_owned_institute_memberships()) == 0:
@@ -80,10 +95,7 @@ class BaseAdmin(admin.GISModelAdmin):
         return RequestAdminForm
 
     def save_model(self, request, obj, form, change):
-        # model_name = self.model.__name__
         obj.creator = request.user
-        # if not request.user.is_superuser:
-        #     obj.institute = self._get_institute(model_name, obj, request)
         obj.save()
 
     list_filter = [InstituteFilter]
@@ -139,27 +151,11 @@ class BaseAdmin(admin.GISModelAdmin):
             "method `filter_institute` is not implemented for this admin view. Please raise an issue in GitHub."
         )
 
-    # def _get_institute(self, model_name, obj, request):
-    #     if model_name == "CameraConfig":
-    #         institute = obj.site.institute
-    #     elif model_name == "Video":
-    #         institute = obj.camera_config_obj.site.institute
-    #     else:
-    #         institute = request.user.get_active_institute(request)
-    #     return institute
-
 
 class BaseInstituteAdmin(BaseAdmin):
     """
     Specific save method in case an institute field is mandatory
     """
-
-    def save_model(self, request, obj, form, change):
-        model_name = self.model.__name__
-        if not request.user.is_superuser:
-            obj.institute = request.user.get_active_membership(request)
-            # obj.institute = self._get_institute(model_name, obj, request)
-        super().save_model(request, obj, form, change)
 
     def filter_institute(self, request, qs):
         memberships = request.user.get_memberships()
