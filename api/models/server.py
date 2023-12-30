@@ -13,6 +13,7 @@ class Server(BaseInstituteModel):
     Server configuration with specific end points and
     file wildcards for frequent retrieval of videos
     """
+    name = models.CharField(max_length=100, help_text="Recognizable unique name for your server")
     type = models.PositiveSmallIntegerField(
         choices=ServerType.choices,
         default=ServerType.FTP

@@ -3,23 +3,24 @@ from django.contrib import admin
 from django_object_actions import DjangoObjectActions, action
 from django.shortcuts import redirect
 
-from api.models import Video, VideoStatus, Task, Site
+from api.models import Video, VideoStatus, Task
 from api.task_utils import get_task
-from api.admin import BaseAdmin
+from api.admin import BaseAdmin, BaseForm
 from api.admin import VideoSiteUserFilter, datetimefilter
 
-class VideoForm(forms.ModelForm):
+
+class VideoForm(BaseForm):
     class Meta:
         model = Video
         fields = "__all__"
 
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super(VideoForm, self).__init__(*args, **kwargs)
-
-    def clean(self):
-        if not self.request.user.get_active_membership():
-            raise forms.ValidationError("You Must have an institute to continue")
+    # def __init__(self, *args, **kwargs):
+    #     self.request = kwargs.pop('request', None)
+    #     super(VideoForm, self).__init__(*args, **kwargs)
+    #
+    # def clean(self):
+    #     if not self.request.user.get_active_membership():
+    #         raise forms.ValidationError("You Must have an institute to continue")
 
 
 class VideoInline(admin.TabularInline):
@@ -79,12 +80,6 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
         'play_button'
     )
     list_filter = [
-        # (
-        #     "camera_config__site",
-        #     Site
-        # ),
-        #
-        # "camera_config__site",
         VideoSiteUserFilter,
         (
             "timestamp",
@@ -117,10 +112,6 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
          )
     ]
     form = VideoForm
-
-    # def get_list_filter(self, request):
-    #     super().get_list_filter(request)
-
 
     def get_readonly_fields(self, request, obj=None):
         # prevent that the file or camera config can be changed afterwards.

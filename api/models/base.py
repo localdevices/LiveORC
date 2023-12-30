@@ -10,15 +10,8 @@ class BaseModel(models.Model):
     creator = models.ForeignKey(
         get_user_model(),
         on_delete=models.CASCADE,
-        # default=get_current_user,
         editable=False
     )
-
-    # institute = models.ForeignKey(Institute, blank=True, null=True, on_delete=models.CASCADE)
-
-    # def save(self, *args, **kwargs):
-    #     if not(self.pk):
-    #         self.user =
 
     class Meta:
         abstract = True
@@ -27,14 +20,17 @@ class BaseModel(models.Model):
     def institute(self):
         return self.site.institute
 
+
 class BaseInstituteModel(models.Model):
     """
     BaseModel with an additional stored field (instead of property) for retrieving the institute
     """
+    def __str__(self):
+        return "{:s} of {:s}".format(self.name, self.institute.name)
+
     creator = models.ForeignKey(
         get_user_model(),
         on_delete=models.CASCADE,
-        # default=get_current_user,
         editable=False
     )
 
@@ -44,5 +40,6 @@ class BaseInstituteModel(models.Model):
         null=False,
         on_delete=models.CASCADE
     )
+
     class Meta:
         abstract = True

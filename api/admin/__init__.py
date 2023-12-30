@@ -16,6 +16,7 @@ from .admin_filters import (
     SiteUserFilter,
     datetimefilter,
     InstituteFilter,
+    TaskInstituteFilter,
     VideoInstituteFilter,
     InstituteOwnerFilter
 )

@@ -24,5 +24,5 @@ class ServerForm(BaseForm):
 
 
 class ServerAdmin(BaseInstituteAdmin):
-    list_display = ["type", "url", "end_point", "wildcard", "frequency"]
+    list_display = ["name", "type", "url", "end_point", "wildcard", "frequency"]
     form = ServerForm

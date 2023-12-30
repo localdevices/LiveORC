@@ -14,16 +14,11 @@ import yaml
 # Register your models here.
 
 class RecipeForm(BaseForm):
-    # recipe_file = forms.FileField(required=False)
+
     class Meta:
         model = Recipe
         fields = ["name", "institute"]
         widgets = {"data": JSONEditorWidget}
-
-    # def __init__(self, *args, **kwargs):
-    #     self.request = kwargs.pop('request', None)
-    #     super(RecipeForm, self).__init__(*args, **kwargs)
-    #
 
     def clean(self):
         super().clean()
@@ -48,18 +43,10 @@ class RecipeForm(BaseForm):
 
 class RecipeCreateForm(RecipeForm):
     recipe_file = forms.FileField()
+
     class Meta:
         model = Recipe
         fields = ["name", "institute"]
-    #
-    # def __init__(self, *args, **kwargs):
-    #     self.request = kwargs.pop('request', None)
-    #     super(RecipeCreateForm, self).__init__(*args, **kwargs)
-    #
-    # def clean(self):
-    #     super(RecipeCreateForm, self).clean()
-    #     if not self.request.user.get_active_membership():
-    #         raise forms.ValidationError("You Must have an institute to continue")
 
 
 class RecipeAdmin(BaseInstituteAdmin):
@@ -74,7 +61,6 @@ class RecipeAdmin(BaseInstituteAdmin):
     list_display = ["name", "institute"]
     search_fields = ["name"]
     list_filter = ["name"]
-
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
         """A separate view for changing models"""

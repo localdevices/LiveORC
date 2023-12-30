@@ -1,7 +1,5 @@
-from django import forms
 from api.admin import BaseInstituteAdmin, BaseForm
 from api.models import Site
-from users.models import Institute
 
 
 class SiteForm(BaseForm):
@@ -11,7 +9,6 @@ class SiteForm(BaseForm):
         fields = "__all__"
 
 
-# Register your models here.
 class SiteAdmin(BaseInstituteAdmin):
     form = SiteForm
     fieldsets = [

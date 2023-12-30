@@ -9,22 +9,15 @@ import json
 import pyorc
 
 
-# Register your models here.
-
 class ProfileForm(BaseForm):
     geojson_file = forms.FileField()
+
     class Meta:
         model = Profile
         fields = "__all__"
 
-    # def __init__(self, *args, **kwargs):
-    #     self.request = kwargs.pop('request', None)
-    #     super(ProfileForm, self).__init__(*args, **kwargs)
-
     def clean(self):
         super().clean()
-        # if not self.request.user.get_active_membership():
-        #     raise forms.ValidationError("You Must have an institute to continue")
         # open the json file and try to parse
         if "geojson_file" in self.files:
             try:
@@ -34,6 +27,7 @@ class ProfileForm(BaseForm):
                 data, crs = pyorc.cli.cli_utils.read_shape(geojson=geo)
             except BaseException as e:
                 raise ValidationError(f"Problem with profile file: {e}")
+
 
 class ProfileAdmin(BaseAdmin):
     class Media:
@@ -71,7 +65,6 @@ class ProfileAdmin(BaseAdmin):
         memberships = request.user.get_memberships()
         institutes = [m.institute for m in memberships]
         return qs.filter(site__institute__in=institutes)
-
 
     def save_model(self, request, obj, form, change):
         request._files["geojson_file"].seek(0)

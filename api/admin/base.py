@@ -4,6 +4,7 @@ from api.admin import InstituteFilter
 
 from users.models import Institute
 
+FOREIGN_KEYS = ["institute", "site", "profile", "camera_config"]
 
 class BaseForm(forms.ModelForm):
     class Meta:
@@ -12,39 +13,34 @@ class BaseForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(BaseForm, self).__init__(*args, **kwargs)
-        # only when
-        if "institute" in self.fields:
-            if not self.request.user.is_superuser:
-                # ensure that only owned institutes are shown
-                choices = []
-                for n, c in enumerate(self.fields["institute"].choices):
-                    if n == 0:
-                        choices.append(c)
-                    else:
-                        if c[0].instance.owner == self.request.user:
-                        # if Institute.objects.get(name=c[1]).owner == self.request.user:
-                            choices.append(c)
-
-                self.fields["institute"].choices = choices
-        if "site" in self.fields:
-            if not self.request.user.is_superuser:
-                # ensure that only owned institutes are shown
-                choices = []
-                for n, c in enumerate(self.fields["site"].choices):
-                    if n == 0:
-                        choices.append(c)
-                    else:
-                        if c[0].instance.institute.owner == self.request.user:
-                            choices.append(c)
-                self.fields["site"].choices = choices
-
+        # below can be removed when moving to a official app dashboard that relies on the API for back/front comms.
+        if not self.request.user.is_superuser:
+            # for any foreign keys, it should be checked which of the total available foreign is institutionally owned
+            # by user
+            for key in FOREIGN_KEYS:
+                if key in self.fields:
+                        # ensure that only owned institutes are shown
+                        choices = []
+                        for n, c in enumerate(self.fields[key].choices):
+                            if n == 0:
+                                # first choice is "leave empty"
+                                choices.append(c)
+                            elif key == "institute":
+                                # institute has owner as direct field
+                                if c[0].instance.owner == self.request.user:
+                                    choices.append(c)
+                            else:
+                                # keys other than institute have "institute" as property
+                                if c[0].instance.institute.owner == self.request.user:
+                                    choices.append(c)
+                        self.fields[key].choices = choices
 
     def clean(self):
-        if len(self.request.user.get_owned_institute_memberships()) == 0:
-            # the line below should never occur as you are already not capable of creating or changing if you do not own
-            # institutes
-            raise forms.ValidationError("You do not own any institutes, please ensure you are owner first.")
-
+        if not self.request.user.is_superuser:
+            if len(self.request.user.get_owned_institute_memberships()) == 0:
+                # the line below should never occur as you are already not capable of creating or changing if you do not own
+                # institutes
+                raise forms.ValidationError("You do not own any institutes, please ensure you are owner first.")
 
 
 class BaseAdmin(admin.GISModelAdmin):
@@ -62,7 +58,7 @@ class BaseAdmin(admin.GISModelAdmin):
 
     def has_view_permission(self, request, obj=None):
         if obj:
-            if obj.institute == request.user.get_active_membership(request=request):
+            if obj.institute in request.user.get_membership_institutes():
                 return True
 
     def has_change_permission(self, request, obj=None):
@@ -117,38 +113,26 @@ class BaseAdmin(admin.GISModelAdmin):
     def i_am_owner(self, obj):
         """
         Check if institute belongs to the same user, and if user is also the owner of given institute
-
-        Parameters
-        ----------
-        obj : model instance under consideration
-
-        Returns
-        -------
-        bool
-
         """
 
-        # model_name = self.model.__name__
         return obj.institute.owner == self.request.user
-        # obj_institute = self._get_institute(model_name, obj, self.request)
-        # return obj.institute == obj_institute
     i_am_owner.boolean = True
     i_am_owner.allow_tags = True
 
     def get_queryset(self, request):
-        model_name = self.model.__name__
-        user_institute = request.user.get_active_membership(request)
         qs = super().get_queryset(request)
         if request.user.is_superuser:
             # super users can see everything. Return all
             return qs
         # Non-super users can only see their own models, and the models from other users within their institute
+        # A model-specific filter_institute method must be in place for this
         qs_filter = self.filter_institute(request, qs)
         return qs_filter
 
     def filter_institute(self, request, qs):
         raise ValueError(
-            "method `filter_institute` is not implemented for this admin view. Please raise an issue in GitHub."
+            "method `filter_institute` is not, but should be, implemented for this admin view. Please raise an issue "
+            "in GitHub."
         )
 
 

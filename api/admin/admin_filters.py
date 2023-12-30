@@ -29,6 +29,7 @@ class InstituteOwnerFilter(admin.SimpleListFilter):
 
         return institutes.values_list("id", "name")
 
+
 class VideoSiteUserFilter(admin.SimpleListFilter):
     title = "Filter sites"
     parameter_name = "camera_config__site__user"
@@ -64,7 +65,7 @@ class InstituteFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         value = self.value()
         if value:
-            return queryset.filter(site__institute__id=value)
+            return queryset.filter(institute__id=value)
 
 
 class VideoInstituteFilter(InstituteFilter):
@@ -72,6 +73,15 @@ class VideoInstituteFilter(InstituteFilter):
         value = self.value()
         if value:
             return queryset.filter(camera_config__site__institute__id=value)
+
+
+class TaskInstituteFilter(InstituteFilter):
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value:
+            return queryset.filter(video__camera_config__site__institute__id=value)
+
+
 
 class SiteUserFilter(admin.SimpleListFilter):
     title = "Filter sites"
