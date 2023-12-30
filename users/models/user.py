@@ -65,19 +65,3 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
         memberships = self.members.all()
         return memberships.filter(institute__owner=self)
 
-
-
-    def get_active_membership(self, request=None):
-        key = settings.INSTITUTE_SESSION_KEY
-        qs = self.members.all()
-        if request:
-            institute_id = request.session.get(key, None)
-            if institute_id:
-                qs = qs.filter(institute__pk=institute_id)
-        qs = qs.select_related("institute")
-        member = qs.order_by("-pk").first()
-        if member:
-            if request and key not in request.session:
-                request.session[key] = member.institute.id
-            return member.institute
-

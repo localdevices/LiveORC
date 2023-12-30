@@ -23,8 +23,6 @@ class RecipeForm(BaseForm):
     def clean(self):
         super().clean()
         # open the json file and try to parse
-        if not self.request.user.get_active_membership():
-            raise forms.ValidationError("You Must have an institute to continue")
         if "recipe_file" in self.files:
             try:
                 self.files["recipe_file"].seek(0)

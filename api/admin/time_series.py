@@ -2,23 +2,15 @@ from django import forms
 from django.contrib import admin
 
 from api.models import TimeSeries
-from api.admin import BaseAdmin
+from api.admin import BaseAdmin, BaseForm
 from api.admin import SiteUserFilter
 
 
-class TimeSeriesForm(forms.ModelForm):
+class TimeSeriesForm(BaseForm):
 
     class Meta:
         model = TimeSeries
         fields = "__all__"
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super(TimeSeriesForm, self).__init__(*args, **kwargs)
-
-    def clean(self):
-        if not self.request.user.get_active_membership():
-            raise forms.ValidationError("You Must have an institute to continue")
 
 
 class TimeSeriesInline(admin.TabularInline):

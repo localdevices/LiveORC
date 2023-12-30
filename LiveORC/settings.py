@@ -192,4 +192,4 @@ AUTH_USER_MODEL = "users.User"
 
 # GDAL_LIBRARY_PATH = "gdal"
 
-INSTITUTE_SESSION_KEY = "active_institute"
+# INSTITUTE_SESSION_KEY = "active_institute"
