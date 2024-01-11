@@ -1,8 +1,7 @@
 from django import forms
 from django.contrib.gis import admin
 from django.contrib import messages
-from LiveORC.utils import choices
-from ..models.institute import Member
+from users.models.institute import Member, TeamRole
 
 
 class MemberForm(forms.ModelForm):
@@ -14,7 +13,7 @@ class MemberForm(forms.ModelForm):
     def clean(self):
         role = self.cleaned_data.get('role')
         institute = self.cleaned_data.get('institute')
-        if Member.objects.filter(institute=institute, role=choices.TeamRole.OWNER).exists() and role == choices.TeamRole.OWNER:
+        if Member.objects.filter(institute=institute, role=TeamRole.OWNER).exists() and role == TeamRole.OWNER:
             raise forms.ValidationError("Owner For this Institute Exists. ")
         return self.cleaned_data
 

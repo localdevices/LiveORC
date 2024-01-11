@@ -1,7 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from LiveORC.utils import choices
+
+
+class TeamRole(models.TextChoices):
+    OWNER = "owner", "Owner"
+    MEMBER = "member", "Member"
 
 
 class Institute(models.Model):
@@ -35,7 +39,7 @@ class Member(models.Model):
         get_user_model(), related_name="members", on_delete=models.CASCADE
     )
     role = models.CharField(
-        choices=choices.TeamRole.choices, default=choices.TeamRole.MEMBER, max_length=32
+        choices=TeamRole.choices, default=TeamRole.MEMBER, max_length=32
     )
 
     def __str__(self):
