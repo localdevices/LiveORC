@@ -2,13 +2,24 @@ from .models import Site, Profile, Recipe, CameraConfig, Video, Server, Task, Pr
 from rest_framework import serializers
 from rest_framework_nested.serializers import NestedHyperlinkedModelSerializer
 
+class InstituteOwned:
+    requires_context = True
 
+    def __call__(self, value, serializer_field):
+        if "institute" in value:
+            owned_institutes = [m.institute for m in serializer_field.context["request"].user.get_owned_institute_memberships()]
+            if not (value["institute"] in owned_institutes):
+                raise serializers.ValidationError(f'You do not own institute {value["institute"]}')
+
+    # if value % 2 != 0:
+    #     raise serializers.ValidationError('This field must be an even number.')
 
 class SiteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Site
         fields = "__all__"
         # fields = ['id', 'name', 'geom']
+        validators = [InstituteOwned()]
 
 
 class CameraConfigSerializer(serializers.ModelSerializer):
@@ -43,6 +54,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ['name', 'data']
+        validators = [InstituteOwned()]
 
 
 class VideoSerializer(serializers.ModelSerializer):
@@ -56,6 +68,7 @@ class ServerSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Server
         fields = ['url', 'end_point', 'wildcard', 'username', 'frequency']
+        validators = [InstituteOwned()]
 
 
 
@@ -79,6 +92,7 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Project
         fields = "__all__"
+        validators = [InstituteOwned()]
 
 
 class TimeSeriesSerializer(serializers.ModelSerializer):

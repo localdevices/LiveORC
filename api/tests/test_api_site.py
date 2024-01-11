@@ -19,7 +19,7 @@ class SiteViewTests(InitTestCase):
         # client = APIClient()
         r = self.client.post(
             '/api/site/',
-            {"name": "geul", "geom": "SRID=4326;POINT (5.914115954402695 50.80678292086996)"}
+            {"name": "geul", "geom": "SRID=4326;POINT (5.914115954402695 50.80678292086996)", }
         )
         self.assertEqual(r.status_code, status.HTTP_401_UNAUTHORIZED)
         r = self.client.get('/api/site/')
@@ -28,6 +28,13 @@ class SiteViewTests(InitTestCase):
     def test_site_login_basic_auth(self):
         # client = APIClient()
         self.client.login(username='user@institute1.com', password='test1234')
+        # # first try to create a record with the wrong institute (2)
+        r = self.client.post(
+            '/api/site/',
+            {"name": "geul", "geom": "SRID=4326;POINT (5.914115954402695 50.80678292086996)", "institute": 2},
+            follow=True
+        )
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         r = self.client.post(
             '/api/site/',
             {"name": "geul", "geom": "SRID=4326;POINT (5.914115954402695 50.80678292086996)", "institute": 1},

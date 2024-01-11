@@ -13,12 +13,13 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         # only add the creator upon saving
-        model_name = serializer.Meta.model.__name__
-        site_obj = serializer.validated_data.get('site')
-        camera_config_obj = serializer.validated_data.get('camera_config')
-        if model_name == "CameraConfig" and site_obj:
-            serializer.save(creator=site_obj.creator)
-        elif model_name == "Video" and camera_config_obj:
-            serializer.save(creator=camera_config_obj.site.creator)
-        else:
-            serializer.save(creator=self.request.user)
+        # model_name = serializer.Meta.model.__name__
+        # site_obj = serializer.validated_data.get('site')
+        # camera_config_obj = serializer.validated_data.get('camera_config')
+        # if model_name == "CameraConfig" and site_obj:
+        #     serializer.save(creator=site_obj.creator)
+        # elif model_name == "Video" and camera_config_obj:
+        #     serializer.save(creator=camera_config_obj.site.creator)
+        # else:
+
+        serializer.save(creator=self.request.user)
