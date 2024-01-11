@@ -9,7 +9,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     This BaseModelViewSet is for all models and model instancesin the API. These all have a 'creator' as non-editable
     field and should be visible only to people within the same institute or to the user that created them
     """
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnlyAsInstitute]
+    permission_classes = [IsOwnerOrReadOnlyAsInstitute, IsAuthenticated]
 
     def perform_create(self, serializer):
         # only add the creator upon saving

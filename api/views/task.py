@@ -30,10 +30,14 @@ class TaskViewSet(BaseModelViewSet):
         if not(data.get("video")):
             data["video"] = video_pk
         # get the video
+        if not (data.get("creator")):
+            data["creator"] = request.user.pk
         try:
             video_instance = Video.objects.get(id=video_pk)
 
             data["task_body"] = get_task(video_instance, request, *args, **kwargs)
+            # add the creator if it does not exist
+
             # replace the serializer
             serializer_class = TaskSerializer
             # run create in the usual manner

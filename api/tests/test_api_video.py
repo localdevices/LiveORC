@@ -5,7 +5,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from .test_setup_db import InitTestCase
 # Create your tests here.
 from api.models import Site, Recipe, Profile
-from users.models import User
+from users.models import User, Institute
 from datetime import datetime
 import json
 import os
@@ -80,14 +80,15 @@ camera_config_form = {
 class VideoViewTests(InitTestCase):
     def setUp(self):
         user = User.objects.get(pk=2)
-        site = Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151), creator=user)
-        Recipe.objects.create(name="ngwerere_recipe", data=recipe, creator=user)
+        institute = Institute.objects.get(pk=1)
+        site = Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151), creator=user, institute=institute)
+        Recipe.objects.create(name="ngwerere_recipe", data=recipe, creator=user, institute=institute)
         Profile.objects.create(name="some_profile", data=profile, site=site, creator=user)
 
     def tearDown(self):
         pass
 
-    def test_add_camconfig(self):
+    def test_add_video(self):
         client = APIClient()
         client.login(username='user@institute1.com', password='test1234')
         # create a camera config on site
@@ -103,6 +104,28 @@ class VideoViewTests(InitTestCase):
         self.assertEquals(r.status_code, status.HTTP_201_CREATED)
         r = client.get("/api/site/1/video/1/")
         self.assertEquals(r.status_code, status.HTTP_200_OK)
+        # make sure a second user with membership can see but not alter the video
+        client.logout()
+        client.login(username='user2@institute1.com', password='test1234')
+        r = client.get("/api/site/1/video/1/")
+        self.assertEquals(r.status_code, status.HTTP_200_OK)
+        r = client.patch(
+            '/api/site/1/video/1/',
+            data={"timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")}
+            # follow=True
+        )
+        self.assertEquals(r.status_code, status.HTTP_403_FORBIDDEN)
+        client.logout()
+        client.login(username='user3@institute2.com', password='test1234')
+        r = client.get("/api/site/1/video/1/")
+        self.assertEquals(r.status_code, status.HTTP_403_FORBIDDEN)
+        r = client.patch(
+            '/api/site/1/video/1/',
+            data={"timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")}
+            # follow=True
+        )
+        self.assertEquals(r.status_code, status.HTTP_403_FORBIDDEN)
+
 
 
     def test_add_image(self):

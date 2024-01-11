@@ -34,13 +34,20 @@ class SiteViewTests(InitTestCase):
             {"name": "geul", "geom": "SRID=4326;POINT (5.914115954402695 50.80678292086996)", "institute": 2},
             follow=True
         )
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
         r = self.client.post(
             '/api/site/',
             {"name": "geul", "geom": "SRID=4326;POINT (5.914115954402695 50.80678292086996)", "institute": 1},
             follow=True
         )
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        # check if site cannot be patched to a non-owned institute
+        r = self.client.patch(
+            '/api/site/1/',
+            data={"institute": 2},
+            follow=True
+        )
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
         r = self.client.get('/api/site/?institute=1', follow=True)
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         r = self.client.get('/api/site/1/', follow=True)

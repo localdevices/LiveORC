@@ -131,9 +131,9 @@ class CameraConfigViewTests(InitTestCase):
         client.login(username='user@institute1.com', password='test1234')
 
         # create a site
-        client.post(
+        r = client.post(
             '/api/site/',
-            {"name": "geul", "geom": "SRID=4326;POINT (5.914115954402695 50.80678292086996)"}
+            {"name": "geul", "geom": "SRID=4326;POINT (5.914115954402695 50.80678292086996)", "institute": 1}
         )
         import json
         r = client.post(
@@ -145,7 +145,25 @@ class CameraConfigViewTests(InitTestCase):
                 "camera_config": json.dumps(cam_config)
             }
         )
-
-        # create a camera config on site
+        r = client.post(
+            '/api/site/1/cameraconfig/',
+            {
+                "name": "geul_cam",
+                "end_date": "2024-01-01",
+                "camera_config": json.dumps(cam_config)
+            }
+        )
+        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+        client.logout()
+        client.login(username='user2@institute1.com', password='test1234')
+        r = client.post(
+            '/api/site/1/cameraconfig/',
+            {
+                "name": "geul_cam2",
+                "end_date": "2024-01-01",
+                "camera_config": json.dumps(cam_config)
+            }
+        )
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 

@@ -1,6 +1,17 @@
 from .models import Site, Profile, Recipe, CameraConfig, Video, Server, Task, Project, TimeSeries
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
+from users.models import User
 from rest_framework_nested.serializers import NestedHyperlinkedModelSerializer
+
+def institute_validator(institute, user):
+    # if institute is not None
+    if institute:
+        owned_institutes = [m.institute for m in user.get_owned_institute_memberships()]
+        if not (institute in owned_institutes):
+            raise PermissionDenied()
+    return
+
 
 class InstituteOwned:
     requires_context = True
@@ -11,16 +22,26 @@ class InstituteOwned:
             if not (value["institute"] in owned_institutes):
                 raise serializers.ValidationError(f'You do not own institute {value["institute"]}')
 
-    # if value % 2 != 0:
-    #     raise serializers.ValidationError('This field must be an even number.')
+class SiteOwned:
+    requires_context = True
+
+    def __call__(self, value, serializer_field):
+        if "site" in value:
+            user = User.objects.get(pk=serializer_field.initial_data["creator"])
+            owned_institutes = [m.institute for m in user.get_owned_institute_memberships()]
+            if not (value["site"].institute in owned_institutes):
+                raise serializers.ValidationError(f'You do not own institute {value["site"].institute}')
 
 class SiteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Site
         fields = "__all__"
         # fields = ['id', 'name', 'geom']
-        validators = [InstituteOwned()]
+        # validators = [InstituteOwned()]
 
+    def validate(self, data):
+        institute_validator(institute=data.get("institute"), user=self.context["request"].user)
+        return data
 
 class CameraConfigSerializer(serializers.ModelSerializer):
     parent_lookup_kwargs = {
@@ -29,12 +50,19 @@ class CameraConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = CameraConfig
         fields = "__all__"
+        # validators = [SiteOwned()]
+
+    def validate(self, data):
+        user = User.objects.get(pk=self.initial_data["creator"])
+        institute_validator(institute=data.get("site").institute, user=user)
+        return data
+
 
 class CameraConfigCreateSerializer(CameraConfigSerializer):
     class Meta:
         model = CameraConfig
         exclude = ("site", )
-
+        # validators = [SiteOwned()]
 
 class ProfileSerializer(serializers.ModelSerializer):
     parent_lookup_kwargs = {
@@ -53,7 +81,7 @@ class ProfileCreateSerializer(ProfileSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
-        fields = ['name', 'data']
+        fields = ['name', 'data', "institute"]
         validators = [InstituteOwned()]
 
 
@@ -82,6 +110,12 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = "__all__"
 
+    def validate(self, data):
+        user = User.objects.get(pk=self.initial_data["creator"])
+        institute_validator(institute=data.get("video").institute, user=user)
+        return data
+
+
 class TaskCreateSerializer(TaskSerializer):
     class Meta:
         model = Task
@@ -105,6 +139,11 @@ class TimeSeriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = TimeSeries
         fields = "__all__"
+
+    def validate(self, data):
+        user = User.objects.get(pk=self.initial_data["creator"])
+        institute_validator(institute=data.get("site").institute, user=user)
+        return data
 
 class TimeSeriesCreateSerializer(TimeSeriesSerializer):
     # parent_lookup_kwargs = {

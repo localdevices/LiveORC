@@ -10,7 +10,7 @@ from .test_api_profile import profile
 from .test_api_video import camera_config_form, prep_video_sample, video_sample_url
 
 from api.models import Site, Recipe, Profile, Video, VideoStatus, Task
-from users.models import User
+from users.models import User, Institute
 
 video_sample = prep_video_sample(video_sample_url)
 
@@ -18,8 +18,9 @@ video_sample = prep_video_sample(video_sample_url)
 class TaskViewTests(InitTestCase):
     def setUp(self):
         user = User.objects.get(pk=2)
-        site = Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151), creator=user)
-        Recipe.objects.create(name="ngwerere_recipe", data=recipe, creator=user)
+        institute = Institute.objects.get(pk=1)
+        site = Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151), institute=institute, creator=user)
+        Recipe.objects.create(name="ngwerere_recipe", data=recipe, institute=institute, creator=user)
         Profile.objects.create(name="some_profile", data=profile, site=site, creator=user)
         # pass
     def tearDown(self):
@@ -66,6 +67,12 @@ class TaskViewTests(InitTestCase):
         self.assertEquals(video.status, VideoStatus.QUEUE)
         # One task should be made, check if there is indeed a total of one tasks in the full queryset
         self.assertEquals(len(Task.objects.all()), 1)
-
+        # check if task creation is not possible as other user
+        client.logout()
+        client.login(username='user2@institute1.com', password='test1234')
+        r = client.post(
+            f'/api/site/1/video/{video_id}/task/'
+        )
+        self.assertEquals(r.status_code, status.HTTP_400_BAD_REQUEST)
 
 

@@ -3,7 +3,7 @@ from django.contrib.gis.geos import Point
 from .test_setup_db import InitTestCase
 from rest_framework import status
 # Create your tests here.
-from users.models import User
+from users.models import User, Institute
 from api.models import Site
 
 import json
@@ -21,17 +21,24 @@ profile = get_profile(profile_file)
 class ProfileViewTests(InitTestCase):
     def setUp(self):
         user = User.objects.get(pk=2)
-        Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151), creator=user)
+        institute = Institute.objects.get(pk=1)
+        Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151), creator=user, institute=institute)
 
         # pass
     def tearDown(self):
         pass
 
-    def test_add_recipe(self):
+    def test_add_profile(self):
         client = APIClient()
         client.login(username='user@institute1.com', password='test1234')
         # create a camera config on site
-        r = client.post('/api/site/1/profile/',{"name": "some_profile", "data": json.dumps(profile)})
+        r = client.post(
+            '/api/site/1/profile/',
+            {
+                "name": "some_profile",
+                "data": json.dumps(profile),
+                "institute": 1}
+        )
         # check the request
         self.assertEquals(r.status_code, status.HTTP_201_CREATED)
         # check if user3 is not able to see the model
@@ -39,5 +46,6 @@ class ProfileViewTests(InitTestCase):
         client.login(username="user3@institute2.com", password="test1234")
         r = client.get('/api/site/1/profile/1', follow=True)
         self.assertEquals(r.status_code, status.HTTP_403_FORBIDDEN)
+
 
 
