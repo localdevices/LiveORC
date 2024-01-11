@@ -4,6 +4,7 @@ from users.models import Institute, Member
 from LiveORC.utils import choices
 
 
+# if a new institute is made, automatically a new membership is applied
 @receiver(post_save, sender=Institute)
 def create_member(sender, instance=None, created=False, **kwargs):
     if created:
