@@ -228,12 +228,14 @@ class Video(models.Model):
     @property
     def thumbnail_preview(self):
         if self.thumbnail:
-            if os.path.isfile(self.thumbnail.url):
-                height = int(settings.THUMBSIZE) / 2
+            height = int(settings.THUMBSIZE) / 2
+            try:
                 width = int((self.thumbnail.width / self.thumbnail.height) * height)
-                return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.thumbnail.url, width, height))
-            return "File missing"
-        return "N/A"
+            except:
+                return mark_safe("File missing")
+                # width = height * 1.5
+            return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.thumbnail.url, width, height))
+        return mark_safe("Nope sorry")
 
     @property
     def is_ready_for_task(self):
