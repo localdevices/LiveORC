@@ -1,8 +1,10 @@
-from .models import Site, Profile, Recipe, CameraConfig, Video, Server, Task, Project, TimeSeries
+from drf_queryfields import QueryFieldsMixin
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from users.models import User
 from rest_framework_nested.serializers import NestedHyperlinkedModelSerializer
+
+from .models import Site, Profile, Recipe, CameraConfig, Video, Server, Task, Project, TimeSeries
 
 def institute_validator(institute, user):
     # if institute is not None
@@ -36,8 +38,6 @@ class SiteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Site
         fields = "__all__"
-        # fields = ['id', 'name', 'geom']
-        # validators = [InstituteOwned()]
 
     def validate(self, data):
         institute_validator(institute=data.get("institute"), user=self.context["request"].user)
@@ -50,7 +50,6 @@ class CameraConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = CameraConfig
         fields = "__all__"
-        # validators = [SiteOwned()]
 
     def validate(self, data):
         user = User.objects.get(pk=self.initial_data["creator"])
@@ -62,7 +61,7 @@ class CameraConfigCreateSerializer(CameraConfigSerializer):
     class Meta:
         model = CameraConfig
         exclude = ("site", )
-        # validators = [SiteOwned()]
+
 
 class ProfileSerializer(serializers.ModelSerializer):
     parent_lookup_kwargs = {
@@ -129,7 +128,7 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
         validators = [InstituteOwned()]
 
 
-class TimeSeriesSerializer(serializers.ModelSerializer):
+class TimeSeriesSerializer(QueryFieldsMixin, serializers.ModelSerializer):
     # def create(self, validated_data):
     #     pass
     parent_lookup_kwargs = {
@@ -138,7 +137,23 @@ class TimeSeriesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TimeSeries
-        fields = "__all__"
+        fields = [
+            "id",
+            "timestamp",
+            "h",
+            "q_05",
+            "q_25",
+            "q_50",
+            "q_75",
+            "q_95",
+            "wetted_surface",
+            "wetted_perimeter",
+            "fraction_velocimetry",
+            "creator",
+            "site",
+            "video"
+        ]
+        read_only_fields = ("video", )
 
     def validate(self, data):
         user = User.objects.get(pk=self.initial_data["creator"])
