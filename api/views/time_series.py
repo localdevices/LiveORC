@@ -29,7 +29,6 @@ class TimeSeriesViewSet(BaseModelViewSet):
     queryset = TimeSeries.objects.all()
     serializer_class = TimeSeriesSerializer
     # permission_classes = [permissions.IsAuthenticated]
-    permission_classes = [permissions.IsAuthenticated]
     filterset_class = TimeSeriesFilter
     http_method_names = ["get", "post", "delete", "patch"]
 
