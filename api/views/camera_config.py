@@ -22,6 +22,8 @@ class CameraConfigViewSet(BaseModelViewSet):
         data = request.data.copy()
         if not(data.get("site")):
             data["site"] = site_pk
+        if not(data.get("creator")):
+            data["creator"] = request.user.pk
         # replace the serializer
         serializer_class = CameraConfigSerializer
         # run create in the usual manner

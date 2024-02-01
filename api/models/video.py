@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
@@ -117,7 +118,7 @@ class VideoStatus(models.IntegerChoices):
     ERROR = 5, "Error occurred"
 
 
-class Video(BaseModel):
+class Video(models.Model):
     """
     Video object with water level and flow information
     """
@@ -162,7 +163,12 @@ class Video(BaseModel):
     camera_config = models.ForeignKey(CameraConfig, on_delete=models.CASCADE)
     time_series = models.OneToOneField(TimeSeries, on_delete=models.SET_NULL, null=True, blank=True)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
-    # user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
+    creator = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        # default=get_current_user,
+        editable=False
+    )
 
     def save(self, *args, **kwargs):
         # move the file field to a separate variable temporarily.
@@ -221,14 +227,15 @@ class Video(BaseModel):
 
     @property
     def thumbnail_preview(self):
-        try:
+        if self.thumbnail:
             height = int(settings.THUMBSIZE) / 2
-            width = int((self.thumbnail.width / self.thumbnail.height) * height)
-            if self.thumbnail:
-                    return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.thumbnail.url, width, height))
-        except:
-            return ""
-        return ""
+            try:
+                width = int((self.thumbnail.width / self.thumbnail.height) * height)
+            except:
+                return mark_safe("File missing")
+                # width = height * 1.5
+            return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.thumbnail.url, width, height))
+        return mark_safe("N/A")
 
     @property
     def is_ready_for_task(self):
@@ -243,7 +250,6 @@ class Video(BaseModel):
             width = int((self.keyframe.width / self.keyframe.height) * height)
             uri = reverse('api:site-video-playback', args=([str(self.camera_config.site.id), str(self.id)]))
             mimetype, _ = mimetypes.guess_type(self.file.name)
-
             if self.file:
                 return mark_safe(
                     '<video src="{}" width="{}" height="{}" type={} controls preload="none"/>'.format(
@@ -259,14 +265,14 @@ class Video(BaseModel):
 
     @property
     def image_preview(self):
-        try:
-            height = int(300)
-            if self.image:
+        height = int(300)
+        if self.image:
+            try:
                 width = int((self.image.width / self.image.height) * height)
                 return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.image.url, width, height))
-        except:
-            return "media not available"
-        return ""
+            except:
+                return mark_safe("File missing")
+        return mark_safe("N/A")
 
     @property
     def link_video(self):
@@ -297,6 +303,10 @@ class Video(BaseModel):
             return mark_safe(
                 f"""<img src="/static/admin/img/icon-no.svg" alt="True"> Error"""
             )
+
+    @property
+    def institute(self):
+        return self.camera_config.institute
 
     class Meta:
         # organize tables along the camera config id and then per time stamp

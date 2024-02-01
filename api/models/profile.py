@@ -55,15 +55,6 @@ class Profile(BaseModel):
     data = models.JSONField(help_text="GeoJSON fields containing Point (x,y,z) geometries that encompass a cross section")
     timestamp = models.DateTimeField("survey date", default=timezone.now)
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
-    # user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
-
-    # def clean(self):
-    #     super().clean()
-    #     try:
-    #         pyorc.cli.cli_utils.read_shape(geojson=self.data)
-    #         # see if you can make a camera config object
-    #     except BaseException as e:
-    #         raise ValidationError(f"Problem with Profile data: {e}")
 
     def __str__(self):
         return f"{self.name} at {self.site.name}"

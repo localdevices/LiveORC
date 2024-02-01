@@ -1,8 +1,17 @@
+from django import forms
 from django.contrib import admin
 
 from api.models import TimeSeries
-from api.admin import BaseAdmin
+from api.admin import BaseAdmin, BaseForm
 from api.admin import SiteUserFilter
+
+
+class TimeSeriesForm(BaseForm):
+
+    class Meta:
+        model = TimeSeries
+        fields = "__all__"
+
 
 class TimeSeriesInline(admin.TabularInline):
     """
@@ -29,16 +38,32 @@ class TimeSeriesAdmin(BaseAdmin):
     list_filter = [SiteUserFilter, "timestamp"]
     fieldsets = [
         (None, {"fields": ["image_preview", "site", "timestamp", "link_video"]}),
-        ("Values", {"fields": ["h", "str_q_05", "str_q_25", "str_q_50", "str_q_75", "str_q_95", "wetted_surface", "wetted_perimeter", "str_fraction_velocimetry"]})
+        (
+            "Values", {
+                "fields":
+                    [
+                        "h",
+                        "str_q_05",
+                        "str_q_25",
+                        "str_q_50",
+                        "str_q_75",
+                        "str_q_95",
+                        "wetted_surface",
+                        "wetted_perimeter",
+                        "str_fraction_velocimetry"
+                    ]
+            }
+        )
     ]
+    form = TimeSeriesForm
 
     @admin.display(ordering='site__name', description="Site")
     def get_site_name(self, obj):
         return obj.site.name
 
     def get_readonly_fields(self, request, obj=None):
-        # prevent that the file or camera config can be changed afterwards. That is very risky and can lead to inconsistent
-        # model records
+        # prevent that the file or camera config can be changed afterwards. That is very risky and can lead to
+        # inconsistent model records
         if obj:
             return (
                 *self.readonly_fields,
@@ -56,6 +81,11 @@ class TimeSeriesAdmin(BaseAdmin):
                 "str_fraction_velocimetry"
             )
         return self.readonly_fields
+
+    def filter_institute(self, request, qs):
+        memberships = request.user.get_memberships()
+        institutes = [m.institute for m in memberships]
+        return qs.filter(site__institute__in=institutes)
 
     def link_video(self, obj):
         return obj.link_video
@@ -105,7 +135,6 @@ class TimeSeriesAdmin(BaseAdmin):
             return round(obj.q_95, 2)
     str_q_95.short_description = 'Discharge 95% [m3/s]'
     str_q_95.allow_tags = True
-
 
     def str_fraction_velocimetry(self, obj):
         if obj.fraction_velocimetry:

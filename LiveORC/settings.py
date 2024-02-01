@@ -35,21 +35,22 @@ if DEBUG:
 
 INSTALLED_APPS = [
     'users',
-    'django.contrib.admin',
+    # 'django.contrib.admin',
+    'LiveORC.admin.CustomAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
-    'django_filters',
     'django_json_widget',
     'rest_framework',
     'api',
     'rangefilter',
     'drf_spectacular',
     'fontawesomefree',
-    'django_object_actions'
+    'django_object_actions',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -190,3 +191,5 @@ STATICFILES_DIRS = [
 AUTH_USER_MODEL = "users.User"
 
 # GDAL_LIBRARY_PATH = "gdal"
+
+# INSTITUTE_SESSION_KEY = "active_institute"

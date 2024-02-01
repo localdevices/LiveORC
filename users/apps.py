@@ -6,3 +6,6 @@ class UsersConfig(AppConfig):
     name = 'users'
     verbose_name = 'users and institutes'
 
+    # required to ensure a membership is created upon creation of a new institute
+    def ready(self):
+        import users.signals

@@ -17,7 +17,7 @@ class VideoViewSet(BaseModelViewSet):
     """
     queryset = Video.objects.all().order_by('-timestamp')
     serializer_class = VideoSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     http_method_names = ["post"]
 
     def get_queryset(self):

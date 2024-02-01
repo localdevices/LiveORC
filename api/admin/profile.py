@@ -3,16 +3,15 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 
 from api.models import Profile
-from api.admin import BaseAdmin, SiteUserFilter
+from api.admin import BaseAdmin, SiteUserFilter, BaseForm
 
 import json
 import pyorc
 
 
-# Register your models here.
-
-class ProfileForm(forms.ModelForm):
+class ProfileForm(BaseForm):
     geojson_file = forms.FileField()
+
     class Meta:
         model = Profile
         fields = "__all__"
@@ -28,6 +27,7 @@ class ProfileForm(forms.ModelForm):
                 data, crs = pyorc.cli.cli_utils.read_shape(geojson=geo)
             except BaseException as e:
                 raise ValidationError(f"Problem with profile file: {e}")
+
 
 class ProfileAdmin(BaseAdmin):
     class Media:
@@ -60,6 +60,11 @@ class ProfileAdmin(BaseAdmin):
     @admin.display(ordering='site__name', description="Site")
     def get_site_name(self, obj):
         return obj.site.name
+
+    def filter_institute(self, request, qs):
+        memberships = request.user.get_memberships()
+        institutes = [m.institute for m in memberships]
+        return qs.filter(site__institute__in=institutes)
 
     def save_model(self, request, obj, form, change):
         request._files["geojson_file"].seek(0)

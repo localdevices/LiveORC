@@ -31,7 +31,6 @@ class Task(BaseModel):
                                  blank=True)
     task_body = models.JSONField(help_text="task body used to perform task by available node.", default=dict)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
-    # user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
 
 
     def save(self, *args, **kwargs):
@@ -47,4 +46,8 @@ class Task(BaseModel):
         return mark_safe("""
 <progress value="{perc}" max="100"></progress>
 <span style="font-weight:bold">{perc}%</span>""".format(perc=percentage))
+
+    @property
+    def institute(self):
+        return self.video.institute
 

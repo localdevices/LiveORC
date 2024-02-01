@@ -28,10 +28,9 @@ class TimeSeriesViewSet(BaseModelViewSet):
     """
     queryset = TimeSeries.objects.all()
     serializer_class = TimeSeriesSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     filterset_class = TimeSeriesFilter
     http_method_names = ["get", "post", "delete", "patch"]
-    # content_negotiation_class = SelectClientContentNegotiation
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -43,6 +42,8 @@ class TimeSeriesViewSet(BaseModelViewSet):
         data = request.data.copy()
         if not(request.data.get("site")):
             data["site"] = site_pk
+        if not(request.data.get("creator")):
+            data["creator"] = request.user.pk
         # replace the serializer
         serializer_class = TimeSeriesSerializer
         # run create in the usual manner
@@ -71,8 +72,7 @@ class TimeSeriesViewSet(BaseModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-
     def get_queryset(self):
-        # video can also be retrieved nested per site, by filtering on the site of the cameraconfig property.
+        # time series can also be retrieved nested per site, by filtering on the site of the cameraconfig property.
         return TimeSeries.objects.filter(site=self.kwargs['site_pk'])
 

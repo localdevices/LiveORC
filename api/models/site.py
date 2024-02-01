@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.db import models
 from django.contrib.gis.db import models as gismodels
+from api.models import BaseInstituteModel
 from django.utils.html import mark_safe
 from django.urls import reverse
 
@@ -24,7 +25,7 @@ timeseries_template1 = """
 	</script>
 """
 
-class Site(BaseModel):
+class Site(BaseInstituteModel):
     """
     Location of one or more videos
     """

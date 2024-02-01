@@ -69,6 +69,7 @@ lens_position_schema = {
     'required': ['x', 'y', 'z']
 }
 
+
 class CameraConfig(BaseModel):
     """
     Contains JSON with a full camera configuration
@@ -187,4 +188,8 @@ class CameraConfig(BaseModel):
             return self.camera_config["window_size"]
 
     window_size.fget.short_description = "interrogation window size [pix]"
+
+    @property
+    def institute(self):
+        return self.site.institute
 

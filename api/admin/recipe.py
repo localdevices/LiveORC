@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django_json_widget.widgets import JSONEditorWidget
 
 from api.models import Recipe
-from api.admin import BaseAdmin
+from api.admin import BaseInstituteAdmin, BaseForm
 
 import json
 import pyorc
@@ -13,13 +13,12 @@ import yaml
 
 # Register your models here.
 
-class RecipeForm(forms.ModelForm):
-    # recipe_file = forms.FileField(required=False)
+class RecipeForm(BaseForm):
+
     class Meta:
         model = Recipe
-        fields = ["name"]
+        fields = ["name", "institute"]
         widgets = {"data": JSONEditorWidget}
-
 
     def clean(self):
         super().clean()
@@ -40,38 +39,39 @@ class RecipeForm(forms.ModelForm):
             raise ValidationError(f"Problem with recipe file: {e}")
 
 
-class RecipeCreateForm(forms.ModelForm):
+class RecipeCreateForm(RecipeForm):
     recipe_file = forms.FileField()
+
     class Meta:
         model = Recipe
-        fields = ["name"]
+        fields = ["name", "institute"]
 
-class RecipeAdmin(BaseAdmin):
+
+class RecipeAdmin(BaseInstituteAdmin):
     fieldsets = [
-        ("User input", {"fields": ["name", "recipe_file"]}),
+        ("User input", {"fields": ["name", "institute", "recipe_file"]}),
         ("Resulting recipe", {
             "fields": [
                 "data",
             ]}
          )
     ]
-    list_display = ["name"]
+    list_display = ["name", "institute"]
     search_fields = ["name"]
     list_filter = ["name"]
-
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
         """A separate view for changing models"""
         self.form = RecipeForm
         self.fieldsets = [
-            ("User input", {"fields": ["name", "data"]}),
+            ("User input", {"fields": ["name", "institute", "data"]}),
         ]
         # self.readonly_fields = None
         return super(RecipeAdmin, self).change_view(request, object_id)
 
     def add_view(self, request, form_url="", extra_context=None):
         self.form = RecipeCreateForm
-        self.fieldsets = [("User input", {"fields": ["name", "recipe_file"]})]
+        self.fieldsets = [("User input", {"fields": ["name", "institute", "recipe_file"]})]
         self.exclude = ("data",)
         self.readonly_fields = ["data"]
         return super(RecipeAdmin, self).add_view(request)
@@ -84,7 +84,10 @@ class RecipeAdmin(BaseAdmin):
         if "recipe_file" in request._files:
             request._files["recipe_file"].seek(0)
             body = request._files["recipe_file"].read()
-            recipe = yaml.load(body, Loader=yaml.FullLoader)
+            try:
+                recipe = yaml.load(body, Loader=yaml.FullLoader)
+            except:
+                raise ValidationError(f'File {request._files["recipe_file"]} is not a .yaml file')
         else:
             recipe = form.instance.data
         recipe = pyorc.cli.cli_utils.validate_recipe(recipe)

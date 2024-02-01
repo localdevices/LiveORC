@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView
 )
-from api.views import SiteViewSet, ProfileViewSet, RecipeViewSet, CameraConfigViewSet, VideoViewSet, VideoSiteViewSet, TimeSeriesViewSet, TaskViewSet
+from api.views import SiteViewSet, ProfileViewSet, RecipeViewSet, CameraConfigViewSet, VideoViewSet, VideoSiteViewSet, TimeSeriesViewSet, TaskViewSet #, switch_institute
 
 app_name = 'api'
 
@@ -29,6 +29,7 @@ video_router.register(r'task', TaskViewSet, basename='video-task')
 urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # path('institute_switch/<int:institute_id>/', switch_institute),
     path('', include(router.urls)),
     path('', include(site_router.urls)),
     path('', include(video_router.urls)),

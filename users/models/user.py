@@ -1,9 +1,8 @@
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
-from LiveORC.utils.models.base import BaseModel
-from django.apps import apps
-# from ..models import Institute
+from users.models.base import BaseModel
 
 
 class UserManager(BaseUserManager):
@@ -35,12 +34,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
         _("Staff Status"),
         default=False,
         help_text=_("Designates whether the user can log into this admin site"))
-    institute = models.ForeignKey(
-        'Institute',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
+
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
@@ -56,6 +50,18 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     def get_fullname(self):
         return self.name if self.name else self.email
 
-    def is_company_member(self, institute):
+    def is_institute_member(self, institute):
         return self.members.filter(institute=institute).exists()
+
+    def get_memberships(self):
+        return self.members.all()
+
+    def get_membership_institutes(self):
+        memberships = self.members.all()
+        return [m.institute for m in memberships]
+
+    def get_owned_institute_memberships(self):
+        """Get the memberships with institutes owned by current user"""
+        memberships = self.members.all()
+        return memberships.filter(institute__owner=self)
 

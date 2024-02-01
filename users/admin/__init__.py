@@ -5,12 +5,13 @@ from django.contrib.auth.admin import GroupAdmin
 from django.utils.translation import gettext_lazy
 from users.models import (
     Institute,
-    InstituteMember,
+    Member,
     User,
     Group
 )
 
 from .user import UserAdmin
+from .institute import MemberAdmin
 
 # initiate orc admin site with specific titles and logos
 
@@ -22,7 +23,7 @@ from .user import UserAdmin
 admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Institute)
-admin.site.register(InstituteMember)
+admin.site.register(Member, MemberAdmin)
 
 # we are not using groups, hence remove (we will have institutes)
 # TODO: move user/institute to a separate app called Users and Institutes

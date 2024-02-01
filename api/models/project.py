@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from api.models import BaseModel
+from api.models import BaseInstituteModel
 
-class Project(BaseModel):
+
+class Project(BaseInstituteModel):
     """
     Project that holds together one or several videos at different sites (for surveys)
     """

@@ -1,8 +1,15 @@
-from api.admin import BaseAdmin
+from api.admin import BaseInstituteAdmin, BaseForm
+from api.models import Site
 
+
+class SiteForm(BaseForm):
+
+    class Meta:
+        model = Site
+        fields = "__all__"
 
 # Register your models here.
-class SiteAdmin(BaseAdmin):
+class SiteAdmin(BaseInstituteAdmin):
     class Media:
         js = (
             "https://code.jquery.com/jquery-3.7.1.min.js",
@@ -14,9 +21,13 @@ class SiteAdmin(BaseAdmin):
             "admin/js/timeseries.js"
         )
         css = {"all": ("admin/css/slider.css", )}
-
+    form = SiteForm
     fieldsets = [
-        (None, {"fields": ["name", "timeseries_chart"]}),
+        (None, {"fields": ["name", "institute", "timeseries_chart"]}),
+        ("Coordinates", {"fields": ["geom"]})
+    ]
+    super_admin_fieldsets = [
+        (None, {"fields": ["name", "institute", "timeseries_chart"]}),
         ("Coordinates", {"fields": ["geom"]})
     ]
     search_fields = ["name"]
@@ -25,3 +36,9 @@ class SiteAdmin(BaseAdmin):
 
     def timeseries_chart(self, obj):
         return obj.timeseries_chart
+
+    def get_fieldsets(self, request, obj=None):
+        if request.user.is_superuser:
+            return self.super_admin_fieldsets
+        return self.fieldsets
+

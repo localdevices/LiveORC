@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 
 from api.models import CameraConfig, Video
-from api.admin import BaseAdmin, SiteUserFilter
+from api.admin import BaseAdmin, SiteUserFilter, BaseForm
 import json
 import pyorc
 
@@ -17,15 +17,21 @@ class VideoInline(admin.TabularInline):
     extra = 3
 
 
-class CameraConfigForm(forms.ModelForm):
+class CameraConfigForm(BaseForm):
     json_file = forms.FileField()
     class Meta:
         model = CameraConfig
         fields = ["name", "site", "server", "recipe", "profile", "camera_config"] #, "bbox"]
 
+    # def __init__(self, *args, **kwargs):
+    #     self.request = kwargs.pop('request', None)
+    #     super(CameraConfigForm, self).__init__(*args, **kwargs)
+
 
     def clean(self):
         super().clean()
+        # if not self.request.user.get_active_membership():
+        #     raise forms.ValidationError("You Must have an institute to continue")
         # open the json file and try to parse
         if "json_file" in self.files:
             data = json.load(self.files["json_file"])
@@ -70,6 +76,11 @@ class CameraConfigAdmin(BaseAdmin):
     @admin.display(ordering='site__name', description="Site")
     def get_site_name(self, obj):
         return obj.site.name
+
+    def filter_institute(self, request, qs):
+        institutes = request.user.get_membership_institutes()
+        return qs.filter(site__institute__in=institutes)
+
 
     def save_model(self, request, obj, form, change):
         request._files["json_file"].seek(0)
