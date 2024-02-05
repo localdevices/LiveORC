@@ -9,6 +9,7 @@ from .recipe import RecipeViewSet
 from .task import TaskViewSet
 from .time_series import TimeSeriesViewSet
 from .video import VideoViewSet, VideoSiteViewSet
+from .device import DeviceViewSet
 from users.models.institute import Institute
 
 #

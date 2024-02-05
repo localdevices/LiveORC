@@ -4,7 +4,7 @@ from rest_framework.exceptions import PermissionDenied
 from users.models import User
 from rest_framework_nested.serializers import NestedHyperlinkedModelSerializer
 
-from .models import Site, Profile, Recipe, CameraConfig, Video, Server, Task, Project, TimeSeries
+from .models import Site, Profile, Recipe, CameraConfig, Video, Server, Task, Project, TimeSeries, Device
 
 def institute_validator(institute, user):
     # if institute is not None
@@ -33,6 +33,15 @@ class SiteOwned:
             owned_institutes = [m.institute for m in user.get_owned_institute_memberships()]
             if not (value["site"].institute in owned_institutes):
                 raise serializers.ValidationError(f'You do not own institute {value["site"].institute}')
+
+
+class DeviceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Device
+        fields = "__all__"
+        validators = [InstituteOwned()]
+
+
 
 class SiteSerializer(serializers.ModelSerializer):
     class Meta:

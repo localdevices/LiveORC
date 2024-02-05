@@ -9,3 +9,4 @@ from .project import Project
 from .time_series import TimeSeries
 from .video import Video, VideoStatus
 from .task import Task
+from .device import Device

@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.db import models
 
 from api.models import BaseInstituteModel
@@ -12,5 +11,3 @@ class Project(BaseInstituteModel):
     description = models.TextField(
         help_text="Summary of the project details, e.g. sites, client, purpose, intended outcome"
     )
-    # user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
-
