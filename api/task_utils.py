@@ -3,6 +3,7 @@ from django.conf import settings
 from django.urls import reverse
 # helper functions to develop tasks from models
 from nodeorc import models
+from api.models import Video, CameraConfig
 
 OUTPUT_FILES_ALL = {
     "piv": {
@@ -24,6 +25,27 @@ OUTPUT_FILES_ALL = {
 
 }
 
+# this is used when a task_form is created
+OUTPUT_FILES_ALL_TEMPLATE = {
+    "piv": {
+        "remote_name": "piv_{}.nc",
+        "tmp_name": "OUTPUT/piv.nc"
+    },
+    "transect": {
+        "remote_name": "transect_1_{}.nc",
+        "tmp_name": "OUTPUT/transect_transect_1.nc"
+    },
+    "piv_mask": {
+        "remote_name": "piv_mask_{}.nc",
+        "tmp_name": "OUTPUT/piv_mask.nc"
+    },
+    "jpg": {
+        "remote_name": "plot_quiver_{}.jpg",
+        "tmp_name": "OUTPUT/plot_quiver.jpg"
+    }
+
+}
+
 
 def get_task(instance, request, serialize=True, *args, **kwargs):
     """
@@ -37,16 +59,18 @@ def get_task(instance, request, serialize=True, *args, **kwargs):
     -------
 
     """
-    callback_url = get_callback_url(request)
-    # TODO connect storage once agnostic storage solutions implemented
-    storage = get_storage(instance)
     subtasks = get_subtasks(instance)
-    output_files = OUTPUT_FILES_ALL
+    storage = get_storage(instance)
+    if isinstance(instance, Video):
+        output_files = OUTPUT_FILES_ALL  # TODO: allow for templated files
+    elif isinstance(instance, CameraConfig):
+        output_files = OUTPUT_FILES_ALL_TEMPLATE
+    callbacks = []
     task = models.Task(
-        callback_url=callback_url,
-        storage=storage,
         subtasks=subtasks,
-        output_files=output_files
+        output_files=output_files,
+        callbacks=callbacks,
+        storage=storage
     )
     return task.to_json(serialize=serialize)
 
@@ -104,35 +128,53 @@ def get_subtasks(instance):
         set of nodeorc.models.Subtask types
     """
     error_msg = "No water level or time series associated with video"
-    if not(instance.time_series):
-        raise Exception(error_msg)
-    if not(instance.time_series.h):
-        raise Exception(error_msg)
-    if not(instance.camera_config.recipe):
+    if isinstance(instance, Video):
+        if not(instance.time_series):
+            raise Exception(error_msg)
+        if not(instance.time_series.h):
+            raise Exception(error_msg)
+        camera_config = instance.camera_config
+        video = instance
+    else:
+        camera_config = instance
+        video = None
+    if not(camera_config.recipe):
         raise Exception("Cannot create task, no recipe available")
     # we assume first that only 2d is processed
     task_type = "2d_only"
     # check if we can do a full processing with 1d included. This requires camera profile and a transect section in the
     # recipe
-    if instance.camera_config.profile and "transect" in instance.camera_config.recipe.data:
+    if camera_config.profile and "transect" in camera_config.recipe.data:
         task_type = "all"
 
     # now dependent on the available data, prepare a task
     if task_type == "all":
-        subtask = get_subtask_all(instance)
+        subtask = get_subtask_all(camera_config=camera_config, video=video)
+    else:
+        raise NotImplementedError("2D only tasks are not yet supported. Add a profile to the Camera Config to allow for processing this task.")
     # we provide a list back so that we can later extend this to hold several subtasks, e.g. one per cross section
     # if we have more than one.
     return [subtask]
 
+def get_callbacks(instance):
+    callbacks = [
+        get_callback_discharge_patch(instance),
+        get_callback_video_patch(instance)
+    ]
+    return callbacks
 
 
-def get_subtask_all(instance):
+def get_subtask_all(
+        camera_config,
+        video,
+):
     """
     Makes a full subtask using the entire recipe, including getting profiles ready for processing where needed
 
     Parameters
     ----------
-    instance
+    camera_config
+    video
 
     Returns
     -------
@@ -140,28 +182,32 @@ def get_subtask_all(instance):
     """
 
     name = "velocity_flow_subprocess"
-    cameraconfig = instance.camera_config.camera_config
-    h_a = instance.time_series.h
-    videofile = str(instance.file)
-    recipe = instance.camera_config.recipe.data
-    profile = instance.camera_config.profile.data
+    cameraconfig = camera_config.camera_config
+    recipe = camera_config.recipe.data
+    profile = camera_config.profile.data
+    if video:
+        h_a = video.time_series.h
+        videofile = str(video.file)
+        input_files = {
+            "videofile": {
+                "remote_name": str(video.file),
+                "tmp_name": str(video.file)
+            }
+        }
+    else:
+        h_a = -9999.0  # placeholder for real water level
+        videofile = "video.mp4"  # placeholder for real water level
+        input_files = {
+            "videofile": {
+                "remote_name": "video.mp4",
+                "tmp_name": "video.mp4"
+            }
+        }
+    output_files = OUTPUT_FILES_ALL  # hard-coded output file names, typical for this task
     # remove the geojson and shapefile parts
     recipe = recipe_update_profile(recipe, profile)
 
-    # recipe is adapted to match profile, now prepare the callbacks
-
-    callbacks = [
-        get_callback_discharge_patch(instance),
-        get_callback_video_patch(instance)
-    ]
     # TODO: input_files should refer to name of file only (now full subpath to MEDIA_ROOT). Location is arranged by the Storage
-    input_files = {
-        "videofile": {
-           "remote_name": str(instance.file),
-            "tmp_name": str(instance.file)
-        }
-    }
-    output_files = OUTPUT_FILES_ALL  # hard-coded output file names, typical for this task
     # define the subtask
     kwargs = {
         "videofile": videofile,
@@ -174,7 +220,6 @@ def get_subtask_all(instance):
     subtask = models.Subtask(
         name=name,
         kwargs=kwargs,
-        callbacks=callbacks,
         input_files=input_files,
         output_files=output_files
     )
