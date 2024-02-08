@@ -24,7 +24,7 @@ def get_data():
     }
     return data
 
-class RecipeViewTests(InitTestCase):
+class DeviceTests(InitTestCase):
     def setUp(self):
         pass
 

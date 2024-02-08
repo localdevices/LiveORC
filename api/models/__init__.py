@@ -10,3 +10,4 @@ from .time_series import TimeSeries
 from .video import Video, VideoStatus
 from .task import Task
 from .device import Device
+from .task_form import TaskForm, TaskFormStatus
