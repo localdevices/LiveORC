@@ -58,7 +58,7 @@ class CameraConfigViewSet(BaseModelViewSet):
                 name="callback",
                 type=str,
                 required=True,
-                enum=[c.strip("get_form_callback") for c in CALLBACK_FUNCTIONS_FORM],  # allowed names of callbacks
+                enum=[c.lstrip("get_form_callback_") for c in CALLBACK_FUNCTIONS_FORM],  # allowed names of callbacks
                 location=OpenApiParameter.QUERY,
                 description='name of callback function to add',
 
@@ -79,19 +79,22 @@ class CameraConfigViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
                 content_type="application/json"
             )
-        callbacks = request.query_params.getlist("callback")
+        query_callbacks = [f"get_form_callback_{c}" for c in request.query_params.getlist("callback")]
         # check if callbacks are available
-        for callback in callbacks:
-            if not f"get_callback_{callback}" in CALLBACK_FUNCTIONS_FORM:
+        for callback in query_callbacks:
+            if not callback in CALLBACK_FUNCTIONS_FORM:
                 return Response(
-                    data={"callback": [f"Callback {callback} is not available, choose from {[c.strip('get_form_callback_') for c in CALLBACK_FUNCTIONS_FORM]}"]},
+                    data={
+                        "callback": [
+                            f"Callback {callback.lsplit('get_form_callback')} is not available, choose from {[c.lstrip('get_form_callback_') for c in CALLBACK_FUNCTIONS_FORM]}"
+                        ]
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                     content_type="application/json"
                 )
-
         instance = self.get_object()
-
-        task_form = get_task_form(instance, request, *args, **kwargs)
+        task_form = get_task_form(instance, query_callbacks, request, *args, **kwargs)
+        # TODO: implement task_form in database
         # print(f"URL: {request.build_absolute_uri(reverse('video'))}")
         return Response(instance.data, status=status.HTTP_200_OK)
 

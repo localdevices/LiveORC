@@ -196,7 +196,7 @@ class CameraConfigViewTests(InitTestCase):
         device_id = r.json()["id"]
         # now see if a task_form can be produced using the current camera_config
         r = client.post(
-            f'/api/site/1/cameraconfig/1/create_task/?device_id={device_id}',
+            f'/api/site/1/cameraconfig/1/create_task/?device_id={device_id}&callback=discharge_post&callback=video_no_file_post',
         )
 
         client.logout()

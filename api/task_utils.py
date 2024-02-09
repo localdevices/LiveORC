@@ -3,6 +3,7 @@ from django.urls import reverse
 # helper functions to develop tasks from models
 from nodeorc import models
 from api.models import Video, CameraConfig
+from api import callback_utils
 
 OUTPUT_FILES_ALL = {
     "piv": {
@@ -45,7 +46,14 @@ OUTPUT_FILES_ALL_TEMPLATE = {
 
 }
 
-def get_task_form(instance, request, serialize=True, *args, **kwargs):
+def get_task_form(
+    instance,
+    query_callbacks,
+    request,
+    serialize=True,
+    *args,
+    **kwargs
+):
     """
     Retrieve a subtask form for repetitive use on nodeORC, e.g. for a fixed site
 
@@ -53,6 +61,8 @@ def get_task_form(instance, request, serialize=True, *args, **kwargs):
     ----------
     instance : CameraConfig
         Camera configuration for which to create a Task Form
+    query_callbacks : list[str]
+        names of callbacks to retrieve for the instance
     request : request
     serialize : bool
         Defines whether to serialize the task or leave it as a nodeorc Task Object
@@ -67,7 +77,7 @@ def get_task_form(instance, request, serialize=True, *args, **kwargs):
     """
     subtasks = get_subtasks_form(instance)
     output_files = OUTPUT_FILES_ALL_TEMPLATE
-    callbacks = []
+    callbacks = get_callbacks(instance, query_callbacks)
     task_form = models.Task(
         subtasks=subtasks,
         output_files=output_files,
@@ -188,11 +198,8 @@ def get_subtasks(instance):
     # if we have more than one.
     return [subtask]
 
-def get_callbacks(instance):
-    callbacks = [
-        get_callback_discharge_patch(instance),
-        get_callback_video_patch(instance)
-    ]
+def get_callbacks(instance, query_callbacks):
+    callbacks = [getattr(callback_utils, c)(instance) for c in query_callbacks]
     return callbacks
 
 
