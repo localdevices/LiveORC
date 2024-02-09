@@ -12,7 +12,7 @@ from users.models import User, Institute
 def get_ip():
     return requests.get('https://api.ipify.org').content.decode('utf8')
 
-def get_data():
+def get_device_data():
     data = {
         "id": str(uuid.uuid4()),
         "name": "TEST_DEVICE",
@@ -35,7 +35,7 @@ class DeviceTests(InitTestCase):
         client = APIClient()
         client.login(username='user@institute1.com', password='test1234')
         # create a camera config on site
-        data = get_data()
+        data = get_device_data()
         r = client.post(
             '/api/device/',
             data,

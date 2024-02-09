@@ -1,4 +1,3 @@
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.conf import settings
 from django.urls import reverse
 # helper functions to develop tasks from models
@@ -46,6 +45,36 @@ OUTPUT_FILES_ALL_TEMPLATE = {
 
 }
 
+def get_task_form(instance, request, serialize=True, *args, **kwargs):
+    """
+    Retrieve a subtask form for repetitive use on nodeORC, e.g. for a fixed site
+
+    Parameters
+    ----------
+    instance : CameraConfig
+        Camera configuration for which to create a Task Form
+    request : request
+    serialize : bool
+        Defines whether to serialize the task or leave it as a nodeorc Task Object
+    *args : list
+        additional args to parse
+    **kwargs : dict
+        additional kwargs to parse
+
+    Returns
+    -------
+    dict (serialized) or nodeorc.models.Task (not serialized)
+    """
+    subtasks = get_subtasks_form(instance)
+    output_files = OUTPUT_FILES_ALL_TEMPLATE
+    callbacks = []
+    task_form = models.Task(
+        subtasks=subtasks,
+        output_files=output_files,
+        callbacks=callbacks,
+    )
+    return task_form.to_json(serialize=serialize)
+
 
 def get_task(instance, request, serialize=True, *args, **kwargs):
     """
@@ -61,10 +90,7 @@ def get_task(instance, request, serialize=True, *args, **kwargs):
     """
     subtasks = get_subtasks(instance)
     storage = get_storage(instance)
-    if isinstance(instance, Video):
-        output_files = OUTPUT_FILES_ALL  # TODO: allow for templated files
-    elif isinstance(instance, CameraConfig):
-        output_files = OUTPUT_FILES_ALL_TEMPLATE
+    output_files = OUTPUT_FILES_ALL
     callbacks = []
     task = models.Task(
         subtasks=subtasks,
@@ -113,6 +139,16 @@ def get_storage(instance):
     )
     # TODO: make storage agnostic for cloud storage options
 
+def get_subtasks_form(instance):
+    camera_config = instance
+    video = None
+    subtask = get_subtask_all(
+        camera_config=camera_config,
+        video=video
+    )
+    return [subtask]
+
+
 def get_subtasks(instance):
     """
     Translates video object into a full list of subtasks. The list of subtasks can be defined or automatically
@@ -128,16 +164,12 @@ def get_subtasks(instance):
         set of nodeorc.models.Subtask types
     """
     error_msg = "No water level or time series associated with video"
-    if isinstance(instance, Video):
-        if not(instance.time_series):
-            raise Exception(error_msg)
-        if not(instance.time_series.h):
-            raise Exception(error_msg)
-        camera_config = instance.camera_config
-        video = instance
-    else:
-        camera_config = instance
-        video = None
+    if not(instance.time_series):
+        raise Exception(error_msg)
+    if not(instance.time_series.h):
+        raise Exception(error_msg)
+    camera_config = instance.camera_config
+    video = instance
     if not(camera_config.recipe):
         raise Exception("Cannot create task, no recipe available")
     # we assume first that only 2d is processed
@@ -355,61 +387,5 @@ def get_callback_video_patch(instance):
         )
     )
 
-def callback():
-    return models.Callback(
-        func_name="post_discharge",
-        kwargs={},
-        callback_endpoint="/processing/examplevideo/discharge"  # used to extend the default callback url
-    )
-
-def get_tokens_for_user(user):
-    """
-    Retrieves access and refresh tokens for the user
-
-    Parameters
-    ----------
-    user : User (django auth model instance)
-        The user, typically the one currently logged in and making the request
-
-    Returns
-    -------
-    tokens : dict
-        containing "token_refresh": str and "token_access": str
-
-    """
-    refresh = RefreshToken.for_user(user)
-    return {
-        'token_refresh': str(refresh),
-        'token_access': str(refresh.access_token),
-    }
 
 
-def input_file():
-    """
-    Converts a storage + file location into a File object for nodeorc
-
-    Returns
-    -------
-
-    """
-    return models.File(
-        remote_name="piv.nc",
-        tmp_name="OUTPUT/piv.nc",
-    )
-
-def kwargs_velocimetry():
-    """
-    Collects video file, camera config, recipe and output location into one set of kwargs for velocimetry processor
-
-    Returns
-    -------
-
-    """
-    kwargs = {
-        "videofile": "video.mp4",
-        "cameraconfig": camconfig,
-        "recipe": recipe,
-        "output": os.path.join(temp_path, "OUTPUT"),
-        "prefix": ""
-    }
-    return kwargs
