@@ -37,9 +37,10 @@ class CameraConfigViewSet(BaseModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-    @action(detail=True, methods=['post'], renderer_classes=[renderers.StaticHTMLRenderer])
-    def create_task(self, request, device_id, *args, **kwargs):
+    @action(detail=True, methods=['get', 'post'], renderer_classes=[renderers.StaticHTMLRenderer])
+    def create_task(self, request, *args, **kwargs):
         instance = self.get_object()
+        print(instance)
         # task = get_task_form(instance, request, *args, **kwargs)
         # print(f"URL: {request.build_absolute_uri(reverse('video'))}")
         return Response(instance.data, status=status.HTTP_200_OK)
