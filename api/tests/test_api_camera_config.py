@@ -198,7 +198,7 @@ class CameraConfigViewTests(InitTestCase):
         r = client.post(
             f'/api/site/1/cameraconfig/1/create_task/?device_id={device_id}&callback=discharge_post&callback=video_no_file_post',
         )
-
+        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
         client.logout()
         client.login(username='user2@institute1.com', password='test1234')
         r = client.post(

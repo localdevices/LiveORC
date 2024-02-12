@@ -7,7 +7,7 @@ class TaskFormStatus(models.IntegerChoices):
     NEW = 0, "New"
     SENT = 1, "Sent"
     ERROR = 2, "Error"
-    ACTIVE = 3, "Active"
+    ACCEPTED = 3, "Accepted"
 
 
 class TaskForm(BaseModel):

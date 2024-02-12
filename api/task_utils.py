@@ -49,10 +49,7 @@ OUTPUT_FILES_ALL_TEMPLATE = {
 def get_task_form(
     instance,
     query_callbacks,
-    request,
-    serialize=True,
-    *args,
-    **kwargs
+    serialize=False,
 ):
     """
     Retrieve a subtask form for repetitive use on nodeORC, e.g. for a fixed site

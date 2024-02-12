@@ -3,8 +3,8 @@ from rest_framework import status, renderers
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from api.serializers import CameraConfigSerializer, CameraConfigCreateSerializer
-from api.models import CameraConfig, Device
+from api.serializers import CameraConfigSerializer, CameraConfigCreateSerializer, TaskFormSerializer
+from api.models import CameraConfig, Device, TaskForm
 from api.views import BaseModelViewSet
 
 from api.task_utils import get_task_form
@@ -73,6 +73,14 @@ class CameraConfigViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
                 content_type="application/json"
             )
+        try:
+            device = Device.objects.get(pk=request.query_params["device_id"])
+        except:
+            return Response(
+                data={"device_id": [f"Device {request.query_params['device_id']} does not exist."]},
+                status=status.HTTP_400_BAD_REQUEST,
+                content_type="application/json"
+            )
         if not "callback" in request.query_params:
             return Response(
                 data={"callback": ["At least one callback must be provided"]},
@@ -93,8 +101,15 @@ class CameraConfigViewSet(BaseModelViewSet):
                     content_type="application/json"
                 )
         instance = self.get_object()
-        task_form = get_task_form(instance, query_callbacks, request, *args, **kwargs)
+        task_form = get_task_form(instance, query_callbacks)
+        record = TaskForm(
+            task_body=task_form,
+            device=device,
+            creator=request.user
+        )
+        record.save()
         # TODO: implement task_form in database
+        serializer = TaskFormSerializer(record)
         # print(f"URL: {request.build_absolute_uri(reverse('video'))}")
-        return Response(instance.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
