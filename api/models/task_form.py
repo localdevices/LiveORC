@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 import uuid
 from api.models import BaseModel, Device
@@ -22,6 +23,12 @@ class TaskForm(BaseModel):
         serialize=False,
         editable=False,
         help_text="Identifier of task form as stored on both LiveORC and NodeORC side"
+    )
+    # id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)  # we use a uuid to ensure the name is and remain unique and can be used for file naming
+    created_on = models.DateTimeField(
+        default=timezone.now,
+        editable=False,
+        help_text="Date and time on which task form record is created"
     )
 
     status = models.PositiveSmallIntegerField(choices=TaskFormStatus.choices, default=0)

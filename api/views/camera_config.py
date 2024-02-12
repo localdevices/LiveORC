@@ -75,6 +75,13 @@ class CameraConfigViewSet(BaseModelViewSet):
             )
         try:
             device = Device.objects.get(pk=request.query_params["device_id"])
+            # TODO: check if device belongs to request.user
+            if not(request.user.is_institute_owner(device.institute)):
+                return Response(
+                    data={"device_id": [f"Device {request.query_params['device_id']} does not belong to user."]},
+                    status=status.HTTP_403_FORBIDDEN,
+                    content_type="application/json"
+                )
         except:
             return Response(
                 data={"device_id": [f"Device {request.query_params['device_id']} does not exist."]},

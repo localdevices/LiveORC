@@ -53,6 +53,13 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     def is_institute_member(self, institute):
         return self.members.filter(institute=institute).exists()
 
+    def is_institute_owner(self, institute):
+        """ Check if current user is owner of provided institute """
+        membership = self.members.filter(institute=institute)
+        if len(membership) > 0:
+            return membership[0].institute.owner == self
+        return False
+
     def get_memberships(self):
         return self.members.all()
 
