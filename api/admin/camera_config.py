@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
-from django_object_actions import DjangoObjectActions, action
 from django.urls import path
 
 from api.models import CameraConfig, Video, Device
@@ -87,6 +86,11 @@ class CameraConfigAdmin(BaseAdmin):
          )
     ]
 
+    def post(self, request, pk, *args, **kwargs):
+        print("CHECK")
+    def response_post_save_change(self, request, obj):
+        print("CHECK")
+
     def change_view(
             self,
             request,
@@ -94,13 +98,20 @@ class CameraConfigAdmin(BaseAdmin):
             form_url="",
             extra_context=None
     ):
+        # get devices with ids
+        devices_list = [
+            {"name": str(device), "id": device.id} for device in Device.objects.all()
+        ]
         options_list = ['Option 1', 'Option 2', 'Option 3']
         extra_context = extra_context or {}
-        extra_context['selection_options'] = Device.objects.all()
+        extra_context['device_options'] = devices_list
         extra_context['callback_options'] = callback_options
         return super(CameraConfigAdmin, self).change_view(
             request, object_id, form_url, extra_context=extra_context,
         )
+
+    def has_add_permission(self, request):
+        True
 
     def has_change_permission(self, request, obj=None):
         # once made, you can only delete a cam config
@@ -115,10 +126,11 @@ class CameraConfigAdmin(BaseAdmin):
         elif len(request.user.get_membership_institutes()) > 0:
             return True
 
+
     def get_urls(self):
         urls = super().get_urls()
         my_urls = [
-            path("<int:pk>/send_form/", self.admin_site.admin_view(self.send_form_view)),
+            path("<int:pk>/send_form", self.admin_site.admin_view(self.send_form_view)),
         ]
         return my_urls + urls
 
@@ -143,6 +155,10 @@ class CameraConfigAdmin(BaseAdmin):
         return qs.filter(site__institute__in=institutes)
 
     def send_form_view(self, request, pk):
+        if request.method == "POST":
+            # get the data
+            device_id = request.POST.get("device")
+
         print("HELLO THERE")
 
     def save_model(self, request, obj, form, change):

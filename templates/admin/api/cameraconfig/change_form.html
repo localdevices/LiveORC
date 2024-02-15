@@ -90,8 +90,8 @@
                 <div class="related-widget-wrapper" data-model-ref="device">
                     <select name="device" required id="id_device">
                         <option value="">---------</option>
-                        {% for option in selection_options %}
-                            <option value="{{ option }}">{{ option }}</option>
+                        {% for option in device_options %}
+                            <option value="{{ option.id }}">{{ option.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -113,12 +113,23 @@
         </div>
     </div>
 
-</fieldset>
     <div class="submit-row">
-        <input type="submit" style="background:green;" class="default" value="Send to device"></input>
+        <button type="submit">Submit to device</button>
+<!--        <input type="submit" name="_send_to_device" form="send_form" value="send" style="background:green;" class="default"></input>-->
     </div>
+</fieldset>
 </form>
 </div>
+
+<script>
+function submitForm() {
+    form = document.getElementById("send_form");
+    console.log("Submitting a form for you");
+    console.log(form);
+    form.submit()
+}
+
+</script>
 {% endblock %}
 <!--<div class="submit-row">-->
 <!--        <input type="submit" value=""-->
