@@ -127,7 +127,6 @@ def get_form_callback_video_no_file_post(instance):
     )
 
 
-
 def get_task_callback_video_patch(instance):
     return models.Callback(
         func_name="video",

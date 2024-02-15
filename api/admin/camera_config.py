@@ -1,9 +1,14 @@
 from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
+from django_object_actions import DjangoObjectActions, action
+from django.urls import path
 
-from api.models import CameraConfig, Video
+from api.models import CameraConfig, Video, Device
 from api.admin import BaseAdmin, SiteUserFilter, BaseForm
+from api.views.camera_config import CALLBACK_FUNCTIONS_FORM
+
+callback_options = [{"name": c.lstrip("get_form_callback_"), "value": c} for c in CALLBACK_FUNCTIONS_FORM]
 import json
 import pyorc
 
@@ -16,9 +21,24 @@ class VideoInline(admin.TabularInline):
     model = Video
     extra = 3
 
+# class TaskFormActionForm(admin.helpers.ActionForm):
+#     choices = [("blue", "Blue"), ("green", "Green"), ("black", "Black")]
+#
+#     device = forms.ModelChoiceField(
+#         queryset=Device.objects.all(),
+#         required=True,
+#         to_field_name="device"
+#     )
+#     callbacks = forms.MultipleChoiceField(
+#         required=True,
+#         widget=forms.CheckboxSelectMultiple,
+#         choices=choices
+#
+#     )
 
 class CameraConfigForm(BaseForm):
     json_file = forms.FileField()
+
     class Meta:
         model = CameraConfig
         fields = ["name", "site", "server", "recipe", "profile", "camera_config"] #, "bbox"]
@@ -66,6 +86,42 @@ class CameraConfigAdmin(BaseAdmin):
             ]}
          )
     ]
+
+    def change_view(
+            self,
+            request,
+            object_id,
+            form_url="",
+            extra_context=None
+    ):
+        options_list = ['Option 1', 'Option 2', 'Option 3']
+        extra_context = extra_context or {}
+        extra_context['selection_options'] = Device.objects.all()
+        extra_context['callback_options'] = callback_options
+        return super(CameraConfigAdmin, self).change_view(
+            request, object_id, form_url, extra_context=extra_context,
+        )
+
+    def has_change_permission(self, request, obj=None):
+        # once made, you can only delete a cam config
+        return True
+
+    def has_view_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
+        if obj:
+            if obj.institute in request.user.get_membership_institutes():
+                return True
+        elif len(request.user.get_membership_institutes()) > 0:
+            return True
+
+    def get_urls(self):
+        urls = super().get_urls()
+        my_urls = [
+            path("<int:pk>/send_form/", self.admin_site.admin_view(self.send_form_view)),
+        ]
+        return my_urls + urls
+
     list_display = ["name", "get_site_name"]
     search_fields = ["name"]
     list_filter = [SiteUserFilter]
@@ -73,14 +129,21 @@ class CameraConfigAdmin(BaseAdmin):
     # inlines = [VideoInline]
     readonly_fields = ["bounding_box_view", "height", "width", "resolution", "window_size", "bbox"]
     formfield_overrides = {}
+
     @admin.display(ordering='site__name', description="Site")
     def get_site_name(self, obj):
         return obj.site.name
+
+    def has_create_form_permission(self, request, obj=None):
+        """TODO, ensure this is only ok with owned device and owned objects"""
+        return True
 
     def filter_institute(self, request, qs):
         institutes = request.user.get_membership_institutes()
         return qs.filter(site__institute__in=institutes)
 
+    def send_form_view(self, request, pk):
+        print("HELLO THERE")
 
     def save_model(self, request, obj, form, change):
         request._files["json_file"].seek(0)

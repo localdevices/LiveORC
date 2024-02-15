@@ -10,6 +10,7 @@ from api.models import (
     Profile,
     Recipe,
     TimeSeries,
+    Device
 )
 
 from .admin_filters import (
@@ -28,6 +29,7 @@ from .profile import ProfileAdmin
 from .recipe import RecipeAdmin
 from .video import VideoInline, VideoAdmin
 from .site import SiteAdmin
+from .device import DeviceAdmin
 from .task import TaskAdmin
 from .task_form import TaskFormAdmin
 from .server import ServerAdmin
@@ -44,6 +46,7 @@ admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 # admin.site.register(Project, ProjectAdmin)  # leave out for now, may become relevant for future geospatial applications
 admin.site.register(Video, VideoAdmin)
+admin.site.register(Device, DeviceAdmin)
 admin.site.register(Server, ServerAdmin)
 admin.site.register(Task, TaskAdmin)
 admin.site.register(TaskForm, TaskFormAdmin)

@@ -1,28 +1,19 @@
-from django import forms
-
 from api.admin import BaseAdmin, BaseForm
 from api.admin import TaskInstituteFilter
 
-from api.models import TaskForm, CameraConfig
+from api.models import Device
 
-class TaskFormForm(BaseForm):
-
-    camera_config = forms.ModelChoiceField(
-        queryset=CameraConfig.objects.all(),
-        required=True,
-        to_field_name="camera_config"
-    )
+class DeviceForm(BaseForm):
 
     class Meta:
-        model = TaskForm
-        fields = ["device", "camera_config"]
+        model = Device
+        fields = "__all__"
 
-class TaskFormAdmin(BaseAdmin):
+class DeviceAdmin(BaseAdmin):
+    def has_add_permission(self, request):
+        return False
 
-    form = TaskFormForm
     def has_change_permission(self, request, obj=None):
-        if request.user.is_superuser:
-            return True
         return False
 
     def has_view_permission(self, request, obj=None):
@@ -35,17 +26,21 @@ class TaskFormAdmin(BaseAdmin):
             return True
 
     def has_delete_permission(self, request, obj=None):
-        if request.user.is_superuser:
-            return True
         return False
 
-    ordering = ["-created_on"]
-    list_filter = [TaskInstituteFilter]
-
-    # list_display = ["__all__"]
+    form = DeviceForm
+    # list_filter = [TaskInstituteFilter]
+    #
+    # list_display = [
+    #     "id",
+    #     "thumbnail_preview",
+    #     "get_video_timestamp",
+    #     "progress_bar",
+    #     "video_status"
+    # ]
 
     def filter_institute(self, request, qs):
         memberships = request.user.get_memberships()
         institutes = [m.institute for m in memberships]
-        return qs.filter(device__institute__in=institutes)
+        return qs.filter(institute__in=institutes)
 
