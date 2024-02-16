@@ -1,13 +1,20 @@
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
+from django.http import HttpResponseBadRequest, HttpResponseForbidden, HttpResponseRedirect
 from django.urls import path
+from django.shortcuts import redirect, reverse
 
-from api.models import CameraConfig, Video, Device
+from api.models import CameraConfig, Video, Device, TaskForm, TaskFormStatus
 from api.admin import BaseAdmin, SiteUserFilter, BaseForm
+from api.task_utils import get_task_form
 from api.views.camera_config import CALLBACK_FUNCTIONS_FORM
 
 callback_options = [{"name": c.lstrip("get_form_callback_"), "value": c} for c in CALLBACK_FUNCTIONS_FORM]
+
+callback_discharge = [{"name": c["name"].replace("_", " ").capitalize(), "value": c["value"]} for c in callback_options if c["name"].startswith("discharge")]
+callback_video = [{"name": c["name"].replace("_", " ").capitalize(), "value": c["value"]} for c in callback_options if c["name"].startswith("video")]
+
 import json
 import pyorc
 
@@ -105,7 +112,8 @@ class CameraConfigAdmin(BaseAdmin):
         options_list = ['Option 1', 'Option 2', 'Option 3']
         extra_context = extra_context or {}
         extra_context['device_options'] = devices_list
-        extra_context['callback_options'] = callback_options
+        extra_context['callback_discharge'] = callback_discharge
+        extra_context['callback_video'] = callback_video
         return super(CameraConfigAdmin, self).change_view(
             request, object_id, form_url, extra_context=extra_context,
         )
@@ -158,6 +166,43 @@ class CameraConfigAdmin(BaseAdmin):
         if request.method == "POST":
             # get the data
             device_id = request.POST.get("device")
+            try:
+                device = Device.objects.get(pk=device_id)
+                if not (request.user == device.creator):
+                    messages.error(request, f"Device {device_id} is not owned by you")
+                    return HttpResponseRedirect(reverse("admin:api_cameraconfig_change", args=(pk, )))
+            except:
+                messages.error(request, f"Device {device_id} does not exist")
+                # return redirect('admin/api/cameraconfig')
+                return HttpResponseRedirect(reverse("admin:api_cameraconfig_change", args=(pk, )))
+            # check if a NEW task form is already available. Do not allow having more than one NEW in the queue
+            queryset = TaskForm.objects.filter(status=TaskFormStatus.NEW).filter(device=device)
+            if len(queryset) > 0:
+                messages.error(request, f"A new task form for device {device_id} already exists. If you want to cancel this task form, please first delete it.")
+                return HttpResponseRedirect(reverse("admin:api_cameraconfig_change", args=(pk, )))
+
+            # collect the callbacks
+            query_callbacks = [
+                request.POST.get("discharge"),
+                request.POST.get("video")
+            ]
+            instance = self.get_object(request, pk)
+            task_form = get_task_form(instance, query_callbacks)
+            record = TaskForm(
+                task_body=task_form,
+                device=device,
+                creator=request.user,
+                institute=instance.institute
+            )
+            record.save()
+            return HttpResponseRedirect(reverse("admin:api_taskform_change", args=(record.id, )))
+            #
+                # return HttpResponseBadRequest(f"Device {device_id} does not exist.")
+                # # return Response(
+                #     data={"device_id": [f"Device {request.query_params['device_id']} does not exist."]},
+                #     status=status.HTTP_400_BAD_REQUEST,
+                #     # content_type="application/json"
+                # )
 
         print("HELLO THERE")
 

@@ -20,7 +20,6 @@ def get_device_data():
         "processor": platform.processor(),
         "memory": psutil.virtual_memory().total / (1024**3),
         "ip_address": get_ip(),
-        "institute": 1
     }
     return data
 

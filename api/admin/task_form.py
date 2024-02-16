@@ -7,22 +7,14 @@ from api.models import TaskForm, CameraConfig
 
 class TaskFormForm(BaseForm):
 
-    camera_config = forms.ModelChoiceField(
-        queryset=CameraConfig.objects.all(),
-        required=True,
-        to_field_name="camera_config"
-    )
-
     class Meta:
         model = TaskForm
-        fields = ["device", "camera_config"]
+        fields = ["device", "task_body"]
 
 class TaskFormAdmin(BaseAdmin):
 
     form = TaskFormForm
     def has_change_permission(self, request, obj=None):
-        if request.user.is_superuser:
-            return True
         return False
 
     def has_view_permission(self, request, obj=None):
@@ -41,11 +33,21 @@ class TaskFormAdmin(BaseAdmin):
 
     ordering = ["-created_on"]
     list_filter = [TaskInstituteFilter]
+    list_display = [
+        "id",
+        "created_on",
+        "status_icon"
+    ]
 
     # list_display = ["__all__"]
 
     def filter_institute(self, request, qs):
         memberships = request.user.get_memberships()
         institutes = [m.institute for m in memberships]
-        return qs.filter(device__institute__in=institutes)
+        return qs.filter(institute__in=institutes)
 
+
+    def status_icon(self, obj):
+        return obj.status_icon
+    status_icon.short_description = "Status"
+    status_icon.allow_tags = True

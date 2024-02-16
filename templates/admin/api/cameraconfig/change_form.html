@@ -83,7 +83,7 @@
   <fieldset class="module aligned ">
     <h2>Send to device</h2>
 
-    <div class="form-row field-site">
+    <div class="form-row field-device">
         <div>
             <div class="flex-container">
                 <label class="required" for="id_device">Device:</label>
@@ -96,14 +96,34 @@
                     </select>
                 </div>
             </div>
-
+        </div>
+    </div>
+    <div class="form-row field-callback-discharge">
+        <div>
             <div class="flex-container">
-                <label class="required" for="callbacks">Callbacks:</label>
-                <div class="related-widget-wrapper" data-model-ref="callbacks">
-                    <div name="callbacks" id="callbacks">
-                        {% for choice in callback_options %}
+                <label class="required" for="callbacks_discharge">Callbacks discharge:</label>
+                <div class="related-widget-wrapper" data-model-ref="callbacks_discharge">
+                    <div name="callbacks_discharge" id="callbacks_discharge">
+                        {% for choice in callback_discharge %}
                             <label>
-                                <input type="checkbox" name="{{ choice.value }}" value="{{ choice.name }}">
+                                <input type="radio" name="discharge" value="{{ choice.value }}" required>
+                                {{ choice.name }}
+                            </label><br>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-row field-callback-video">
+        <div>
+            <div class="flex-container">
+                <label class="required" for="callbacks_video">Callbacks video:</label>
+                <div class="related-widget-wrapper" data-model-ref="callbacks_video">
+                    <div name="callbacks_video" id="callbacks_video">
+                        {% for choice in callback_video %}
+                            <label>
+                                <input type="radio" name="video" value="{{ choice.value }}" required>
                                 {{ choice.name }}
                             </label><br>
                         {% endfor %}
@@ -114,22 +134,12 @@
     </div>
 
     <div class="submit-row">
-        <button type="submit">Submit to device</button>
-<!--        <input type="submit" name="_send_to_device" form="send_form" value="send" style="background:green;" class="default"></input>-->
+<!--        <button type="submit" class="closeLink">Submit to device</button>-->
+        <input type="submit" name="_send_to_device" value="send" style="background:green;" class="default"></input>
     </div>
 </fieldset>
 </form>
 </div>
-
-<script>
-function submitForm() {
-    form = document.getElementById("send_form");
-    console.log("Submitting a form for you");
-    console.log(form);
-    form.submit()
-}
-
-</script>
 {% endblock %}
 <!--<div class="submit-row">-->
 <!--        <input type="submit" value=""-->

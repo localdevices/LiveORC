@@ -20,6 +20,18 @@ class BaseModel(models.Model):
     def institute(self):
         return self.site.institute
 
+class BaseModelNoInstitute(models.Model):
+
+    creator = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        editable=False
+    )
+
+    class Meta:
+        abstract = True
+
+
 
 class BaseInstituteModel(models.Model):
     """

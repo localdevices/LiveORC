@@ -1,4 +1,4 @@
-from .base import BaseModel, BaseInstituteModel
+from .base import BaseModel, BaseInstituteModel, BaseModelNoInstitute
 from .site import Site
 from .server import Server
 from .profile import Profile

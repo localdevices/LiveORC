@@ -1,17 +1,18 @@
-from django.db import models
+from django.contrib.gis.db import models
 from django.utils import timezone
-from datetime import datetime
+from django.contrib.auth import get_user_model
 
-from api.models import BaseInstituteModel
+from api.models import BaseModelNoInstitute
 
 
-class Device(BaseInstituteModel):
+class Device(BaseModelNoInstitute):
     """
     Device records, that keep track of field devices, and provide configuration messages to them
+    A device belong to a user, not an institute. Based on the configuration, a device can
+    also swap for which institute it performs duties.
     """
     id = models.UUIDField(
         primary_key=True,
-        # editable=False,
         help_text="Unique identifier of device"
     )
     name = models.CharField(max_length=250, help_text="Name of device")
@@ -22,3 +23,8 @@ class Device(BaseInstituteModel):
     last_seen = models.DateTimeField(help_text="Last seen online", default=timezone.now)
     ip_address = models.GenericIPAddressField(help_text="IP-address of last online occurrence")
 
+    def __str__(self):
+        return "Device {:s} at ip address {:s}".format(self.name, self.ip_address)
+
+    def __repr__(self):
+        return self.__str__()

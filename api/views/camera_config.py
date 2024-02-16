@@ -76,7 +76,7 @@ class CameraConfigViewSet(BaseModelViewSet):
         try:
             device = Device.objects.get(pk=request.query_params["device_id"])
             # TODO: check if device belongs to request.user
-            if not(request.user.is_institute_owner(device.institute)):
+            if not(request.user == device.creator):
                 return Response(
                     data={"device_id": [f"Device {request.query_params['device_id']} does not belong to user."]},
                     status=status.HTTP_403_FORBIDDEN,
@@ -110,9 +110,11 @@ class CameraConfigViewSet(BaseModelViewSet):
         instance = self.get_object()
         task_form = get_task_form(instance, query_callbacks)
         record = TaskForm(
+            id=task_form["id"],
             task_body=task_form,
             device=device,
-            creator=request.user
+            creator=request.user,
+            institute=instance.institute
         )
         record.save()
         # TODO: implement task_form in database

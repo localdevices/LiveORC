@@ -1,15 +1,16 @@
-from api.admin import BaseAdmin, BaseForm
-from api.admin import TaskInstituteFilter
+from django.contrib.gis import admin
+from django import forms
 
 from api.models import Device
 
-class DeviceForm(BaseForm):
+class DeviceForm(forms.ModelForm):
 
     class Meta:
         model = Device
         fields = "__all__"
 
-class DeviceAdmin(BaseAdmin):
+
+class DeviceAdmin(admin.GISModelAdmin):
     def has_add_permission(self, request):
         return False
 
@@ -27,6 +28,7 @@ class DeviceAdmin(BaseAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
 
     form = DeviceForm
     # list_filter = [TaskInstituteFilter]

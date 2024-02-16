@@ -1,5 +1,6 @@
 import json
 import os
+import uuid
 
 from rest_framework.test import APIClient
 from rest_framework import status
@@ -194,11 +195,28 @@ class CameraConfigViewTests(InitTestCase):
             data,
         )
         device_id = r.json()["id"]
+        device_details = r.json()
         # now see if a task_form can be produced using the current camera_config
         r = client.post(
             f'/api/site/1/cameraconfig/1/create_task/?device_id={device_id}&callback=discharge_post&callback=video_no_file_post',
         )
         self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+        # now request the prepared task form as device
+        new_device_id = uuid.uuid4()
+        url = f"/api/device/{new_device_id}/get_task_form/"
+        r = client.get(
+            url,
+            data=device_details
+        )
+        self.assertEquals(r.status_code, status.HTTP_204_NO_CONTENT)
+
+        url = f"/api/device/{device_id}/get_task_form/"
+        r = client.get(
+            url,
+            data=device_details
+        )
+
+        # finally check if other user cannot access
         client.logout()
         client.login(username='user2@institute1.com', password='test1234')
         r = client.post(
@@ -209,6 +227,7 @@ class CameraConfigViewTests(InitTestCase):
                 "camera_config": json.dumps(cam_config)
             }
         )
+
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
