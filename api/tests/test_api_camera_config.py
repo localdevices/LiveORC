@@ -9,6 +9,8 @@ from .test_setup_db import InitTestCase
 from .test_api_device import get_device_data
 # Create your tests here.
 
+from api.models import TaskForm, TaskFormStatus
+
 cam_config = {
             "height": 1080,
             "width": 1920,
@@ -203,10 +205,12 @@ class CameraConfigViewTests(InitTestCase):
         self.assertEquals(r.status_code, status.HTTP_201_CREATED)
         # now request the prepared task form as device
         new_device_id = uuid.uuid4()
+        new_device_details = device_details
+        new_device_details["id"] = new_device_id
         url = f"/api/device/{new_device_id}/get_task_form/"
         r = client.get(
             url,
-            data=device_details
+            data=new_device_details
         )
         self.assertEquals(r.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -215,7 +219,23 @@ class CameraConfigViewTests(InitTestCase):
             url,
             data=device_details
         )
-
+        # patch the task form
+        url = f"/api/device/{device_id}/patch_task_form/"
+        task_id = r.json()["id"]
+        r = client.patch(
+            url,
+            data={
+                "id": task_id,
+                "status": 3
+            },
+        )
+        self.assertEquals(r.status_code, status.HTTP_200_OK)
+        # check if the taskform indeed now is stored as ACCEPTED in the database
+        self.assertEquals(
+            TaskFormStatus(TaskForm.objects.get(pk=task_id).status),
+            TaskFormStatus.ACCEPTED
+        )
+        # check the status of the task in the background
         # finally check if other user cannot access
         client.logout()
         client.login(username='user2@institute1.com', password='test1234')

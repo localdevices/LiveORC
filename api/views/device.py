@@ -39,10 +39,18 @@ class DeviceViewSet(BaseModelViewSet):
         """Check if a new task form is available for the device that is logging in """
         try:
             device = Device.objects.get(pk=kwargs["pk"])
+            if not(request.user == device.creator):
+                return Response(
+                    data={"device_id": [f"Device {device.id} does not belong to user."]},
+                    status=status.HTTP_403_FORBIDDEN,
+                    content_type="application/json"
+                )
+
         except:
             # if this nis an entirely new device, then make a new device for this particular case
             params = request.query_params.dict()
             params["creator"] = request.user
+            params["id"] = kwargs["pk"]
             device = Device(**params)
         # update the device
         ip_address = request.META.get("REMOTE_ADDR")
@@ -54,16 +62,55 @@ class DeviceViewSet(BaseModelViewSet):
         queryset = TaskForm.objects.filter(status=TaskFormStatus.NEW).filter(device=device)
         if len(queryset) == 0:
             return Response(
-                data={"device_id": [f"No new configuration for Device {request.query_params['device_id']}"]},
+                data={"device_id": [f"No new configuration for Device {device.id}"]},
                 status=status.HTTP_204_NO_CONTENT,
                 content_type="application/json"
             )
         if len(queryset) == 1:
             task_form = queryset[0]
             serializer = TaskFormSerializer(task_form)
+            # set status to SENT (will be set to REJECTED or ACCEPTED once validated on NodeORC)
+            task_form.status = TaskFormStatus.SENT
+            task_form.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(
-                data={"task_form": [f"There are multiple new task forms available for device {request.query_params['device_id']}, delete them so that only one is available"]},
+                data={"task_form": [f"There are multiple new task forms available for device {device.id}, delete them so that only one is available"]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+    @action(detail=True, methods=['patch'], renderer_classes=[renderers.JSONRenderer])
+    def patch_task_form(self, request, *args, **kwargs):
+        """ Patch a task form to ACCEPTED or REJECTED """
+        try:
+            device = Device.objects.get(pk=kwargs["pk"])
+            if not(request.user == device.creator):
+                return Response(
+                    data={"device_id": [f"Device {device.id} does not belong to user."]},
+                    status=status.HTTP_403_FORBIDDEN,
+                    content_type="application/json"
+                )
+        except:
+            return Response(
+                data={"device_id": [f"Device {kwargs['pk']} does not exist."]},
+                status=status.HTTP_400_BAD_REQUEST,
+                content_type="application/json"
+            )
+        task_form_id = request.data.get("id")
+        # get the status by status number
+        task_status = TaskFormStatus(
+            int(request.data.get("status"))
+        )
+        task_form = TaskForm.objects.get(pk=task_form_id)
+        # patch the status
+        task_form.status = task_status
+        task_form.save()
+        serializer = TaskFormSerializer(task_form)
+        # print(f"URL: {request.build_absolute_uri(reverse('video'))}")
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
+
+

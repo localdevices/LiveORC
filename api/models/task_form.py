@@ -8,7 +8,7 @@ from api.models import BaseModelNoInstitute, BaseInstituteModel, Device
 class TaskFormStatus(models.IntegerChoices):
     NEW = 0, "New"
     SENT = 1, "Sent"
-    ERROR = 2, "Error"
+    REJECTED = 2, "Rejected"
     ACCEPTED = 3, "Accepted"
 
 
