@@ -238,7 +238,10 @@ class CameraConfigViewTests(InitTestCase):
         # check the status of the task in the background
         # finally check if other user cannot access
         client.logout()
-        client.login(username='user2@institute1.com', password='test1234')
+        client.login(
+            username='user2@institute1.com',
+            password='test1234'
+        )
         r = client.post(
             '/api/site/1/cameraconfig/',
             {
@@ -247,7 +250,6 @@ class CameraConfigViewTests(InitTestCase):
                 "camera_config": json.dumps(cam_config)
             }
         )
-
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
