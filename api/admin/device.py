@@ -2,6 +2,7 @@ from django.contrib.gis import admin
 from django import forms
 
 from api.models import Device
+from api.models import DeviceStatus, DeviceFormStatus
 
 class DeviceForm(forms.ModelForm):
 
@@ -27,22 +28,42 @@ class DeviceAdmin(admin.GISModelAdmin):
             return True
 
     def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
         return False
 
 
     form = DeviceForm
     # list_filter = [TaskInstituteFilter]
     #
-    # list_display = [
-    #     "id",
-    #     "thumbnail_preview",
-    #     "get_video_timestamp",
-    #     "progress_bar",
-    #     "video_status"
-    # ]
+    list_display = [
+        "name",
+        "id",
+        "message",
+        "status_ok",
+        "form_status_ok"
+    ]
 
     def filter_institute(self, request, qs):
         memberships = request.user.get_memberships()
         institutes = [m.institute for m in memberships]
         return qs.filter(institute__in=institutes)
+
+    def status_ok(self, obj):
+        """
+        Check if device status is healthy
+        """
+
+        return obj.status == DeviceStatus.HEALTHY
+    status_ok.boolean = True
+    status_ok.allow_tags = True
+
+    def form_status_ok(self, obj):
+        """
+        Check if currently active form of device is functional
+        """
+
+        return obj.form_status == DeviceFormStatus.VALID_FORM
+    form_status_ok.boolean = True
+    form_status_ok.allow_tags = True
 

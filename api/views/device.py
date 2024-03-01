@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from api.serializers import DeviceSerializer, TaskFormSerializer
-from api.models import Device, TaskFormStatus, TaskForm
+from api.models import Device, TaskFormStatus, TaskForm, DeviceStatus, DeviceFormStatus
 from api.views import BaseModelViewSet
 from users.models import Institute
 
@@ -37,6 +37,11 @@ class DeviceViewSet(BaseModelViewSet):
     @action(detail=True, methods=['get'], renderer_classes=[renderers.JSONRenderer])
     def get_task_form(self, request, *args, **kwargs):
         """Check if a new task form is available for the device that is logging in """
+        # get information about device
+        params = request.data.dict()
+        if not(params):
+            # try to get them from query_params, usually with unit tests, they end up here
+            params = request.query_params.dict()
         try:
             device = Device.objects.get(pk=kwargs["pk"])
             if not(request.user == device.creator):
@@ -45,10 +50,8 @@ class DeviceViewSet(BaseModelViewSet):
                     status=status.HTTP_403_FORBIDDEN,
                     content_type="application/json"
                 )
-
         except:
-            # if this nis an entirely new device, then make a new device for this particular case
-            params = request.query_params.dict()
+            # if this is an entirely new device, then make a new device for this particular case
             params["creator"] = request.user
             params["id"] = kwargs["pk"]
             device = Device(**params)
@@ -57,6 +60,9 @@ class DeviceViewSet(BaseModelViewSet):
         if ip_address:
             device.ip_address = ip_address
         device.last_seen = timezone.now()
+        device.status = DeviceStatus(int(params.get("status")))
+        device.form_status = DeviceFormStatus(int(params.get("form_status")))
+        device.message = params.get("message")
         device.save()
         # query for new task forms for this particular device
         queryset = TaskForm.objects.filter(status=TaskFormStatus.NEW).filter(device=device)

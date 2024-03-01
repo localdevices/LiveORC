@@ -93,11 +93,6 @@ class CameraConfigAdmin(BaseAdmin):
          )
     ]
 
-    def post(self, request, pk, *args, **kwargs):
-        print("CHECK")
-    def response_post_save_change(self, request, obj):
-        print("CHECK")
-
     def change_view(
             self,
             request,
@@ -117,23 +112,6 @@ class CameraConfigAdmin(BaseAdmin):
         return super(CameraConfigAdmin, self).change_view(
             request, object_id, form_url, extra_context=extra_context,
         )
-
-    def has_add_permission(self, request):
-        True
-
-    def has_change_permission(self, request, obj=None):
-        # once made, you can only delete a cam config
-        return True
-
-    def has_view_permission(self, request, obj=None):
-        if request.user.is_superuser:
-            return True
-        if obj:
-            if obj.institute in request.user.get_membership_institutes():
-                return True
-        elif len(request.user.get_membership_institutes()) > 0:
-            return True
-
 
     def get_urls(self):
         urls = super().get_urls()

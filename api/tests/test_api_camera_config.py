@@ -204,13 +204,15 @@ class CameraConfigViewTests(InitTestCase):
         )
         self.assertEquals(r.status_code, status.HTTP_201_CREATED)
         # now request the prepared task form as device
-        new_device_id = uuid.uuid4()
-        new_device_details = device_details
-        new_device_details["id"] = new_device_id
+        new_device_details = get_device_data()
+        new_device_id = new_device_details["id"]
+        # new_device_id = uuid.uuid4()
+        # new_device_details = device_details
+        # new_device_details["id"] = new_device_id
         url = f"/api/device/{new_device_id}/get_task_form/"
         r = client.get(
             url,
-            data=new_device_details
+            json=new_device_details,
         )
         self.assertEquals(r.status_code, status.HTTP_204_NO_CONTENT)
 

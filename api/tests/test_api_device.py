@@ -9,8 +9,10 @@ from rest_framework import status
 from .test_setup_db import InitTestCase
 from users.models import User, Institute
 
+
 def get_ip():
     return requests.get('https://api.ipify.org').content.decode('utf8')
+
 
 def get_device_data():
     data = {
@@ -20,6 +22,8 @@ def get_device_data():
         "processor": platform.processor(),
         "memory": psutil.virtual_memory().total / (1024**3),
         "ip_address": get_ip(),
+        "status": 0,
+        "form_status": 0
     }
     return data
 

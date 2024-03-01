@@ -9,5 +9,5 @@ from .project import Project
 from .time_series import TimeSeries
 from .video import Video, VideoStatus
 from .task import Task
-from .device import Device
+from .device import Device, DeviceStatus, DeviceFormStatus
 from .task_form import TaskForm, TaskFormStatus

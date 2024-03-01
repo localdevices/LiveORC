@@ -195,6 +195,7 @@ def get_subtasks(instance):
     # if we have more than one.
     return [subtask]
 
+
 def get_callbacks(instance, query_callbacks):
     callbacks = [getattr(callback_utils, c)(instance) for c in query_callbacks]
     return callbacks

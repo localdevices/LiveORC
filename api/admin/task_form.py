@@ -31,11 +31,11 @@ class TaskFormAdmin(BaseAdmin):
             return True
         return False
 
-    ordering = ["-created_on"]
+    ordering = ["-created_at"]
     list_filter = [TaskInstituteFilter]
     list_display = [
         "id",
-        "created_on",
+        "created_at",
         "status_icon"
     ]
 

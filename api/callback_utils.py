@@ -73,7 +73,8 @@ def get_task_callback_discharge_patch(instance):
                 str(instance.camera_config.site.id),
                 str(instance.time_series.id)
             ])
-        )
+        ),
+        file="transect"
     )
 
 
@@ -98,8 +99,10 @@ def get_form_callback_discharge_post(instance):
             args=([
                 str(instance.site.id),
             ])
-        )
+        ),
+        file="transect"
     )
+
 
 def get_form_callback_video_post(instance):
     return models.Callback(
@@ -114,6 +117,7 @@ def get_form_callback_video_post(instance):
         files_to_send=["jpg"]
     )
 
+
 def get_form_callback_video_no_file_post(instance):
     return models.Callback(
         func_name="video_no_file",
@@ -123,7 +127,9 @@ def get_form_callback_video_no_file_post(instance):
         },
         endpoint=reverse(
             "api:video-list",
-        )
+        ),
+        files_to_send=["jpg"]
+
     )
 
 
@@ -140,6 +146,7 @@ def get_task_callback_video_patch(instance):
                 str(instance.camera_config.site.id),
                 str(instance.id)
             ])
-        )
+        ),
+        files_to_send=["jpg"]
     )
 

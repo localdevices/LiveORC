@@ -10,6 +10,7 @@ class TaskFormStatus(models.IntegerChoices):
     SENT = 1, "Sent"
     REJECTED = 2, "Rejected"
     ACCEPTED = 3, "Accepted"
+    BROKEN = 6, "Broken"
 
 
 class TaskForm(BaseInstituteModel):
@@ -26,7 +27,7 @@ class TaskForm(BaseInstituteModel):
         help_text="Identifier of task form as stored on both LiveORC and NodeORC side"
     )
     # id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)  # we use a uuid to ensure the name is and remain unique and can be used for file naming
-    created_on = models.DateTimeField(
+    created_at = models.DateTimeField(
         default=timezone.now,
         editable=False,
         help_text="Date and time on which task form record is created"
@@ -34,7 +35,8 @@ class TaskForm(BaseInstituteModel):
 
     status = models.PositiveSmallIntegerField(choices=TaskFormStatus.choices, default=0)
     task_body = models.JSONField(help_text="task body used to perform task by available node.", default=dict)
-    device = models.ForeignKey(Device, on_delete=models.CASCADE)
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, help_text="Device for which task form is meant")
+    message = models.TextField(help_text="message from device about status in case of error", null=True)
 
     def __str__(self):
         return "Task {:s} for {:s}".format(str(self.id), str(self.device))
@@ -48,12 +50,12 @@ class TaskForm(BaseInstituteModel):
             return mark_safe(
                 f"""<i class="fa-solid fa-stopwatch" style="color: #417893;"></i> Sent"""
             )
-        elif self.status == TaskFormStatus.ERROR:
+        elif self.status == TaskFormStatus.REJECTED:
             return mark_safe(
                 f"""<img src="/static/admin/img/icon-no.svg" alt="True"> Error"""
             )
         else:
             # accepted
             return mark_safe(
-                f"""<img src="/static/admin/img/icon-yes.svg" alt="True"> Done"""
+                f"""<img src="/static/admin/img/icon-yes.svg" alt="True"> Accepted"""
             )
