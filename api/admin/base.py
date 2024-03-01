@@ -47,6 +47,8 @@ class BaseAdmin(admin.GISModelAdmin):
 
     def has_module_permission(self, request):
         # if user is not staff and does not have any memberships then user is not entitled to anything, so return False
+        if request.user.is_superuser:
+            return True
         return request.user.is_staff and len(request.user.get_memberships()) > 0
 
     def has_add_permission(self, request):

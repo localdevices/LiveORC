@@ -11,6 +11,7 @@ from users.models import (
 )
 
 from .user import UserAdmin
+from .first_user import FirstUserCreationForm, FirstUserAdmin
 from .institute import MemberAdmin
 
 # initiate orc admin site with specific titles and logos

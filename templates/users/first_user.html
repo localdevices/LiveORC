@@ -1,0 +1,21 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+{% block content %}
+{{ block.super }}
+<body>
+      <div id="content-start" class="content" tabindex="-1">
+
+        <!-- Content -->
+        <div id="content" class="colM">
+
+          <h1>Welcome to LiveOpenRiverCam</h1>
+            <div><p>To get started, you will need at least one superuser account. This page will only show up once. After this, only the superuser can add and administer new accounts.</p>
+            </div>
+          <div id="content-main">
+
+    <form method="post">
+        {% csrf_token %} {{ form.as_p }}
+    <input type="submit" value="Create new user" />
+    </form></div></div></div>
+</body>
+{% endblock %}
