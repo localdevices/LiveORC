@@ -1,10 +1,15 @@
-from django.test import TestCase
-from django.contrib.auth.models import User
-from django.urls import reverse
-from rest_framework.test import APIRequestFactory, APIClient
+import json
+import os
+import uuid
+
+from rest_framework.test import APIClient
 from rest_framework import status
 from .test_setup_db import InitTestCase
+
+from .test_api_device import get_device_data
 # Create your tests here.
+
+from api.models import TaskForm, TaskFormStatus
 
 cam_config = {
             "height": 1080,
@@ -113,6 +118,23 @@ cam_config = {
             "bbox": "POLYGON ((192105.83143541854 313146.7594177593, 192097.9736885897 313162.8536376775, 192106.27690422587 313166.9075506143, 192114.13465105472 313150.81333069614, 192105.83143541854 313146.7594177593))"
         }
 
+recipe_file = os.path.join(
+    os.path.dirname(__file__),
+    "testdata",
+    "hommerich_recipe.json"
+)
+profile_file = os.path.join(
+    os.path.dirname(__file__),
+    "testdata",
+    "hommerich_profile.geojson"
+)
+
+
+with open(recipe_file, "r") as f:
+    recipe = json.loads(f.read())
+
+with open(profile_file, "r") as f:
+    profile = json.loads(f.read())
 
 
 class CameraConfigViewTests(InitTestCase):
@@ -135,27 +157,95 @@ class CameraConfigViewTests(InitTestCase):
             '/api/site/',
             {"name": "geul", "geom": "SRID=4326;POINT (5.914115954402695 50.80678292086996)", "institute": 1}
         )
-        import json
+        # make a profile and recipe
         r = client.post(
-            '/api/cameraconfig/',
+            '/api/site/1/profile/',
             {
-                "name": "geul_cam",
-                "site": 1,
-                "end_date": "2024-01-01",
-                "camera_config": json.dumps(cam_config)
+                "name": "some_profile",
+                "data": json.dumps(profile),
+                "institute": 1}
+        )
+        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+        r = client.post(
+            '/api/recipe/',
+            {
+                "name": "general_recipe",
+                "data": json.dumps(recipe),
+                "institute": 1
             }
         )
+
+        # check the request
+        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+
+        # make a camera_config, with profile and recipe included
         r = client.post(
             '/api/site/1/cameraconfig/',
             {
                 "name": "geul_cam",
                 "end_date": "2024-01-01",
-                "camera_config": json.dumps(cam_config)
+                "camera_config": json.dumps(cam_config),
+                "profile": 1,
+                "recipe": 1
             }
         )
         self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+        # make a device with which we can test the task_form creation
+        data = get_device_data()
+        r = client.post(
+            '/api/device/',
+            data,
+        )
+        device_id = r.json()["id"]
+        device_details = r.json()
+        # remove non-serializable parts
+        device_details.pop("message")
+        # now see if a task_form can be produced using the current camera_config
+        r = client.post(
+            f'/api/site/1/cameraconfig/1/create_task/?device_id={device_id}&callback=discharge_post&callback=video_no_file_post',
+        )
+        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+        # now request the prepared task form as device
+        new_device_details = get_device_data()
+        new_device_id = new_device_details["id"]
+        # new_device_id = uuid.uuid4()
+        # new_device_details = device_details
+        # new_device_details["id"] = new_device_id
+        url = f"/api/device/{new_device_id}/get_task_form/"
+        r = client.get(
+            url,
+            data=new_device_details,
+        )
+        self.assertEquals(r.status_code, status.HTTP_204_NO_CONTENT)
+
+        url = f"/api/device/{device_id}/get_task_form/"
+        r = client.get(
+            url,
+            data=device_details
+        )
+        # patch the task form
+        url = f"/api/device/{device_id}/patch_task_form/"
+        task_id = r.json()["id"]
+        r = client.patch(
+            url,
+            data={
+                "id": task_id,
+                "status": 3
+            },
+        )
+        self.assertEquals(r.status_code, status.HTTP_200_OK)
+        # check if the taskform indeed now is stored as ACCEPTED in the database
+        self.assertEquals(
+            TaskFormStatus(TaskForm.objects.get(pk=task_id).status),
+            TaskFormStatus.ACCEPTED
+        )
+        # check the status of the task in the background
+        # finally check if other user cannot access
         client.logout()
-        client.login(username='user2@institute1.com', password='test1234')
+        client.login(
+            username='user2@institute1.com',
+            password='test1234'
+        )
         r = client.post(
             '/api/site/1/cameraconfig/',
             {

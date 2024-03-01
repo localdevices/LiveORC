@@ -5,10 +5,12 @@ from api.models import (
     CameraConfig,
     Video,
     Task,
+    TaskForm,
     Server,
     Profile,
     Recipe,
     TimeSeries,
+    Device
 )
 
 from .admin_filters import (
@@ -27,7 +29,9 @@ from .profile import ProfileAdmin
 from .recipe import RecipeAdmin
 from .video import VideoInline, VideoAdmin
 from .site import SiteAdmin
+from .device import DeviceAdmin
 from .task import TaskAdmin
+from .task_form import TaskFormAdmin
 from .server import ServerAdmin
 
 # initiate orc admin site with specific titles and logos
@@ -42,8 +46,10 @@ admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 # admin.site.register(Project, ProjectAdmin)  # leave out for now, may become relevant for future geospatial applications
 admin.site.register(Video, VideoAdmin)
+admin.site.register(Device, DeviceAdmin)
 admin.site.register(Server, ServerAdmin)
 admin.site.register(Task, TaskAdmin)
+admin.site.register(TaskForm, TaskFormAdmin)
 admin.site.register(TimeSeries, TimeSeriesAdmin)
 admin.site.unregister(Group)
 

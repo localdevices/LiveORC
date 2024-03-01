@@ -4,7 +4,17 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView
 )
-from api.views import SiteViewSet, ProfileViewSet, RecipeViewSet, CameraConfigViewSet, VideoViewSet, VideoSiteViewSet, TimeSeriesViewSet, TaskViewSet #, switch_institute
+from api.views import (
+    SiteViewSet,
+    ProfileViewSet,
+    RecipeViewSet,
+    CameraConfigViewSet,
+    VideoViewSet,
+    VideoSiteViewSet,
+    TimeSeriesViewSet,
+    TaskViewSet,
+    DeviceViewSet
+)
 
 app_name = 'api'
 
@@ -15,6 +25,7 @@ router.register(r'site', SiteViewSet)
 # router.register(r'profile', ProfileViewSet)
 router.register(r'recipe', RecipeViewSet)
 router.register(r'video', VideoViewSet)
+router.register(r'device', DeviceViewSet)
 # router.register(r'timeseries', TimeSeriesViewSet)
 
 site_router = routers.NestedSimpleRouter(router, r'site', lookup='site')

@@ -1,8 +1,9 @@
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.conf import settings
 from django.urls import reverse
 # helper functions to develop tasks from models
 from nodeorc import models
+from api.models import Video, CameraConfig
+from api import callback_utils
 
 OUTPUT_FILES_ALL = {
     "piv": {
@@ -24,6 +25,63 @@ OUTPUT_FILES_ALL = {
 
 }
 
+# this is used when a task_form is created
+OUTPUT_FILES_ALL_TEMPLATE = {
+    "piv": {
+        "remote_name": "piv_{}.nc",
+        "tmp_name": "OUTPUT/piv.nc"
+    },
+    "transect": {
+        "remote_name": "transect_1_{}.nc",
+        "tmp_name": "OUTPUT/transect_transect_1.nc"
+    },
+    "piv_mask": {
+        "remote_name": "piv_mask_{}.nc",
+        "tmp_name": "OUTPUT/piv_mask.nc"
+    },
+    "jpg": {
+        "remote_name": "plot_quiver_{}.jpg",
+        "tmp_name": "OUTPUT/plot_quiver.jpg"
+    }
+
+}
+
+def get_task_form(
+    instance,
+    query_callbacks,
+    serialize=False,
+):
+    """
+    Retrieve a subtask form for repetitive use on nodeORC, e.g. for a fixed site
+
+    Parameters
+    ----------
+    instance : CameraConfig
+        Camera configuration for which to create a Task Form
+    query_callbacks : list[str]
+        names of callbacks to retrieve for the instance
+    request : request
+    serialize : bool
+        Defines whether to serialize the task or leave it as a nodeorc Task Object
+    *args : list
+        additional args to parse
+    **kwargs : dict
+        additional kwargs to parse
+
+    Returns
+    -------
+    dict (serialized) or nodeorc.models.Task (not serialized)
+    """
+    subtasks = get_subtasks_form(instance)
+    output_files = OUTPUT_FILES_ALL_TEMPLATE
+    callbacks = get_callbacks(instance, query_callbacks)
+    task_form = models.Task(
+        subtasks=subtasks,
+        output_files=output_files,
+        callbacks=callbacks,
+    )
+    return task_form.to_json(serialize=serialize)
+
 
 def get_task(instance, request, serialize=True, *args, **kwargs):
     """
@@ -37,16 +95,15 @@ def get_task(instance, request, serialize=True, *args, **kwargs):
     -------
 
     """
-    callback_url = get_callback_url(request)
-    # TODO connect storage once agnostic storage solutions implemented
-    storage = get_storage(instance)
     subtasks = get_subtasks(instance)
+    storage = get_storage(instance)
     output_files = OUTPUT_FILES_ALL
+    callbacks = []
     task = models.Task(
-        callback_url=callback_url,
-        storage=storage,
         subtasks=subtasks,
-        output_files=output_files
+        output_files=output_files,
+        callbacks=callbacks,
+        storage=storage
     )
     return task.to_json(serialize=serialize)
 
@@ -89,6 +146,16 @@ def get_storage(instance):
     )
     # TODO: make storage agnostic for cloud storage options
 
+def get_subtasks_form(instance):
+    camera_config = instance
+    video = None
+    subtask = get_subtask_all(
+        camera_config=camera_config,
+        video=video
+    )
+    return [subtask]
+
+
 def get_subtasks(instance):
     """
     Translates video object into a full list of subtasks. The list of subtasks can be defined or automatically
@@ -108,31 +175,43 @@ def get_subtasks(instance):
         raise Exception(error_msg)
     if not(instance.time_series.h):
         raise Exception(error_msg)
-    if not(instance.camera_config.recipe):
+    camera_config = instance.camera_config
+    video = instance
+    if not(camera_config.recipe):
         raise Exception("Cannot create task, no recipe available")
     # we assume first that only 2d is processed
     task_type = "2d_only"
     # check if we can do a full processing with 1d included. This requires camera profile and a transect section in the
     # recipe
-    if instance.camera_config.profile and "transect" in instance.camera_config.recipe.data:
+    if camera_config.profile and "transect" in camera_config.recipe.data:
         task_type = "all"
 
     # now dependent on the available data, prepare a task
     if task_type == "all":
-        subtask = get_subtask_all(instance)
+        subtask = get_subtask_all(camera_config=camera_config, video=video)
+    else:
+        raise NotImplementedError("2D only tasks are not yet supported. Add a profile to the Camera Config to allow for processing this task.")
     # we provide a list back so that we can later extend this to hold several subtasks, e.g. one per cross section
     # if we have more than one.
     return [subtask]
 
 
+def get_callbacks(instance, query_callbacks):
+    callbacks = [getattr(callback_utils, c)(instance) for c in query_callbacks]
+    return callbacks
 
-def get_subtask_all(instance):
+
+def get_subtask_all(
+        camera_config,
+        video,
+):
     """
     Makes a full subtask using the entire recipe, including getting profiles ready for processing where needed
 
     Parameters
     ----------
-    instance
+    camera_config
+    video
 
     Returns
     -------
@@ -140,28 +219,32 @@ def get_subtask_all(instance):
     """
 
     name = "velocity_flow_subprocess"
-    cameraconfig = instance.camera_config.camera_config
-    h_a = instance.time_series.h
-    videofile = str(instance.file)
-    recipe = instance.camera_config.recipe.data
-    profile = instance.camera_config.profile.data
+    cameraconfig = camera_config.camera_config
+    recipe = camera_config.recipe.data
+    profile = camera_config.profile.data
+    if video:
+        h_a = video.time_series.h
+        videofile = str(video.file)
+        input_files = {
+            "videofile": {
+                "remote_name": str(video.file),
+                "tmp_name": str(video.file)
+            }
+        }
+    else:
+        h_a = -9999.0  # placeholder for real water level
+        videofile = "video.mp4"  # placeholder for real water level
+        input_files = {
+            "videofile": {
+                "remote_name": "video.mp4",
+                "tmp_name": "video.mp4"
+            }
+        }
+    output_files = OUTPUT_FILES_ALL  # hard-coded output file names, typical for this task
     # remove the geojson and shapefile parts
     recipe = recipe_update_profile(recipe, profile)
 
-    # recipe is adapted to match profile, now prepare the callbacks
-
-    callbacks = [
-        get_callback_discharge_patch(instance),
-        get_callback_video_patch(instance)
-    ]
     # TODO: input_files should refer to name of file only (now full subpath to MEDIA_ROOT). Location is arranged by the Storage
-    input_files = {
-        "videofile": {
-           "remote_name": str(instance.file),
-            "tmp_name": str(instance.file)
-        }
-    }
-    output_files = OUTPUT_FILES_ALL  # hard-coded output file names, typical for this task
     # define the subtask
     kwargs = {
         "videofile": videofile,
@@ -174,7 +257,6 @@ def get_subtask_all(instance):
     subtask = models.Subtask(
         name=name,
         kwargs=kwargs,
-        callbacks=callbacks,
         input_files=input_files,
         output_files=output_files
     )
@@ -310,61 +392,5 @@ def get_callback_video_patch(instance):
         )
     )
 
-def callback():
-    return models.Callback(
-        func_name="post_discharge",
-        kwargs={},
-        callback_endpoint="/processing/examplevideo/discharge"  # used to extend the default callback url
-    )
-
-def get_tokens_for_user(user):
-    """
-    Retrieves access and refresh tokens for the user
-
-    Parameters
-    ----------
-    user : User (django auth model instance)
-        The user, typically the one currently logged in and making the request
-
-    Returns
-    -------
-    tokens : dict
-        containing "token_refresh": str and "token_access": str
-
-    """
-    refresh = RefreshToken.for_user(user)
-    return {
-        'token_refresh': str(refresh),
-        'token_access': str(refresh.access_token),
-    }
 
 
-def input_file():
-    """
-    Converts a storage + file location into a File object for nodeorc
-
-    Returns
-    -------
-
-    """
-    return models.File(
-        remote_name="piv.nc",
-        tmp_name="OUTPUT/piv.nc",
-    )
-
-def kwargs_velocimetry():
-    """
-    Collects video file, camera config, recipe and output location into one set of kwargs for velocimetry processor
-
-    Returns
-    -------
-
-    """
-    kwargs = {
-        "videofile": "video.mp4",
-        "cameraconfig": camconfig,
-        "recipe": recipe,
-        "output": os.path.join(temp_path, "OUTPUT"),
-        "prefix": ""
-    }
-    return kwargs

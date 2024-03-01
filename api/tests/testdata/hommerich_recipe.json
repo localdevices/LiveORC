@@ -1,0 +1,132 @@
+{
+    "video": {
+        "start_frame": 0,
+        "end_frame": 125,
+        "h_a": 0.0
+    },
+    "frames": {
+        "time_diff": {
+            "abs": false,
+            "thres": 0.0
+        },
+        "minmax": {
+            "min": 0
+        }
+    },
+    "velocimetry": {
+        "get_piv": {},
+        "write": true
+    },
+    "mask": {
+        "write": true,
+        "mask_group1": {
+            "minmax": {
+                "s_max": 3.0
+            }
+        },
+        "mask_group2": {
+            "outliers": {
+                "mode": "and"
+            }
+        },
+        "mask_group3": {
+            "angle": {
+                "angle_tolerance": 1.57
+            }
+        },
+        "mask_group4": {
+            "count": {
+                "tolerance": 0.2
+            }
+        },
+        "mask_group5": {
+            "window_mean": {
+                "wdw": 2,
+                "reduce_time": true
+            }
+        },
+        "mask_group6": {
+            "window_nan": {
+                "wdw": 1,
+                "reduce_time": true
+            }
+        }
+    },
+    "transect": {
+        "write": true,
+        "transect_1": {
+            "get_transect": {
+                "rolling": 4,
+                "tolerance": 0.3,
+                "wdw_x_min": -10,
+                "wdw_x_max": 2
+            },
+            "get_q": {
+                "fill_method": "log_interp",
+                "v_corr": 0.85
+            },
+            "get_river_flow": null,
+            "geojson": {
+                "type": "FeatureCollection",
+                "name": "cross_moved_2",
+                "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+                "features": [
+                { "type": "Feature", "properties": { "_ID": 13, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:53:08.000 CEST", "_LATITUDE": 50.807115902500001, "_LONGITUDE": 5.9137071207999998, "_ELEVATION": 140.8515, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.91372759932492, 50.807082659869849, 140.8515 ] } },
+                { "type": "Feature", "properties": { "_ID": 14, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:54:30.000 CEST", "_LATITUDE": 50.807113995000002, "_LONGITUDE": 5.9136996582999997, "_ELEVATION": 140.6723, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913720136830224, 50.807080752370666, 140.672333333333341 ] } },
+                { "type": "Feature", "properties": { "_ID": 15, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:54:48.000 CEST", "_LATITUDE": 50.807113173300003, "_LONGITUDE": 5.9136951247000002, "_ELEVATION": 140.5387, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913715603222425, 50.807079930704532, 140.538666666666643 ] } },
+                { "type": "Feature", "properties": { "_ID": 16, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:55:13.000 CEST", "_LATITUDE": 50.80711145, "_LONGITUDE": 5.91368242, "_ELEVATION": 139.793, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913702898509642, 50.807078207372562, 139.793 ] } },
+                { "type": "Feature", "properties": { "_ID": 17, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:55:29.000 CEST", "_LATITUDE": 50.807110084999998, "_LONGITUDE": 5.9136769882999998, "_ELEVATION": 139.492, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913697466846846, 50.807076842373171, 139.492 ] } },
+                { "type": "Feature", "properties": { "_ID": 18, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:55:54.000 CEST", "_LATITUDE": 50.8071079033, "_LONGITUDE": 5.9136661267, "_ELEVATION": 138.903, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913686605188061, 50.807074660707656, 138.903 ] } },
+                { "type": "Feature", "properties": { "_ID": 19, "_NAME": null, "_REMARKS": "gcp", "_REC_TIME": "08/31/2022 16:56:13.000 CEST", "_LATITUDE": 50.807107905000002, "_LONGITUDE": 5.9136660517, "_ELEVATION": 138.902, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913686530188119, 50.807074662374319, 138.902 ] } },
+                { "type": "Feature", "properties": { "_ID": 20, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:56:41.000 CEST", "_LATITUDE": 50.807105466700001, "_LONGITUDE": 5.913656445, "_ELEVATION": 138.444, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913676923528285, 50.807072224042031, 138.444 ] } },
+                { "type": "Feature", "properties": { "_ID": 21, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:57:17.000 CEST", "_LATITUDE": 50.807101455000002, "_LONGITUDE": 5.9136462283000002, "_ELEVATION": 138.116, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913666706868504, 50.807068212376478, 138.116 ] } },
+                { "type": "Feature", "properties": { "_ID": 22, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:57:29.000 CEST", "_LATITUDE": 50.807100085000002, "_LONGITUDE": 5.9136325317000002, "_ELEVATION": 137.986, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913653010212148, 50.807066842377942, 137.986 ] } },
+                { "type": "Feature", "properties": { "_ID": 23, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:57:39.000 CEST", "_LATITUDE": 50.807096591700002, "_LONGITUDE": 5.9136227682999998, "_ELEVATION": 138.014, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913643246885485, 50.80706334904567, 138.014 ] } },
+                { "type": "Feature", "properties": { "_ID": 24, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:57:50.000 CEST", "_LATITUDE": 50.807092606700003, "_LONGITUDE": 5.9136111082999996, "_ELEVATION": 137.968, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913631586893506, 50.807059364046943, 137.968 ] } },
+                { "type": "Feature", "properties": { "_ID": 25, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:57:59.000 CEST", "_LATITUDE": 50.807088913299999, "_LONGITUDE": 5.9136018433000004, "_ELEVATION": 137.991, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913622321899735, 50.807055670714611, 137.991 ] } },
+                { "type": "Feature", "properties": { "_ID": 26, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:58:09.000 CEST", "_LATITUDE": 50.807085545, "_LONGITUDE": 5.9135915, "_ELEVATION": 137.958, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913611978573559, 50.807052302382395, 137.958 ] } },
+                { "type": "Feature", "properties": { "_ID": 27, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:58:19.000 CEST", "_LATITUDE": 50.807080051699998, "_LONGITUDE": 5.9135785567000001, "_ELEVATION": 138.042, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913599035248841, 50.807046809050448, 138.042 ] } },
+                { "type": "Feature", "properties": { "_ID": 28, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:58:28.000 CEST", "_LATITUDE": 50.807075126699999, "_LONGITUDE": 5.9135681483000004, "_ELEVATION": 138.06, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.9135886269223, 50.8070418840516, 138.06 ] } },
+                { "type": "Feature", "properties": { "_ID": 29, "_NAME": null, "_REMARKS": null, "_REC_TIME": "08/31/2022 16:58:42.000 CEST", "_LATITUDE": 50.807068988300003, "_LONGITUDE": 5.913554145, "_ELEVATION": 138.142, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913574623598234, 50.807035745719787, 138.142 ] } },
+                { "type": "Feature", "properties": { "_ID": 30, "_NAME": null, "_REMARKS": "gcp", "_REC_TIME": "08/31/2022 16:59:01.000 CEST", "_LATITUDE": 50.807065623299998, "_LONGITUDE": 5.91354495, "_ELEVATION": 138.502, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913565428604495, 50.807032380720734, 138.502 ] } },
+                { "type": "Feature", "properties": { "_ID": 31, "_NAME": null, "_REMARKS": "gcp", "_REC_TIME": "08/31/2022 16:59:34.000 CEST", "_LATITUDE": 50.807063226700002, "_LONGITUDE": 5.9135331666999997, "_ELEVATION": 138.686, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913553645279706, 50.807029984055333, 138.686 ] } },
+                { "type": "Feature", "properties": { "_ID": 32, "_NAME": null, "_REMARKS": "gcp", "_REC_TIME": "08/31/2022 16:59:49.000 CEST", "_LATITUDE": 50.80706003, "_LONGITUDE": 5.9135252267, "_ELEVATION": 139.099, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913545705285036, 50.807026787389532, 139.099 ] } },
+                { "type": "Feature", "properties": { "_ID": 33, "_NAME": null, "_REMARKS": "gcp", "_REC_TIME": "08/31/2022 17:00:02.000 CEST", "_LATITUDE": 50.807057041699998, "_LONGITUDE": 5.9135169, "_ELEVATION": 139.532, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913537378624057, 50.807023799057141, 139.532 ] } },
+                { "type": "Feature", "properties": { "_ID": 34, "_NAME": null, "_REMARKS": "gcp", "_REC_TIME": "08/31/2022 17:00:17.000 CEST", "_LATITUDE": 50.807054, "_LONGITUDE": 5.9135093682999997, "_ELEVATION": 139.99, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913529846962444, 50.80702075739125, 139.99 ] } },
+                { "type": "Feature", "properties": { "_ID": 35, "_NAME": null, "_REMARKS": "gcp", "_REC_TIME": "08/31/2022 17:00:31.000 CEST", "_LATITUDE": 50.807050863299999, "_LONGITUDE": 5.9135008, "_ELEVATION": 140.246, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913521278634948, 50.807017620725517, 140.246 ] } },
+                { "type": "Feature", "properties": { "_ID": 36, "_NAME": null, "_REMARKS": "gcp", "_REC_TIME": "08/31/2022 17:00:44.000 CEST", "_LATITUDE": 50.8070478717, "_LONGITUDE": 5.9134913833000002, "_ELEVATION": 140.452, "_ORTHO_HT": 0.0 }, "geometry": { "type": "Point", "coordinates": [ 5.913511861974819, 50.807014629059836, 140.452 ] } }
+                ]
+            }
+        }
+    },
+    "plot": {
+        "plot_quiver": {
+            "frames": null,
+            "velocimetry": {
+                "alpha": 0.3,
+                "cmap": "rainbow",
+                "scale": 600,
+                "width": 0.0015,
+                "vmax": 1.5
+            },
+            "transect": {
+                "transect_1": {
+                    "cmap": "rainbow",
+                    "add_colorbar": true,
+                    "add_text": true,
+                    "text_prefix": "",
+                    "scale": 100,
+                    "width": 0.002,
+                    "vmin": 0,
+                    "vmax": 1.5
+                }
+            },
+            "mode": "camera",
+            "reducer": "mean",
+            "write_pars": {
+                "dpi": 100,
+                "bbox_inches": "tight"
+            }
+        }
+    }
+}
