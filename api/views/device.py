@@ -38,10 +38,12 @@ class DeviceViewSet(BaseModelViewSet):
     def get_task_form(self, request, *args, **kwargs):
         """Check if a new task form is available for the device that is logging in """
         # get information about device
-        params = request.data.dict()
-        if not(params):
-            # try to get them from query_params, usually with unit tests, they end up here
+        data = request.data
+        if not(data):
+            # try to get params from query_params, usually with unit tests, they end up here (django bug?)
             params = request.query_params.dict()
+        else:
+            params = data.dict()
         try:
             device = Device.objects.get(pk=kwargs["pk"])
             if not(request.user == device.creator):

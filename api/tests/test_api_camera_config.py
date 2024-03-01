@@ -198,6 +198,8 @@ class CameraConfigViewTests(InitTestCase):
         )
         device_id = r.json()["id"]
         device_details = r.json()
+        # remove non-serializable parts
+        device_details.pop("message")
         # now see if a task_form can be produced using the current camera_config
         r = client.post(
             f'/api/site/1/cameraconfig/1/create_task/?device_id={device_id}&callback=discharge_post&callback=video_no_file_post',
@@ -212,7 +214,7 @@ class CameraConfigViewTests(InitTestCase):
         url = f"/api/device/{new_device_id}/get_task_form/"
         r = client.get(
             url,
-            json=new_device_details,
+            data=new_device_details,
         )
         self.assertEquals(r.status_code, status.HTTP_204_NO_CONTENT)
 
