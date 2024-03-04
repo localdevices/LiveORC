@@ -15,5 +15,6 @@ django-extensions
 shortuuid
 fontawesomefree
 pytest-django
+django-storages
 
 nodeopenrivercam @ https://github.com/localdevices/nodeorc.git
