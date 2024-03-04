@@ -38,7 +38,7 @@ class Device(BaseModelNoInstitute):
     form_status = models.PositiveSmallIntegerField(choices=DeviceFormStatus.choices, default=0)
     message = models.TextField(help_text="Message from the device, e.g. indicating info on errors", null=True)
     last_seen = models.DateTimeField(help_text="Last seen online", default=timezone.now)
-    ip_address = models.GenericIPAddressField(help_text="IP-address of last online occurrence")
+    ip_address = models.GenericIPAddressField(help_text="IP-address of last online occurrence", null=True)
 
 
 

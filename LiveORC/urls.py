@@ -53,7 +53,8 @@ from django.urls import reverse_lazy
 # admin.AdminSite.get_app_list = get_app_list
 
 urlpatterns = [
-    path('', RedirectView.as_view(url=reverse_lazy('admin:index'))),
+    path('', include('users.urls')),
+    # path('', RedirectView.as_view(url=reverse_lazy('admin:index'))),
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/', include('api.urls', namespace='api')),
