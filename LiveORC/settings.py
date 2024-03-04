@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'fontawesomefree',
     'django_object_actions',
     'django_filters',
+    'storages',
 ]
 
 MIDDLEWARE = [
