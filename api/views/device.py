@@ -66,7 +66,7 @@ class DeviceViewSet(BaseModelViewSet):
             params["id"] = kwargs["pk"]
             device = Device(**params)
         # update the device
-        ip_address = get_client_ip_address(request.META.get("REMOTE_ADDR"))
+        ip_address = get_client_ip_address(request)
         if ip_address:
             device.ip_address = ip_address
         device.last_seen = timezone.now()
