@@ -9,6 +9,14 @@ from api.models import Device, TaskFormStatus, TaskForm, DeviceStatus, DeviceFor
 from api.views import BaseModelViewSet
 from users.models import Institute
 
+def get_client_ip_address(request):
+    req_headers = request.META
+    x_forwarded_for_value = req_headers.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for_value:
+        ip_addr = x_forwarded_for_value.split(',')[-1].strip()
+    else:
+        ip_addr = req_headers.get('REMOTE_ADDR')
+    return ip_addr
 
 class DeviceViewSet(BaseModelViewSet):
     """
@@ -58,7 +66,7 @@ class DeviceViewSet(BaseModelViewSet):
             params["id"] = kwargs["pk"]
             device = Device(**params)
         # update the device
-        ip_address = request.META.get("REMOTE_ADDR")
+        ip_address = get_client_ip_address(request.META.get("REMOTE_ADDR"))
         if ip_address:
             device.ip_address = ip_address
         device.last_seen = timezone.now()
