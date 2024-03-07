@@ -3,6 +3,7 @@ django
 djangorestframework
 djangorestframework-simplejwt
 django-admin-rangefilter
+django-admin-interface
 drf-nested-routers
 pytest-django
 django-debug-toolbar
@@ -17,3 +18,4 @@ fontawesomefree
 pytest-django
 
 nodeopenrivercam @ https://github.com/localdevices/nodeorc.git
+

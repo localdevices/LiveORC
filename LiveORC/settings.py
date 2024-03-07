@@ -35,6 +35,8 @@ if DEBUG:
 
 INSTALLED_APPS = [
     'users',
+    "admin_interface",
+    "colorfield",
     # 'django.contrib.admin',
     'LiveORC.admin.CustomAdminConfig',
     'django.contrib.auth',

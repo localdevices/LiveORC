@@ -22,6 +22,7 @@ timeseries_template1 = """
 	    var t2 = {};
 	    var t_last = {};
 	    var video_prefix = "/admin/api/video/"
+	    visualize();
 	</script>
 """
 
