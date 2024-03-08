@@ -31,13 +31,13 @@ else:
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "some-secret-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "True").lower() == "True".lower()
+DEBUG = os.getenv("DEBUG", "YES").lower() == "YES".lower()
 
-HOSTS = os.getenv("ALLOWED_HOSTS")
+HOSTS = os.getenv("LORC_HOST")
 ALLOWED_HOSTS = [] if HOSTS is None else HOSTS.split(",")
 # ALLOWED_HOSTS = []  # default django project code
-if DEBUG:
-    ALLOWED_HOSTS = ["*"]
+# if DEBUG:
+ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
@@ -184,7 +184,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -194,7 +194,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_ROOT = os.path.join(BASE_DIR, STATIC_URL)
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static/admin"),
+    os.path.join(BASE_DIR, "static"),
 ]
 
 AUTH_USER_MODEL = "users.User"

@@ -5,18 +5,24 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: liveopenrivercam
-    command: sh -c "pip install django-json-widget && python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"
-    restart: always
+    entrypoint: /bin/bash -c "/liveorc/start.sh"
+#    command: /bin/bash -c "python3 manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
+    restart: unless-stopped
     volumes:
-      - type: bind
-        source: ./
-        target: /app
-#    volumes:
-#      - .:/app
+      - .:/liveorc:z
+      - lorc_data:/data:z
+      - lorc_media:/liveorc/media:z
+    environment:
+      - DJANGO_DBASE_DIR=/data
+      - LORC_PORT
+      - LORC_HOST
+      - LORC_SECRET_KEY
+      - DEBUG
     ports:
-      - "8000:8000"
+      - "${LORC_PORT}:8000"
 #    depends_on:
 #      - db:
 #          condition: service_healthy
-#  volumes:
-#    data:
+volumes:
+  lorc_data:
+  lorc_media:
