@@ -12,9 +12,16 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 import datetime
 from pathlib import Path
+import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+# try to get BASE_DIR from env variable
 BASE_DIR = Path(__file__).resolve().parent.parent
+DBASE_DIR = os.getenv("DJANGO_DBASE_DIR")
+if not DBASE_DIR:
+    DBASE_DIR = BASE_DIR
+else:
+    DBASE_DIR = Path(DBASE_DIR)
 
 
 # Quick-start development settings - unsuitable for production
@@ -131,7 +138,7 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.spatialite',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'NAME': DBASE_DIR / 'db.sqlite3',
         }
     }
 
@@ -192,6 +199,5 @@ STATICFILES_DIRS = [
 
 AUTH_USER_MODEL = "users.User"
 
-# GDAL_LIBRARY_PATH = "gdal"
-
-# INSTITUTE_SESSION_KEY = "active_institute"
+if "win" in sys.platform:
+    GDAL_LIBRARY_PATH = "gdal"

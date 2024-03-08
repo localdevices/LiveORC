@@ -8,6 +8,7 @@ drf-nested-routers
 pytest-django
 django-debug-toolbar
 django-filter
+django-json-widget
 django-object-actions
 djangorestframework-csv
 djangorestframework-queryfields
@@ -17,5 +18,5 @@ shortuuid
 fontawesomefree
 pytest-django
 
-nodeopenrivercam @ https://github.com/localdevices/nodeorc.git
+git+https://github.com/localdevices/nodeorc.git
 

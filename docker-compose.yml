@@ -1,0 +1,22 @@
+version: '3'
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: liveopenrivercam
+    command: sh -c "pip install django-json-widget && python3 manage.py migrate --noinput && python3 manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"
+    restart: always
+    volumes:
+      - type: bind
+        source: ./
+        target: /app
+#    volumes:
+#      - .:/app
+    ports:
+      - "8000:8000"
+#    depends_on:
+#      - db:
+#          condition: service_healthy
+#  volumes:
+#    data:
