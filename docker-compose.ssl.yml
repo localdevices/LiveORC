@@ -6,7 +6,7 @@ volumes:
 services:
   webapp:
     ports:
-      - "${WO_SSL_INSECURE_PORT_REDIRECT}:8080"
+      - "${LORC_SSL_INSECURE_PORT_REDIRECT}:8080"
     volumes:
       - letsencrypt:/webodm/nginx/letsencrypt
     environment:
