@@ -56,23 +56,23 @@ case $key in
     ;;
     --media-dir)
     LORC_MEDIA_DIR=$(realpath "$2")
-    export WO_MEDIA_DIR
+    export LORC_MEDIA_DIR
     shift # past argument
     shift # past value
     ;;
     --db-dir)
     LORC_DB_DIR=$(realpath "$2")
-    export WO_DB_DIR
+    export LORC_DB_DIR
     shift # past argument
     shift # past value
     ;;
     --ssl)
-    export WO_SSL=YES
+    export LORC_SSL=YES
     shift # past argument
     ;;
     --ssl-key)
     LORC_SSL_KEY=$(realpath "$2")
-    export WO_SSL_KEY
+    export LORC_SSL_KEY
     shift # past argument
     shift # past value
     ;;
@@ -102,11 +102,11 @@ case $key in
 #    shift # past argument
 #    shift # past value
 #    ;;
-    --no-default-node)
-    echo "ATTENTION: --no-default-node is deprecated. Use --default-nodes instead."
-    export WO_DEFAULT_NODES=0
-    shift # past argument
-    ;;
+#    --no-default-node)
+#    echo "ATTENTION: --no-default-node is deprecated. Use --default-nodes instead."
+#    export WO_DEFAULT_NODES=0
+#    shift # past argument
+#    ;;
     --detached)
     detached=true
     shift # past argument
