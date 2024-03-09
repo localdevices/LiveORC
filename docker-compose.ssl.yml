@@ -10,5 +10,5 @@ services:
     volumes:
       - letsencrypt:/webodm/nginx/letsencrypt
     environment:
-      - WO_SSL
-      - WO_SSL_KEY
+      - LORC_SSL
+      - LORC_SSL_KEY

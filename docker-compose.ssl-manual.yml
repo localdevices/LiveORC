@@ -1,0 +1,7 @@
+# This configuration adds the volumes necessary for SSL manual setup
+version: '2.1'
+services:
+  webapp:
+    volumes:
+      - ${LORC_SSL_KEY}:/webodm/nginx/ssl/key.pem
+      - ${LORC_SSL_CERT}:/webodm/nginx/ssl/cert.pem
