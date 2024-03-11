@@ -6,6 +6,9 @@ ENV PYTHONUNBUFFERED 1
 
 
 COPY requirements.txt /liveorc/
+
+# Get folder ready
+ADD . /liveorc
 WORKDIR /liveorc
 
 # install dependencies
@@ -18,14 +21,17 @@ RUN pip install --upgrade pip \
 
 RUN pip install gunicorn
 
-COPY . /liveorc/
+# COPY . /liveorc/
 # make scripts executable
 RUN chmod +x /liveorc/start.sh
 RUN chmod +x /liveorc/nginx/letsencrypt-autogen.sh
 RUN python3 manage.py collectstatic --noinput
+RUN python3 manage.py makemigrations --noinput
 RUN python3 manage.py migrate --noinput
 # copy the nice liveorc style files
-COPY ./django-admin-interface/media /liveorc/media
+COPY django-admin-interface/media /liveorc/media
 # upload the record with styling
 RUN python3 manage.py loaddata ./django-admin-interface/admin_interface_theme_liveorc.json
 VOLUME /liveorc/media
+VOLUME /liveorc/dbase
+

@@ -32,7 +32,7 @@ fi
 source "${__dirname}/.env"
 DEFAULT_PORT="$LORC_PORT"
 DEFAULT_HOST="$LORC_HOST"
-DEFAULT_MEDIA_DIR="$LORC_MEDIA_DIR"
+# DEFAULT_MEDIA_DIR="$LORC_MEDIA_DIR"
 DEFAULT_DB_DIR="$LORC_DB_DIR"
 DEFAULT_SSL="$LORC_SSL"
 DEFAULT_SSL_INSECURE_PORT_REDIRECT="$LORC_SSL_INSECURE_PORT_REDIRECT"
@@ -54,12 +54,12 @@ case $key in
     shift # past argument
     shift # past value
     ;;
-    --media-dir)
-    LORC_MEDIA_DIR=$(realpath "$2")
-    export LORC_MEDIA_DIR
-    shift # past argument
-    shift # past value
-    ;;
+#    --media-dir)
+#    LORC_MEDIA_DIR=$(realpath "$2")
+#    export LORC_MEDIA_DIR
+#    shift # past argument
+#    shift # past value
+#    ;;
     --db-dir)
     LORC_DB_DIR=$(realpath "$2")
     export LORC_DB_DIR
@@ -221,7 +221,7 @@ start(){
 	run "${command}"
 }
 down(){
-	command="docker compose -f docker-compose.yml"
+	command="docker compose -f docker-compose.yml down"
 	run "${command}"
 }
 
@@ -264,7 +264,7 @@ enable_ssl(){
 					echo -e "\033[93mLets Encrypt cannot run on port: $LORC_PORT, switching to 443.\033[39m"
 					echo "If you need to use a different port, you'll need to generate the SSL certificate files separately and use the --ssl-key and --ssl-certificate options."
 			fi
-			export WO_PORT=443
+			export LORC_PORT=443
 	fi
 
 	# Make sure we have a hostname

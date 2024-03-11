@@ -1,19 +1,18 @@
 version: '3'
 services:
-  backend:
+  webapp:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: liveopenrivercam
     entrypoint: /bin/bash -c "/liveorc/start.sh"
-#    command: /bin/bash -c "python3 manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
     restart: unless-stopped
     volumes:
       - .:/liveorc:z
-      - lorc_data:/data:z
+      - lorc_data:/liveorc/dbase:z
       - lorc_media:/liveorc/media:z
     environment:
-      - DJANGO_DBASE_DIR=/data
+      - DJANGO_DBASE_DIR=/liveorc/dbase
       - LORC_PORT
       - LORC_HOST
       - LORC_SECRET_KEY
