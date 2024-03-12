@@ -89,6 +89,8 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
 }
 
+# use modals instead of popups for django-admin-interface
+X_FRAME_OPTIONS = "SAMEORIGIN"
 
 
 ROOT_URLCONF = 'LiveORC.urls'
@@ -197,9 +199,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static", "admin"),
-]
+#STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, "static", "admin"),
+#]
 
 AUTH_USER_MODEL = "users.User"
 

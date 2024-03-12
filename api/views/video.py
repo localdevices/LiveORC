@@ -31,6 +31,18 @@ class VideoViewSet(BaseModelViewSet):
         return HttpResponse(video, content_type=mimetype)
 
 
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def thumbnail(self, request, *args, **kwargs):
+        img = self.get_object().thumbnail
+        mimetype, _ = mimetypes.guess_type(img.file.name)
+        return HttpResponse(img, content_type=mimetype)
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def image(self, request, *args, **kwargs):
+        img = self.get_object().image
+        mimetype, _ = mimetypes.guess_type(img.file.name)
+        return HttpResponse(img, content_type=mimetype)
+
     def create(self, request, *args, **kwargs):
         """
         Override create to make sure that if a tiume series with a water level is found, a new task is launched to

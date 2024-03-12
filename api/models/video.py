@@ -234,7 +234,8 @@ class Video(models.Model):
             except:
                 return mark_safe("File missing")
                 # width = height * 1.5
-            return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.thumbnail.url, width, height))
+            uri = reverse('api:site-video-thumbnail', args=([str(self.camera_config.site.id), str(self.id)]))
+            return mark_safe('<img src="{}" width="{}" height="{}" />'.format(uri, width, height))
         return mark_safe("N/A")
 
     @property
@@ -269,7 +270,8 @@ class Video(models.Model):
         if self.image:
             try:
                 width = int((self.image.width / self.image.height) * height)
-                return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.image.url, width, height))
+                uri = reverse('api:site-video-image', args=([str(self.camera_config.site.id), str(self.id)]))
+                return mark_safe('<img src="{}" width="{}" height="{}" />'.format(uri, width, height))
             except:
                 return mark_safe("File missing")
         return mark_safe("N/A")

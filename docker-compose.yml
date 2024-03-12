@@ -11,6 +11,7 @@ services:
       - .:/liveorc:z
       - lorc_data:/liveorc/dbase:z
       - lorc_media:/liveorc/media:z
+      - lorc_static:/liveorc/static
     environment:
       - DJANGO_DBASE_DIR=/liveorc/dbase
       - LORC_PORT
@@ -25,3 +26,4 @@ services:
 volumes:
   lorc_data:
   lorc_media:
+  lorc_static:
