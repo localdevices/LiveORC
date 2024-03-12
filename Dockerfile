@@ -26,8 +26,16 @@ RUN pip install gunicorn
 RUN chmod +x /liveorc/start.sh
 RUN chmod +x /liveorc/nginx/letsencrypt-autogen.sh
 RUN python3 manage.py collectstatic --noinput --skip-checks
+
+# make sure that any locally made migrations are not persisting in the volumes
+RUN rm -fr /liveorc/users/migrations/*
+RUN rm -fr /liveorc/api/migrations/*
+RUN rm -fr /liveorc/dbase/*
+RUN touch /liveorc/users/migrations/__init__.py
+RUN touch /liveorc/api/migrations/__init__.py
 RUN python3 manage.py makemigrations --noinput
 RUN python3 manage.py migrate --noinput
+
 # copy the nice liveorc style files
 COPY django-admin-interface/media /liveorc/media
 # upload the record with styling
@@ -35,3 +43,5 @@ RUN python3 manage.py loaddata ./django-admin-interface/admin_interface_theme_li
 VOLUME /liveorc/media
 VOLUME /liveorc/dbase
 VOLUME /liveorc/static
+VOLUME /liveorc/api/migrations
+VOLUME /liveorc/users/migrations
