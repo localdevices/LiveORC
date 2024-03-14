@@ -12,36 +12,27 @@ ADD . /liveorc
 WORKDIR /liveorc
 
 # install dependencies
-RUN apt update
-RUN apt install ffmpeg libsm6 libxext6 libgl1 python3-venv libgdal-dev libsqlite3-mod-spatialite nginx certbot gettext -y
+RUN apt update && apt install ffmpeg libsm6 libxext6 libgl1 python3-venv libgdal-dev libsqlite3-mod-spatialite nginx certbot gettext dos2unix -y && \
+    # setup application with database
+    pip install --upgrade pip && pip install --trusted-host pypi.python.org --requirement requirements.txt && pip install gunicorn && \
+    # make scripts executable and run as unix
+    dos2unix /liveorc/start.sh && dos2unix /liveorc/nginx/letsencrypt-autogen.sh && \
+    chmod +x /liveorc/start.sh && chmod +x /liveorc/nginx/letsencrypt-autogen.sh && \
+    python3 manage.py collectstatic --noinput --skip-checks && \
+    # make sure that any locally made migrations are not persisting in the volumes
+    rm -fr /liveorc/users/migrations/* && rm -fr /liveorc/api/migrations/* && rm -fr /liveorc/dbase/* && \
+    touch /liveorc/users/migrations/__init__.py && touch /liveorc/api/migrations/__init__.py && \
+    python3 manage.py makemigrations --noinput && python3 manage.py migrate --noinput && \
+    python3 manage.py collectstatic --noinput --skip-checks && \
+    # upload the record with styling
+    python3 manage.py loaddata ./django-admin-interface/admin_interface_theme_liveorc.json
 
-# setup application with database
-RUN pip install --upgrade pip \
-    &&  pip install --trusted-host pypi.python.org --requirement requirements.txt
-
-RUN pip install gunicorn
-
-# COPY . /liveorc/
-# make scripts executable
-RUN chmod +x /liveorc/start.sh
-RUN chmod +x /liveorc/nginx/letsencrypt-autogen.sh
-RUN python3 manage.py collectstatic --noinput --skip-checks
-
-# make sure that any locally made migrations are not persisting in the volumes
-RUN rm -fr /liveorc/users/migrations/*
-RUN rm -fr /liveorc/api/migrations/*
-RUN rm -fr /liveorc/dbase/*
-RUN touch /liveorc/users/migrations/__init__.py
-RUN touch /liveorc/api/migrations/__init__.py
-RUN python3 manage.py makemigrations --noinput
-RUN python3 manage.py migrate --noinput
-
-# copy the nice liveorc style files
+# copy the nice style to the media volume
 COPY django-admin-interface/media /liveorc/media
-# upload the record with styling
-RUN python3 manage.py loaddata ./django-admin-interface/admin_interface_theme_liveorc.json
+
 VOLUME /liveorc/media
 VOLUME /liveorc/dbase
 VOLUME /liveorc/static
 VOLUME /liveorc/api/migrations
 VOLUME /liveorc/users/migrations
+

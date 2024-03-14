@@ -9,7 +9,7 @@ printenv > .cronenv
 
 
 congrats(){
-    (sleep 5; echo
+    (sleep 10; echo
 
     echo "Trying to establish communication..."
     status=$(curl --max-time 300 -L -s -o /dev/null -w "%{http_code}" "$proto://localhost:8000")
