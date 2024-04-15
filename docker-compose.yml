@@ -1,0 +1,33 @@
+version: '3'
+services:
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: liveopenrivercam
+    entrypoint: /bin/bash -c "/liveorc/start.sh"
+    restart: unless-stopped
+    volumes:
+      - .:/liveorc:z
+      - lorc_data:/liveorc/dbase:z
+      - lorc_media:/liveorc/media:z
+      - lorc_static:/liveorc/static
+      - lorc_migration_users:/liveorc/users/migrations:z
+      - lorc_migration_api:/liveorc/api/migrations:z
+    environment:
+      - DJANGO_DBASE_DIR=/liveorc/dbase
+      - LORC_PORT
+      - LORC_HOST
+      - LORC_SECRET_KEY
+      - DEBUG
+    ports:
+      - "${LORC_PORT}:8000"
+#    depends_on:
+#      - db:
+#          condition: service_healthy
+volumes:
+  lorc_data:
+  lorc_media:
+  lorc_static:
+  lorc_migration_users:
+  lorc_migration_api:

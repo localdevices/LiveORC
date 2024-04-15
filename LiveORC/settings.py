@@ -12,9 +12,17 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 import datetime
 from pathlib import Path
+import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+# try to get BASE_DIR from env variable
 BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DBASE_DIR = os.getenv("DJANGO_DBASE_DIR")
+if not DBASE_DIR:
+    DBASE_DIR = os.path.join(BASE_DIR, 'dbase')
+else:
+    DBASE_DIR = DBASE_DIR
 
 
 # Quick-start development settings - unsuitable for production
@@ -24,17 +32,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "some-secret-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "True").lower() == "True".lower()
-
-HOSTS = os.getenv("ALLOWED_HOSTS")
+DEBUG = os.getenv("DEBUG", "NO").lower() == "YES".lower()
+HOSTS = os.getenv("LORC_HOST")
 ALLOWED_HOSTS = [] if HOSTS is None else HOSTS.split(",")
 # ALLOWED_HOSTS = []  # default django project code
-if DEBUG:
-    ALLOWED_HOSTS = ["*"]
+# if DEBUG:
+ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
     'users',
+    "admin_interface",
+    "colorfield",
     # 'django.contrib.admin',
     'LiveORC.admin.CustomAdminConfig',
     'django.contrib.auth',
@@ -81,14 +90,20 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
 }
 
+# use modals instead of popups for django-admin-interface
+X_FRAME_OPTIONS = "SAMEORIGIN"
 
 
 ROOT_URLCONF = 'LiveORC.urls'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates/')],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates/'),
+            MEDIA_ROOT,
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -101,7 +116,6 @@ TEMPLATES = [
     },
 ]
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 THUMBSIZE = 50  # SIZE OF THUMBNAILS
 WSGI_APPLICATION = 'LiveORC.wsgi.application'
@@ -130,7 +144,7 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.spatialite',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'NAME': os.path.join(DBASE_DIR, 'db.sqlite3'),
         }
     }
 
@@ -176,7 +190,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -184,14 +198,13 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-STATIC_ROOT = os.path.join(BASE_DIR, STATIC_URL)
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static/admin"),
-]
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+#STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, "static", "admin"),
+#]
 
 AUTH_USER_MODEL = "users.User"
-
-# GDAL_LIBRARY_PATH = "gdal"
 
 # INSTITUTE_SESSION_KEY = "active_institute"
 
@@ -202,3 +215,5 @@ STORAGES = {
     },
 }
 
+if "win" in sys.platform:
+    GDAL_LIBRARY_PATH = "gdal"
