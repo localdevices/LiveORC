@@ -17,6 +17,7 @@ django-extensions
 shortuuid
 fontawesomefree
 pytest-django
+django-storages
 
 git+https://github.com/localdevices/nodeorc.git
 

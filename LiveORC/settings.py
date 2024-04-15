@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'fontawesomefree',
     'django_object_actions',
     'django_filters',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -204,6 +205,15 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 #]
 
 AUTH_USER_MODEL = "users.User"
+
+# INSTITUTE_SESSION_KEY = "active_institute"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {},
+    },
+}
 
 if "win" in sys.platform:
     GDAL_LIBRARY_PATH = "gdal"
