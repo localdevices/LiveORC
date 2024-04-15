@@ -207,13 +207,44 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 AUTH_USER_MODEL = "users.User"
 
 # INSTITUTE_SESSION_KEY = "active_institute"
+storage_url = os.getenv("LORC_STORAGE_URL")
+if storage_url:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "endpoint_url": storage_url,
+                "access_key": os.getenv("LORC_STORAGE_ACCESS"),
+                "secret_key": os.getenv("LORC_STORAGE_SECRET"),
+                "bucket_name": "media"
+                # "token_credential": DefaultAzureCredential(),
+                # "account_name": "mystorageaccountname",
+                # "azure_container": "media",
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+            "OPTIONS": {
+                "location": os.path.join(BASE_DIR, "static"),
+                "base_url": "/static/",
 
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-        "OPTIONS": {},
-    },
-}
+            },
+        }
+    }
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+            "OPTIONS": {},
+        },
+        "staticfiles": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+            "OPTIONS": {
+                "location": os.path.join(BASE_DIR, "static"),
+                "base_url": "/static/",
+            },
+        }
+    }
 
 if "win" in sys.platform:
     GDAL_LIBRARY_PATH = "gdal"

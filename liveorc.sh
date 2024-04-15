@@ -54,6 +54,12 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+	--file-system-storage)
+	LORC_STORAGE_URL=""
+	LORC_STORAGE_ACCESS=""
+	LORC_STORAGE_SECRET=""
+	shift
+	;;
 #    --media-dir)
 #    LORC_MEDIA_DIR=$(realpath "$2")
 #    export LORC_MEDIA_DIR
@@ -145,6 +151,7 @@ usage(){
   echo ""
   echo "Options:"
   echo "        --port  <port>  Set the port that LiveORC should bind to (default: $DEFAULT_PORT)"
+  echo "        --file-system-storage	Set storage volume to a local storage instead of (default) a S3 bucket"
   echo "        --hostname      <hostname>      Set the hostname that LiveORC will be accessible from (default: $DEFAULT_HOST)"
 #  echo "        --media-dir     <path>  Path where processing results will be stored to (default: $DEFAULT_MEDIA_DIR (docker named volume))"
 #  echo "        --db-dir        <path>  Path where the Postgres db data will be stored to (default: $DEFAULT_DB_DIR (docker named volume))"
@@ -197,6 +204,11 @@ start(){
 	echo "================================"
 	echo "Host: $LORC_HOST"
 	echo "Port: $LORC_PORT"
+	if [ "$LORC_STORAGE_URL" = "" ]; then
+		echo "Storage volume: $LORC_MEDIA_DIR"
+	else
+		echo "Storage volume: $LORC_STORAGE_URL"
+	fi
 #	echo "Media directory: $LORC_MEDIA_DIR"
 #	echo "Postgres DB directory: $LORC_DB_DIR"
 	echo "SSL: $LORC_SSL"
@@ -209,6 +221,9 @@ start(){
 
 	# assemble a command, extended with options further onwards
 	command="docker compose -f docker-compose.yml"
+	if [ -n "$LORC_STORAGE_URL" = "" ]; then
+		enable_s3
+	fi
 
 	if [ "$LORC_SSL" = "YES" ]; then
 		enable_ssl
@@ -239,6 +254,17 @@ rebuild(){
 	echo -e "\033[1mDone!\033[0m You can now start LiveODM by running $0 start"
 }
 
+enable_s3(){
+	if [ -n "$LORC_STORAGE_ACCESS" ]; then
+			echo -e "\033[91mStorage access key does not exist. Configure as environment variable LORC_STORAGE_ACCESS\033[39m"
+			exit 1
+	fi
+	if [ -n "$LORC_STORAGE_SECRET" ]; then
+			echo -e "\033[91mStorage secret key does not exist. Configure as environment variable LORC_STORAGE_SECRET\033[39m"
+			exit 1
+	fi
+	command+=" -f docker-compose.s3.yml"
+}
 enable_ssl(){
 	if [ -n "$LORC_SSL_KEY" ] && [ ! -e "$LORC_SSL_KEY" ]; then
 			echo -e "\033[91mSSL key file does not exist: $LORC_SSL_KEY\033[39m"
