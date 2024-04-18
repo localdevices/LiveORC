@@ -36,6 +36,11 @@ DEFAULT_HOST="$LORC_HOST"
 DEFAULT_DB_DIR="$LORC_DB_DIR"
 DEFAULT_SSL="$LORC_SSL"
 DEFAULT_SSL_INSECURE_PORT_REDIRECT="$LORC_SSL_INSECURE_PORT_REDIRECT"
+DEFAULT_RABBITMQ="$LORC_RABBITMQ"
+DEFAULT_RABBITMQ_DEFAULT_USER="$LORC_RABBITMQ_USER"
+DEFAULT_RABBITMQ_DEFAULT_PASS="$LORC_RABBITMQ_PASS"
+DEFAULT_RABBITMQ_DEFAULT_VHOST="$LORC_RABBITMQ_VHOST"
+
 
 # Parse args for overrides
 POSITIONAL=()
@@ -84,6 +89,26 @@ case $key in
     ;;
     --ssl-insecure-port-redirect)
     export LORC_SSL_INSECURE_PORT_REDIRECT="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --rabbitmq)
+    export $LORC_RABBITMQ="$2"
+    shift # past argument
+    shift # past value
+    ;;
+  --rabbitmq-user)
+    export LORC_RABBITMQ_USER="$2"
+    shift # past argument
+    shift # past value
+    ;;
+  --rabbitmq-pass)
+    export LORC_RABBITMQ_PASS="$2"
+    shift # past argument
+    shift # past value
+    ;;
+  --rabbitmq-vhost)
+    export LORC_RABBITMQ_VHOST="$2"
     shift # past argument
     shift # past value
     ;;
@@ -163,6 +188,10 @@ usage(){
 #  echo "        --settings      Path to a settings.py file to enable modifications of system settings (default: None)"
 #  echo "        --worker-memory Maximum amount of memory allocated for the worker process (default: unlimited)"
 #  echo "        --worker-cpus   Maximum number of CPUs allocated for the worker process (default: all)"
+  echo "        --rabbitmq   Enable Rabbitmq Use. (default: $DEFAULT_RABBITMQ)"
+  echo "        --rabbitmq-user  <username>  Set the username for rabbitmq (default: $DEFAULT_RABBITMQ_DEFAULT_USER)"
+  echo "        --rabbitmq-pass  <password>  Set the password for rabbitmq (default: $DEFAULT_RABBITMQ_DEFAULT_PASS)"
+  echo "        --rabbitmq-vhost  <vhost>  Set the vhost for rabbitmq (default: $DEFAULT_RABBITMQ_DEFAULT_VHOST)"
 
   exit
 }
@@ -203,12 +232,17 @@ start(){
 	echo "SSL key: $LORC_SSL_KEY"
 	echo "SSL certificate: $LORC_SSL_CERT"
 	echo "SSL insecure port redirect: $LORC_SSL_INSECURE_PORT_REDIRECT"
+	echo "RabbitMQ: $LORC_RABBITMQ"
 	echo "================================"
 	echo "Make sure to issue a $0 down if you decide to change the environment."
 	echo ""
 
 	# assemble a command, extended with options further onwards
 	command="docker compose -f docker-compose.yml"
+
+	if [ "$LORC_RABBITMQ" = "YES" ]; then
+	  command+=" -f docker-compose.rabbitmq.yml"
+	fi
 
 	if [ "$LORC_SSL" = "YES" ]; then
 		enable_ssl
