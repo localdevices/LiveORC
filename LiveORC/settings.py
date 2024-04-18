@@ -20,9 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DBASE_DIR = os.getenv("DJANGO_DBASE_DIR")
 if not DBASE_DIR:
-    DBASE_DIR = os.path.join(BASE_DIR, 'dbase')
-else:
-    DBASE_DIR = DBASE_DIR
+    DBASE_DIR = os.path.join(BASE_DIR, 'data')
 
 
 # Quick-start development settings - unsuitable for production

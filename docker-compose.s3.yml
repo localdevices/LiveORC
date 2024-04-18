@@ -1,4 +1,4 @@
-version: '3'
+#version: '3'
 services:
   storage:
     image: minio/minio
@@ -11,5 +11,5 @@ services:
       MINIO_CONSOLE_PORT: 9001
 
     volumes:
-      - lorc_media:/data
+      - lorc_data:/data
     command: server /data --console-address ":9001"

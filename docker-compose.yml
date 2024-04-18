@@ -1,4 +1,4 @@
-version: '3'
+#version: '3'
 services:
   webapp:
     build:
@@ -9,16 +9,21 @@ services:
     restart: unless-stopped
     volumes:
       - .:/liveorc:z
-      - lorc_data:/liveorc/dbase:z
-      - lorc_media:/liveorc/media:z
+      - lorc_data:/liveorc/data:z
+#      - lorc_media:/liveorc/data/media:z
       - lorc_static:/liveorc/static
       - lorc_migration_users:/liveorc/users/migrations:z
       - lorc_migration_api:/liveorc/api/migrations:z
     environment:
-      - DJANGO_DBASE_DIR=/liveorc/dbase
+      - DJANGO_DBASE_DIR=/liveorc/data
+      - "${LORC_STORAGE_ACCESS}:MINIO_ROOT_USER"
+      - "${LORC_STORAGE_SECRET}:MINIO_ROOT_PASSWORD"
       - LORC_PORT
       - LORC_HOST
       - LORC_SECRET_KEY
+      - LORC_STORAGE_URL
+      - LORC_STORAGE_ACCESS
+      - LORC_STORAGE_SECRET
       - DEBUG
     ports:
       - "${LORC_PORT}:8000"
