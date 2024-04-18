@@ -17,6 +17,13 @@ from api.models import BaseModel, CameraConfig, Project, TimeSeries
 
 VIDEO_EXTENSIONS = ["MOV", "MKV", "MP4", "AVI", "M4V"]
 
+def storage_path(file_field):
+    if "FileSystemStorage" in str(file_field.storage):
+        # local storage used
+        return file_field.path
+    else:
+        # remote storage used
+        return file_field.url
 
 def add_frame_to_model(video_field, img_field, frame_nr=0, suffix="", thumb=False):
     """
@@ -36,14 +43,14 @@ def add_frame_to_model(video_field, img_field, frame_nr=0, suffix="", thumb=Fals
     thumb : boolean
         Set to True to resize the image, settings.THUMBSIZE is used for the size settings
     """
-    if "FieldFile" in repr(video_field):
+    if "ImageFieldFile" in repr(video_field):
+        image = cv2.imread(storage_path(video_field))
+    elif "FieldFile" in repr(video_field):
         # a video is passed, so use opencv to get the key frame
-        cap = cv2.VideoCapture(video_field.path)
+        cap = cv2.VideoCapture(storage_path(video_field))
         if frame_nr != 0:
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame_nr)
         res, image = cap.read()
-    elif "ImageFieldFile" in repr(video_field):
-        image = cv2.imread(video_field.path)
     # turn into RGB
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     img_name, video_extension = os.path.splitext(os.path.basename(video_field.name))

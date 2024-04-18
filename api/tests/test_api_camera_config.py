@@ -186,7 +186,8 @@ class CameraConfigViewTests(InitTestCase):
                 "end_date": "2024-01-01",
                 "camera_config": json.dumps(cam_config),
                 "profile": 1,
-                "recipe": 1
+                "recipe": 1,
+                "nodeorc_version": "0.1.0"
             }
         )
         self.assertEquals(r.status_code, status.HTTP_201_CREATED)
