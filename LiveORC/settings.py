@@ -19,6 +19,7 @@ import sys
 BASE_DIR = Path(__file__).resolve().parent.parent
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DBASE_DIR = os.getenv("DJANGO_DBASE_DIR")
+
 if not DBASE_DIR:
     DBASE_DIR = os.path.join(BASE_DIR, 'data')
 
@@ -31,6 +32,10 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "some-secret-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "NO").lower() == "YES".lower()
+
+if DEBUG:
+    print(f"STARTING SERVER IN DEBUG MODE")
+
 HOSTS = os.getenv("LORC_HOST")
 ALLOWED_HOSTS = [] if HOSTS is None else HOSTS.split(",")
 # ALLOWED_HOSTS = []  # default django project code
@@ -204,45 +209,36 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 AUTH_USER_MODEL = "users.User"
 
-# INSTITUTE_SESSION_KEY = "active_institute"
 storage_url = os.getenv("LORC_STORAGE_URL")
-if storage_url:
-    STORAGES = {
-        "default": {
-            "BACKEND": "storages.backends.s3.S3Storage",
-            "OPTIONS": {
-                "endpoint_url": storage_url,
-                "access_key": os.getenv("LORC_STORAGE_ACCESS"),
-                "secret_key": os.getenv("LORC_STORAGE_SECRET"),
-                "bucket_name": "media"
-                # "token_credential": DefaultAzureCredential(),
-                # "account_name": "mystorageaccountname",
-                # "azure_container": "media",
-            },
-        },
-        "staticfiles": {
-            "BACKEND": "django.core.files.storage.FileSystemStorage",
-            "OPTIONS": {
-                "location": os.path.join(BASE_DIR, "static"),
-                "base_url": "/static/",
 
-            },
-        }
+STORAGES = {
+    # default storage is used for media files of installed apps (not our own)
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {},
+    },
+    "staticfiles": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {
+            "location": os.path.join(BASE_DIR, "static"),
+            "base_url": "/static/",
+        },
+    }
+}
+if storage_url:
+    # provide a bucket as media storage for our app
+    STORAGES["media"] = {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "endpoint_url": storage_url,
+            "access_key": os.getenv("LORC_STORAGE_ACCESS"),
+            "secret_key": os.getenv("LORC_STORAGE_SECRET"),
+            "bucket_name": "media"
+        },
     }
 else:
-    STORAGES = {
-        "default": {
-            "BACKEND": "django.core.files.storage.FileSystemStorage",
-            "OPTIONS": {},
-        },
-        "staticfiles": {
-            "BACKEND": "django.core.files.storage.FileSystemStorage",
-            "OPTIONS": {
-                "location": os.path.join(BASE_DIR, "static"),
-                "base_url": "/static/",
-            },
-        }
-    }
+    # use the same as default
+    STORAGES["media"] = STORAGES["default"]
 
 if "win" in sys.platform:
     GDAL_LIBRARY_PATH = "gdal"

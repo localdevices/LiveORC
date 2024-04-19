@@ -42,7 +42,7 @@ http {
             root /liveorc;
         }
         location /media/admin-interface {
-            alias /liveorc/django-admin-interface/media/admin-interface;
+            alias /liveorc/media/admin-interface;
         }
 
 
