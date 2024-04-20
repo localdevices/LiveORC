@@ -108,6 +108,28 @@ class CameraConfigViewSet(BaseModelViewSet):
                     content_type="application/json"
                 )
         instance = self.get_object()
+        if not instance.recipe:
+            return Response(
+                data={
+                    "recipe": [
+                        "Camera config does not contain a recipe. Please add a recipe before making a task form"
+                    ]
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+                content_type="application/json"
+            )
+        if not instance.profile:
+            return Response(
+                data={
+                    "recipe": [
+                        "Camera config does not contain a profile. Please add a profile before making a task form"
+                    ]
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+                content_type="application/json"
+            )
+
+
         task_form = get_task_form(instance, query_callbacks)
         record = TaskForm(
             id=task_form["id"],
