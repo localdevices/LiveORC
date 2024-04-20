@@ -156,7 +156,10 @@ class CameraConfigAdmin(BaseAdmin):
             # check if a NEW task form is already available. Do not allow having more than one NEW in the queue
             queryset = TaskForm.objects.filter(status=TaskFormStatus.NEW).filter(device=device)
             if len(queryset) > 0:
-                messages.error(request, f"A new task form for device {device_id} already exists. If you want to cancel this task form, please first delete it.")
+                messages.error(
+                    request, f"A new task form for device {device_id} already exists. If you want to cancel this task "
+                             f"form, please first delete it."
+                )
                 return HttpResponseRedirect(reverse("admin:api_cameraconfig_change", args=(pk, )))
 
             # collect the callbacks
@@ -165,6 +168,21 @@ class CameraConfigAdmin(BaseAdmin):
                 request.POST.get("video")
             ]
             instance = self.get_object(request, pk)
+            # perform checks on instance. It must have a recipe and a profile
+            if not instance.recipe:
+                messages.error(
+                    request, f"the camera configuration does not have a recipe. Select a recipe and save the "
+                             f"configuration first."
+                )
+                return HttpResponseRedirect(reverse("admin:api_cameraconfig_change", args=(pk, )))
+
+            if not instance.profile:
+                messages.error(
+                    request, f"the camera configuration does not have a profile. Select a profile and save the "
+                             f"configuration first."
+                )
+                return HttpResponseRedirect(reverse("admin:api_cameraconfig_change", args=(pk, )))
+
             task_form = get_task_form(instance, query_callbacks)
             record = TaskForm(
                 task_body=task_form,
