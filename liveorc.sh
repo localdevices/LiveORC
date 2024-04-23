@@ -189,9 +189,9 @@ usage(){
 #  echo "        --worker-memory Maximum amount of memory allocated for the worker process (default: unlimited)"
 #  echo "        --worker-cpus   Maximum number of CPUs allocated for the worker process (default: all)"
   echo "        --rabbitmq   Enable Rabbitmq Use. (default: $DEFAULT_RABBITMQ)"
-  echo "        --rabbitmq-user  <username>  Set the username for rabbitmq (default: $DEFAULT_RABBITMQ_DEFAULT_USER)"
-  echo "        --rabbitmq-pass  <password>  Set the password for rabbitmq (default: $DEFAULT_RABBITMQ_DEFAULT_PASS)"
-  echo "        --rabbitmq-vhost  <vhost>  Set the vhost for rabbitmq (default: $DEFAULT_RABBITMQ_DEFAULT_VHOST)"
+  echo "        --rabbitmq-user  <username>  Set the username for rabbitmq (default: $DEFAULT_RABBITMQ_USER)"
+  echo "        --rabbitmq-pass  <password>  Set the password for rabbitmq (default: $DEFAULT_RABBITMQ_PASS)"
+  echo "        --rabbitmq-vhost  <vhost>  Set the vhost for rabbitmq (default: $DEFAULT_RABBITMQ_VHOST)"
 
   exit
 }
