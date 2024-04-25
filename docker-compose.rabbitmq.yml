@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  rabbit:
+    image: rabbitmq:3-management
+    container_name: rabbit
+    hostname: rabbit
+    environment:
+      - LORC_RABBITMQ
+      - LORC_RABBITMQ_USER
+      - LORC_RABBITMQ_PASS
+      - LORC_RABBITMQ_VHOST
+    ports:
+      - "5682:5672"
+      - "15682:15672"
