@@ -41,7 +41,6 @@ DEFAULT_RABBITMQ_USER="$LORC_RABBITMQ_USER"
 DEFAULT_RABBITMQ_PASS="$LORC_RABBITMQ_PASS"
 DEFAULT_RABBITMQ_VHOST="$LORC_RABBITMQ_VHOST"
 
-
 # Parse args for overrides
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -59,6 +58,12 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+	--file-system-storage)
+	LORC_STORAGE_URL=""
+	LORC_STORAGE_ACCESS=""
+	LORC_STORAGE_SECRET=""
+	shift
+	;;
 #    --media-dir)
 #    LORC_MEDIA_DIR=$(realpath "$2")
 #    export LORC_MEDIA_DIR
@@ -170,10 +175,11 @@ usage(){
   echo ""
   echo "Options:"
   echo "        --port  <port>  Set the port that LiveORC should bind to (default: $DEFAULT_PORT)"
+  echo "        --file-system-storage	Set storage volume to a local storage instead of (default) a S3 bucket"
   echo "        --hostname      <hostname>      Set the hostname that LiveORC will be accessible from (default: $DEFAULT_HOST)"
 #  echo "        --media-dir     <path>  Path where processing results will be stored to (default: $DEFAULT_MEDIA_DIR (docker named volume))"
 #  echo "        --db-dir        <path>  Path where the Postgres db data will be stored to (default: $DEFAULT_DB_DIR (docker named volume))"
-#  echo "        --default-nodes The amount of default NodeODM nodes attached to LiveORC on startup (default: $DEFAULT_NODES)"
+#  echo "        --default-nodes The amount of default NodeORC nodes attached to LiveORC on startup (default: $DEFAULT_NODES)"
 #  echo "        --with-micmac   Create a NodeMICMAC node attached to LiveORC on startup. Experimental! (default: disabled)"
   echo "        --ssl   Enable SSL and automatically request and install a certificate from letsencrypt.org. (default: $DEFAULT_SSL)"
   echo "        --ssl-key       <path>  Manually specify a path to the private key file (.pem) to use with nginx to enable SSL (default: None)"
@@ -184,7 +190,6 @@ usage(){
 #  echo "        --dev-watch-plugins     Automatically build plugins while in dev mode. (default: disabled)"
 #  echo "        --broker        Set the URL used to connect to the celery broker (default: $DEFAULT_BROKER)"
   echo "        --detached      Run LiveORC in detached mode. This means LiveORC will run in the background, without blocking the terminal (default: disabled)"
-#  echo "        --gpu   Use GPU NodeODM nodes (Linux only) (default: disabled)"
 #  echo "        --settings      Path to a settings.py file to enable modifications of system settings (default: None)"
 #  echo "        --worker-memory Maximum amount of memory allocated for the worker process (default: unlimited)"
 #  echo "        --worker-cpus   Maximum number of CPUs allocated for the worker process (default: all)"
@@ -226,6 +231,11 @@ start(){
 	echo "================================"
 	echo "Host: $LORC_HOST"
 	echo "Port: $LORC_PORT"
+	if [ "$LORC_STORAGE_URL" = "" ]; then
+		echo "Storage volume: $LORC_MEDIA_DIR"
+	else
+		echo "Storage volume: $LORC_STORAGE_URL"
+	fi
 #	echo "Media directory: $LORC_MEDIA_DIR"
 #	echo "Postgres DB directory: $LORC_DB_DIR"
 	echo "SSL: $LORC_SSL"
@@ -239,6 +249,9 @@ start(){
 
 	# assemble a command, extended with options further onwards
 	command="docker compose -f docker-compose.yml"
+	if [ -n "$LORC_STORAGE_URL" ]; then
+		enable_s3
+	fi
 
 	if [ "$LORC_RABBITMQ" = "YES" ]; then
 	  command+=" -f docker-compose.rabbitmq.yml"
@@ -260,7 +273,7 @@ down(){
 }
 
 stop(){
-	echo "Stopping LiveODM..."
+	echo "Stopping LiveORC..."
 
 	command="docker compose -f docker-compose.yml"
 	command+=" stop"
@@ -270,9 +283,20 @@ stop(){
 rebuild(){
 	run "docker compose down --remove-orphans"
 	run "docker compose -f docker-compose.yml build --no-cache"
-	echo -e "\033[1mDone!\033[0m You can now start LiveODM by running $0 start"
+	echo -e "\033[1mDone!\033[0m You can now start LiveORC by running $0 start"
 }
 
+enable_s3(){
+	if [ -z "$LORC_STORAGE_ACCESS" ]; then
+			echo -e "\033[91mStorage access key does not exist. Configure as environment variable LORC_STORAGE_ACCESS\033[39m"
+			exit 1
+	fi
+	if [ -z "$LORC_STORAGE_SECRET" ]; then
+			echo -e "\033[91mStorage secret key does not exist. Configure as environment variable LORC_STORAGE_SECRET\033[39m"
+			exit 1
+	fi
+	command+=" -f docker-compose.s3.yml"
+}
 enable_ssl(){
 	if [ -n "$LORC_SSL_KEY" ] && [ ! -e "$LORC_SSL_KEY" ]; then
 			echo -e "\033[91mSSL key file does not exist: $LORC_SSL_KEY\033[39m"

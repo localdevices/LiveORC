@@ -18,9 +18,8 @@ RUN apt update && apt install ffmpeg libsm6 libxext6 libgl1 python3-venv libgdal
     # make scripts executable and run as unix
     dos2unix /liveorc/start.sh && dos2unix /liveorc/nginx/letsencrypt-autogen.sh && \
     chmod +x /liveorc/start.sh && chmod +x /liveorc/nginx/letsencrypt-autogen.sh && \
-    python3 manage.py collectstatic --noinput --skip-checks && \
     # make sure that any locally made migrations are not persisting in the volumes
-    rm -fr /liveorc/users/migrations/* && rm -fr /liveorc/api/migrations/* && rm -fr /liveorc/dbase/* && \
+    rm -fr /liveorc/users/migrations/* && rm -fr /liveorc/api/migrations/* && rm -fr /liveorc/data/* && \
     touch /liveorc/users/migrations/__init__.py && touch /liveorc/api/migrations/__init__.py && \
     python3 manage.py makemigrations --noinput && python3 manage.py migrate --noinput && \
     python3 manage.py collectstatic --noinput --skip-checks && \
@@ -30,8 +29,7 @@ RUN apt update && apt install ffmpeg libsm6 libxext6 libgl1 python3-venv libgdal
 # copy the nice style to the media volume
 COPY django-admin-interface/media /liveorc/media
 
-VOLUME /liveorc/media
-VOLUME /liveorc/dbase
+VOLUME /liveorc/data
 VOLUME /liveorc/static
 VOLUME /liveorc/api/migrations
 VOLUME /liveorc/users/migrations

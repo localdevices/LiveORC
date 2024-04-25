@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.files.storage import storages
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
@@ -16,6 +17,19 @@ from django.conf import settings
 from api.models import BaseModel, CameraConfig, Project, TimeSeries
 
 VIDEO_EXTENSIONS = ["MOV", "MKV", "MP4", "AVI", "M4V"]
+
+
+def select_storage():
+    return storages["media"]
+
+
+def storage_path(file_field):
+    if "FileSystemStorage" in str(file_field.storage):
+        # local storage used
+        return file_field.path
+    else:
+        # remote storage used
+        return file_field.url
 
 
 def add_frame_to_model(video_field, img_field, frame_nr=0, suffix="", thumb=False):
@@ -36,14 +50,14 @@ def add_frame_to_model(video_field, img_field, frame_nr=0, suffix="", thumb=Fals
     thumb : boolean
         Set to True to resize the image, settings.THUMBSIZE is used for the size settings
     """
-    if "FieldFile" in repr(video_field):
+    if "ImageFieldFile" in repr(video_field):
+        image = cv2.imread(storage_path(video_field))
+    elif "FieldFile" in repr(video_field):
         # a video is passed, so use opencv to get the key frame
-        cap = cv2.VideoCapture(video_field.path)
+        cap = cv2.VideoCapture(storage_path(video_field))
         if frame_nr != 0:
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame_nr)
         res, image = cap.read()
-    elif "ImageFieldFile" in repr(video_field):
-        image = cv2.imread(video_field.path)
     # turn into RGB
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     img_name, video_extension = os.path.splitext(os.path.basename(video_field.name))
@@ -84,6 +98,7 @@ def get_video_path(instance, filename):
     )
     return end_point
 
+
 def get_thumb_path(instance, filename):
     end_point = os.path.join(
         "thumb",
@@ -93,6 +108,7 @@ def get_thumb_path(instance, filename):
     )
     return end_point
 
+
 def get_keyframe_path(instance, filename):
     end_point = os.path.join(
         "keyframe",
@@ -101,7 +117,8 @@ def get_keyframe_path(instance, filename):
         filename
     )
     return end_point
-"http://0.0.0.0:8000/admin/api/video/31/actions/toolfunc/"
+
+
 def get_task_run(id):
     uri = reverse('admin:api_video_actions', args=([str(id), "toolfunc"]))
     return mark_safe(
@@ -122,7 +139,6 @@ class Video(models.Model):
     """
     Video object with water level and flow information
     """
-    # id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)  # we use a uuid to ensure the name is and remain unique and can be used for file naming
     created_at = models.DateTimeField(
         default=timezone.now,
         editable=False,
@@ -136,23 +152,26 @@ class Video(models.Model):
         upload_to=get_video_path,
         validators=[FileExtensionValidator(allowed_extensions=VIDEO_EXTENSIONS)],
         null=True,
+        storage=select_storage
     )
     keyframe = models.ImageField(
         upload_to=get_keyframe_path,
         help_text="Extracted frame for user contextual understanding or for making camera configurations",
         editable=False,
-        max_length=254
+        max_length=254,
+        storage=select_storage
     )
     image = models.ImageField(
         upload_to=get_video_path,
         help_text="Image showing the results of a velocimetry analysis",
         null=True,
-        # max_length=254
+        storage=select_storage
     )
     thumbnail = models.ImageField(
         upload_to=get_thumb_path,
         help_text="Thumbnail frame for list views",
-        editable=False
+        editable=False,
+        storage=select_storage
     )
     status = models.PositiveSmallIntegerField(
         choices=VideoStatus.choices,
