@@ -36,10 +36,9 @@ DEFAULT_HOST="$LORC_HOST"
 DEFAULT_DB_DIR="$LORC_DB_DIR"
 DEFAULT_SSL="$LORC_SSL"
 DEFAULT_SSL_INSECURE_PORT_REDIRECT="$LORC_SSL_INSECURE_PORT_REDIRECT"
-DEFAULT_RABBITMQ="$LORC_RABBITMQ"
 DEFAULT_RABBITMQ_USER="$LORC_RABBITMQ_USER"
 DEFAULT_RABBITMQ_PASS="$LORC_RABBITMQ_PASS"
-DEFAULT_RABBITMQ_VHOST="$LORC_RABBITMQ_VHOST"
+DEFAULT_RABBITMQ_URL="$LORC_RABBITMQ_URL"
 
 # Parse args for overrides
 POSITIONAL=()
@@ -59,9 +58,9 @@ case $key in
     shift # past value
     ;;
 	--file-system-storage)
-	LORC_STORAGE_URL=""
-	LORC_STORAGE_ACCESS=""
-	LORC_STORAGE_SECRET=""
+	export LORC_STORAGE_URL=""
+	export LORC_STORAGE_ACCESS=""
+	export LORC_STORAGE_SECRET=""
 	shift
 	;;
 #    --media-dir)
@@ -97,26 +96,21 @@ case $key in
     shift # past argument
     shift # past value
     ;;
-    --rabbitmq)
-    export $LORC_RABBITMQ="$2"
-    shift # past argument
-    shift # past value
-    ;;
-  --rabbitmq-user)
-    export LORC_RABBITMQ_USER="$2"
-    shift # past argument
-    shift # past value
-    ;;
-  --rabbitmq-pass)
-    export LORC_RABBITMQ_PASS="$2"
-    shift # past argument
-    shift # past value
-    ;;
-  --rabbitmq-vhost)
-    export LORC_RABBITMQ_VHOST="$2"
-    shift # past argument
-    shift # past value
-    ;;
+#    --rabbitmq-url)
+#    export $LORC_RABBITMQ_URL="$2"
+#    shift # past argument
+#    shift # past value
+#    ;;
+#  --rabbitmq-user)
+#    export LORC_RABBITMQ_USER="$2"
+#    shift # past argument
+#    shift # past value
+#    ;;
+#  --rabbitmq-pass)
+#    export LORC_RABBITMQ_PASS="$2"
+#    shift # past argument
+#    shift # past value
+#    ;;
 #    --debug)
 #    export LORC_DEBUG=YES
 #    shift # past argument
@@ -193,10 +187,9 @@ usage(){
 #  echo "        --settings      Path to a settings.py file to enable modifications of system settings (default: None)"
 #  echo "        --worker-memory Maximum amount of memory allocated for the worker process (default: unlimited)"
 #  echo "        --worker-cpus   Maximum number of CPUs allocated for the worker process (default: all)"
-  echo "        --rabbitmq   Enable Rabbitmq Use. (default: $DEFAULT_RABBITMQ)"
-  echo "        --rabbitmq-user  <username>  Set the username for rabbitmq (default: $DEFAULT_RABBITMQ_USER)"
-  echo "        --rabbitmq-pass  <password>  Set the password for rabbitmq (default: $DEFAULT_RABBITMQ_PASS)"
-  echo "        --rabbitmq-vhost  <vhost>  Set the vhost for rabbitmq (default: $DEFAULT_RABBITMQ_VHOST)"
+#  echo "        --rabbitmq-url  <url>  Set the url for rabbitmq (default: $DEFAULT_RABBITMQ_URL)"
+#  echo "        --rabbitmq-user  <username>  Set the username for rabbitmq (default: $DEFAULT_RABBITMQ_USER)"
+#  echo "        --rabbitmq-pass  <password>  Set the password for rabbitmq (default: $DEFAULT_RABBITMQ_PASS)"
 
   exit
 }
@@ -242,7 +235,7 @@ start(){
 	echo "SSL key: $LORC_SSL_KEY"
 	echo "SSL certificate: $LORC_SSL_CERT"
 	echo "SSL insecure port redirect: $LORC_SSL_INSECURE_PORT_REDIRECT"
-	echo "RabbitMQ: $LORC_RABBITMQ"
+#	echo "RabbitMQ URL: $LORC_RABBITMQ_URL"
 	echo "================================"
 	echo "Make sure to issue a $0 down if you decide to change the environment."
 	echo ""
@@ -253,7 +246,7 @@ start(){
 		enable_s3
 	fi
 
-	if [ "$LORC_RABBITMQ" = "YES" ]; then
+	if [ -n "$LORC_RABBITMQ_URL" = "YES" ]; then
 	  command+=" -f docker-compose.rabbitmq.yml"
 	fi
 

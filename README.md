@@ -1,3 +1,12 @@
+> [!IMPORTANT]
+> LiveORC is still in development. Features such as interactive selection of ground control points, assembling a camera 
+> configuration and making of recipes is not yet available. To make a camera configuration, and guidance on how to 
+> establish a recipe, please use pyOpenRiverCam and continue to the following sections of the user guide:
+> 
+> - [camera configuration](https://localdevices.github.io/pyorc/user-guide/camera_config/index.html)
+> - [processing recipes](https://localdevices.github.io/pyorc/user-guide/cli.html). Scroll down until you find 
+    > information on building recipes
+
 # LiveORC
 Web-based, professional and scalable velocimetry analysis for operational river monitoring with videos
 
@@ -9,6 +18,19 @@ the Windows Subsystem for Linux environment (WSL).
 
 ## prerequisites
 
+To install LiveORC we recommend to use Docker and the `liveorc.sh` script that comes with the code. To install 
+LiveORC you will need to install the following applications (if you do not already have these).
+
+- Git
+- Docker
+- Docker-compose
+- Windows Subsystem for Linux (WSL 2) enabled (recommended)
+
+Windows users should install Docker Desktop and we recommend to use the [WSL 2 backend](https://docs.docker.
+com/desktop/wsl/). If you cannot use WSL 2, then you should give enough resources to run LiveORC. Normally, 4GB 
+memory should be sufficient unless you expect many users at the same time on the web server. Disk storage should be 
+set to a satisfactory amount to store the expected videos, thumbnails and keyframes. Note that one short video can 
+easily be 10MB!
 
 ## local use
 
@@ -90,4 +112,26 @@ If you wish to entirely rebuild LiveORC, then you may run
 
 This will only rebuild the services, not the volumes. This means that any data you may have stored will remain in 
 the persistent volumes.
+
+# Getting started
+
+Once you have setup LiveOpenRiverCam, you should see a message as provided below.
+
+```shell
+liveopenrivercam  | Trying to establish communication...
+liveopenrivercam  |  - - [23/Apr/2024:16:21:28 +0000] "GET / HTTP/1.0" 302 0 "-" "curl/7.88.1"
+liveopenrivercam  |  - - [23/Apr/2024:16:21:29 +0000] "GET /admin/ HTTP/1.0" 302 0 "-" "curl/7.88.1"
+liveopenrivercam  |  - - [23/Apr/2024:16:21:29 +0000] "GET /admin/login/?next=/admin/ HTTP/1.0" 200 16542 "-" "curl/7.88.1"
+liveopenrivercam  | 
+liveopenrivercam  | Congratulations! └@(･◡･)@┐
+liveopenrivercam  | ==========================
+liveopenrivercam  | 
+liveopenrivercam  | If there are no errors, LiveORC should be up and running!
+liveopenrivercam  | 
+liveopenrivercam  | Open a web browser and navigate to http://localhost:8000
+liveopenrivercam  | 
+```
+
+In this case, LiveORC was run without ``--hostname`` and therefore the url is served entirely locally. Browse
+to http://localhost:8000 to get to the first page.
 

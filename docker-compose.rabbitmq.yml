@@ -1,15 +1,11 @@
-version: "3"
-
 services:
-  rabbit:
-    image: rabbitmq:3-management
-    container_name: rabbit
-    hostname: rabbit
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    hostname: rabbitmq
     environment:
-      - LORC_RABBITMQ
-      - LORC_RABBITMQ_USER
-      - LORC_RABBITMQ_PASS
-      - LORC_RABBITMQ_VHOST
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password
     ports:
-      - "5682:5672"
-      - "15682:15672"
+      - "5672:5672"
+      - "15672:15672"
