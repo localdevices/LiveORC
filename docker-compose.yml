@@ -9,7 +9,7 @@ services:
     restart: unless-stopped
     volumes:
       - .:/liveorc:z
-      - lorc_data:/liveorc/data:z
+#      - lorc_data:/liveorc/data:z
       - lorc_media:/liveorc/data/media:z
       - lorc_static:/liveorc/static
       - lorc_migration_users:/liveorc/users/migrations:z

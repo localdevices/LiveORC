@@ -1,0 +1,7 @@
+#version: '3'
+services:
+  webapp:
+    volumes:
+      - ${LORC_DB_DIR}:/liveorc/data:z
+volumes:
+  lorc_data:

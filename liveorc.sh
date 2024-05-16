@@ -34,6 +34,10 @@ DEFAULT_PORT="$LORC_PORT"
 DEFAULT_HOST="$LORC_HOST"
 # DEFAULT_MEDIA_DIR="$LORC_MEDIA_DIR"
 DEFAULT_DB_DIR="$LORC_DB_DIR"
+DEFAULT_DB_HOST="$LORC_DB_HOST"
+DEFAULT_DB_USER="$LORC_DB_USER"
+DEFAULT_DB_PASSWORD="$LORC_DB_PASSWORD"
+
 DEFAULT_SSL="$LORC_SSL"
 DEFAULT_SSL_INSECURE_PORT_REDIRECT="$LORC_SSL_INSECURE_PORT_REDIRECT"
 DEFAULT_RABBITMQ_USER="$LORC_RABBITMQ_USER"
@@ -63,6 +67,10 @@ case $key in
 	export LORC_STORAGE_SECRET=""
 	shift
 	;;
+  --local-database)
+  export LORC_DB_HOST=""
+  shift
+  ;;
 #    --media-dir)
 #    LORC_MEDIA_DIR=$(realpath "$2")
 #    export LORC_MEDIA_DIR
@@ -72,6 +80,24 @@ case $key in
     --db-dir)
     LORC_DB_DIR=$(realpath "$2")
     export LORC_DB_DIR
+    shift # past argument
+    shift # past value
+    ;;
+    --db-host)
+    LORC_DB_HOST=$(realpath "$2")
+    export LORC_DB_HOST
+    shift # past argument
+    shift # past value
+    ;;
+    --db-user)
+    LORC_DB_USER=$(realpath "$2")
+    export LORC_DB_USER
+    shift # past argument
+    shift # past value
+    ;;
+    --db-pass)
+    LORC_DB_PASSWORD=$(realpath "$2")
+    export LORC_DB_PASSWORD
     shift # past argument
     shift # past value
     ;;
@@ -171,8 +197,12 @@ usage(){
   echo "        --port  <port>  Set the port that LiveORC should bind to (default: $DEFAULT_PORT)"
   echo "        --file-system-storage	Set storage volume to a local storage instead of (default) a S3 bucket"
   echo "        --hostname      <hostname>      Set the hostname that LiveORC will be accessible from (default: $DEFAULT_HOST)"
+  echo "        --db-local   Use a local Spatialite database instead of a service-based PostGreSQL / PostGIS database"
+  echo "        --db-host <hostname>    Set the remote Postgis database host that LiveORC will be using (default: $DEFAULT_DB_HOST)"
+  echo "        --db-user <username>    Set the remote Postgis username that LiveORC will be using (default: $DEFAULT_DB_USER)"
+  echo "        --db-pass <password>    Set the remote Postgis password host that LiveORC will be using (default: $DEFAULT_DB_PASSWORD)"
 #  echo "        --media-dir     <path>  Path where processing results will be stored to (default: $DEFAULT_MEDIA_DIR (docker named volume))"
-#  echo "        --db-dir        <path>  Path where the Postgres db data will be stored to (default: $DEFAULT_DB_DIR (docker named volume))"
+  echo "        --db-dir        <path>  Path where the Spatialite database will be stored to, only used with --db-local (default: $DEFAULT_DB_DIR (docker named volume))"
 #  echo "        --default-nodes The amount of default NodeORC nodes attached to LiveORC on startup (default: $DEFAULT_NODES)"
 #  echo "        --with-micmac   Create a NodeMICMAC node attached to LiveORC on startup. Experimental! (default: disabled)"
   echo "        --ssl   Enable SSL and automatically request and install a certificate from letsencrypt.org. (default: $DEFAULT_SSL)"
@@ -229,6 +259,11 @@ start(){
 	else
 		echo "Storage volume: $LORC_STORAGE_URL"
 	fi
+	if [ "$LORC_DB_HOST" = "" ]; then
+		echo "Database: Spatialite stored at $LORC_DB_DIR"
+	else
+		echo "Database: Postgis at $LORC_DB_HOST"
+	fi
 #	echo "Media directory: $LORC_MEDIA_DIR"
 #	echo "Postgres DB directory: $LORC_DB_DIR"
 	echo "SSL: $LORC_SSL"
@@ -244,6 +279,11 @@ start(){
 	command="docker compose -f docker-compose.yml"
 	if [ -n "$LORC_STORAGE_URL" ]; then
 		enable_s3
+	fi
+	if [ -n "$LORC_DB_HOST" ]; then
+	  enable_postgis
+	else
+	  enable_spatialite
 	fi
 
 	if [ -n "$LORC_RABBITMQ_URL" = "YES" ]; then
@@ -290,6 +330,23 @@ enable_s3(){
 	fi
 	command+=" -f docker-compose.s3.yml"
 }
+
+enable_postgis(){
+  if [ -z "$LORC_DB_USER" ]; then
+      echo -e "\033[91mPostgis user name does not exist. Configure as environment variable LORC_DB_USER\033[39m"
+      exit 1
+  fi
+  if [ -z "$LORC_DB_PASSWORD" ]; then
+      echo -e "\033[91mPostgis password does not exist. Configure as environment variable LORC_DB_PASSWORD\033[39m"
+      exit 1
+  fi
+  command+=" -f docker-compose.postgis.yml"
+}
+
+enable_spatialite(){
+  command+=" -f docker-compose.spatialite.yml"
+}
+
 enable_ssl(){
 	if [ -n "$LORC_SSL_KEY" ] && [ ! -e "$LORC_SSL_KEY" ]; then
 			echo -e "\033[91mSSL key file does not exist: $LORC_SSL_KEY\033[39m"
