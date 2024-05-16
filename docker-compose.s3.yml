@@ -11,5 +11,5 @@ services:
       MINIO_CONSOLE_PORT: 9001
 
     volumes:
-      - lorc_data:/data
+      - ${LORC_STORAGE_DIR}:/data
     command: server /data --console-address ":9001"
