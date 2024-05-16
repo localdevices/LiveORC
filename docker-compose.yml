@@ -29,6 +29,7 @@ services:
       - LORC_DB_USER
       - LORC_DB_PASS
       - LORC_DEBUG
+      - LORC_SSL
     ports:
       - "${LORC_PORT}:8000"
 volumes:

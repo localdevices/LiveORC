@@ -63,7 +63,6 @@ else
         ./nginx/letsencrypt-autogen.sh
     fi
 
-
     # Check if SSL key/certs are available
     conf="nginx.conf"
     if [ -e nginx/ssl ]; then
