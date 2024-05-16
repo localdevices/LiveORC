@@ -114,7 +114,7 @@ def get_form_callback_video_post(instance):
         endpoint=reverse(
             "api:video-list",
         ),
-        files_to_send=["jpg"]
+        files_to_send=["jpg", "videofile"]
     )
 
 

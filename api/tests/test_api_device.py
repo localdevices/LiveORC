@@ -23,9 +23,11 @@ def get_device_data():
         "memory": psutil.virtual_memory().total / (1024**3),
         "ip_address": get_ip(),
         "status": 0,
-        "form_status": 0
+        "form_status": 0,
+        "nodeorc_version": "0.1.0"
     }
     return data
+
 
 class DeviceTests(InitTestCase):
     def setUp(self):

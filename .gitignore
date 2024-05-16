@@ -1,3 +1,9 @@
+# django related
+.secret_key
+.cronenv  # prepared in start.sh to be loaded by crontab inside docker container
+nginx/nginx.conf
+nginx/nginx-ssl.conf
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -120,7 +126,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/

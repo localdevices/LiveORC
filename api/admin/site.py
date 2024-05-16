@@ -20,6 +20,7 @@ class SiteAdmin(BaseInstituteAdmin):
             "https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-moment/1.0.1/chartjs-adapter-moment.min.js",
             "admin/js/timeseries.js"
         )
+
         css = {"all": ("admin/css/slider.css", )}
     form = SiteForm
     fieldsets = [

@@ -3,6 +3,7 @@ from django import forms
 
 from api.models import Device
 from api.models import DeviceStatus, DeviceFormStatus
+import nodeorc
 
 class DeviceForm(forms.ModelForm):
 
@@ -41,7 +42,8 @@ class DeviceAdmin(admin.GISModelAdmin):
         "id",
         "message",
         "status_ok",
-        "form_status_ok"
+        "form_status_ok",
+        "version_synced"
     ]
 
     def filter_institute(self, request, qs):
@@ -67,3 +69,12 @@ class DeviceAdmin(admin.GISModelAdmin):
     form_status_ok.boolean = True
     form_status_ok.allow_tags = True
 
+
+    def version_synced(self, obj):
+        """
+        Check if currently active form of device is functional
+        """
+
+        return obj.nodeorc_version == nodeorc.__version__
+    version_synced.boolean = True
+    version_synced.allow_tags = True

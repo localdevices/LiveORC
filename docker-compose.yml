@@ -1,0 +1,40 @@
+#version: '3'
+services:
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: liveopenrivercam
+    entrypoint: /bin/bash -c "/liveorc/start.sh"
+    restart: unless-stopped
+    volumes:
+      - .:/liveorc:z
+      - ${LORC_STORAGE_DIR}:/liveorc/data/media:z
+      - lorc_static:/liveorc/static
+      - lorc_migration_users:/liveorc/users/migrations:z
+      - lorc_migration_api:/liveorc/api/migrations:z
+    environment:
+      - DJANGO_DBASE_DIR=/liveorc/data
+      - "${LORC_STORAGE_ACCESS}:MINIO_ROOT_USER"
+      - "${LORC_STORAGE_SECRET}:MINIO_ROOT_PASSWORD"
+      - LORC_PORT
+      - LORC_HOST
+      - LORC_SECRET_KEY
+      - LORC_STORAGE_HOST
+      - LORC_STORAGE_PORT
+      - LORC_STORAGE_ACCESS
+      - LORC_STORAGE_SECRET
+      - LORC_DB_HOST
+      - LORC_DB_PORT
+      - LORC_DB_USER
+      - LORC_DB_PASS
+      - LORC_DEBUG
+      - LORC_SSL
+    ports:
+      - "${LORC_PORT}:8000"
+volumes:
+  lorc_data:
+  lorc_media:
+  lorc_static:
+  lorc_migration_users:
+  lorc_migration_api:

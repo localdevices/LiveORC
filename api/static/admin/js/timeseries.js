@@ -327,10 +327,17 @@ function handleZoomEvent() {
         }
     }, 200);
 }
+//window.onload = function() {
+//    var ctx = document.getElementById("canvas").getContext("2d");
+//    canvas = document.getElementById("canvas")
+//    window.myLine = new Chart(ctx, config);
+//
+//};
 
-window.onload = function() {
+function visualize(){
+    console.log("Visualizing time series")
     var ctx = document.getElementById("canvas").getContext("2d");
     canvas = document.getElementById("canvas")
     window.myLine = new Chart(ctx, config);
 
-};
+}
