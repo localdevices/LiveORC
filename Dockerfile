@@ -29,7 +29,7 @@ RUN apt update && apt install ffmpeg libsm6 libxext6 libgl1 python3-venv libgdal
 #     touch /liveorc/users/migrations/__init__.py && touch /liveorc/api/migrations/__init__.py && \
 #     python3 manage.py makemigrations --noinput && python3 manage.py migrate --noinput && \
 #     python3 manage.py migrate --noinput && \
-    python3 manage.py collectstatic --noinput --skip-checks && \
+    python3 manage.py collectstatic --noinput --skip-checks
     # upload the record with styling
 #     python3 manage.py loaddata ./django-admin-interface/admin_interface_theme_liveorc.json
 
