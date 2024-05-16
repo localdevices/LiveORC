@@ -57,7 +57,7 @@ is our recommended use. Please take the following into account before starting L
 
 > [!IMPORTANT]
 > Make sure you install LiveORC in a folder structure without spaces. Spaces in folder structures may result in 
-> unexpected behaviour or failures. For windows users, we recommend for instance to run LiveORC under /c/LiveORC 
+> unexpected behaviour or failures. For windows users, we recommend for instance to run LiveORC under `/c/LiveORC/` 
 > directly.
 
 ## Local use
@@ -119,7 +119,7 @@ by the path (without spaces).
 
 Alternatively, if you want to run a larger service, you may want to host files on a cloud storage, externally from
 the `docker` composition. S3 buckets are supported. Provide the hostname, port, username and password by passing 
-the options `--storage-host`, `--storage-port`, `--storage-user` and `--storage-pass, all followed by the 
+the options `--storage-host`, `--storage-port`, `--storage-user` and `--storage-pass`, all followed by the 
 information needed. For instance, a cloud storage on amazon called `http://mystorage.s3.amazonaws.com` on port 80 
 can be connected as follows:
 
@@ -188,8 +188,8 @@ liveopenrivercam  |  - - [23/Apr/2024:16:21:28 +0000] "GET / HTTP/1.0" 302 0 "-"
 liveopenrivercam  |  - - [23/Apr/2024:16:21:29 +0000] "GET /admin/ HTTP/1.0" 302 0 "-" "curl/7.88.1"
 liveopenrivercam  |  - - [23/Apr/2024:16:21:29 +0000] "GET /admin/login/?next=/admin/ HTTP/1.0" 200 16542 "-" "curl/7.88.1"
 liveopenrivercam  | 
-liveopenrivercam  | Congratulations! └@(･◡･)@┐
-liveopenrivercam  | ==========================
+liveopenrivercam  | Congratulations! 🤩 
+liveopenrivercam  | ===================
 liveopenrivercam  | 
 liveopenrivercam  | If there are no errors, LiveORC should be up and running!
 liveopenrivercam  | 
