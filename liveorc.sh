@@ -339,6 +339,7 @@ stop(){
 
 }
 rebuild(){
+	echo "Rebuilding LiveORC services, this may take a while ... 🧋 "
 	run "docker compose down --remove-orphans"
 	run "docker compose -f docker-compose.yml build --no-cache"
 	echo -e "\033[1mDone! ✅ \033[0m You can now start LiveORC by running $0 start"

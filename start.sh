@@ -39,6 +39,14 @@ if [ "$LORC_SSL" = "YES" ]; then
     proto="https"
 fi
 
+# set the settings module for allowing to search for the LiveORC style
+# check if there is a record already
+export DJANGO_SETTINGS_MODULE=LiveORC.settings
+liveorc_style=$(bash -c "echo \"from admin_interface.models import Theme;print(len(Theme.objects.filter(name='LiveOpenRiverCam')));\" | python manage.py shell";)
+if [ $liveorc_style = "0" ]
+then
+	python3 manage.py loaddata ./django-admin-interface/admin_interface_theme_liveorc.json
+fi
 python manage.py migrate
 if [ "$1" = "--no-gunicorn" ]; then
     echo "Running LiveORC locally"
