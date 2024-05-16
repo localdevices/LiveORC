@@ -19,7 +19,6 @@ if [[ $platform = "Windows" ]]; then
 fi
 
 dev_mode=false
-gpu=false
 
 # define realpath replacement function
 if [[ $platform = "MacOS / OSX" ]]; then
@@ -36,8 +35,13 @@ DEFAULT_HOST="$LORC_HOST"
 DEFAULT_DB_DIR="$LORC_DB_DIR"
 DEFAULT_DB_HOST="$LORC_DB_HOST"
 DEFAULT_DB_USER="$LORC_DB_USER"
-DEFAULT_DB_PASSWORD="$LORC_DB_PASSWORD"
-
+DEFAULT_DB_PORT="$LORC_DB_PORT"
+DEFAULT_DB_PASS="$LORC_DB_PASS"
+DEFAULT_STORAGE_HOST="$LORC_STORAGE_HOST"
+DEFAULT_STORAGE_PORT="$LORC_STORAGE_PORT"
+DEFAULT_STORAGE_USER="$LORC_STORAGE_ACCESS"
+DEFAULT_STORAGE_PASS="$LORC_STORAGE_SECRET"
+DEFAULT_STORAGE_DIR="$LORC_STORAGE_DIR"
 DEFAULT_SSL="$LORC_SSL"
 DEFAULT_SSL_INSECURE_PORT_REDIRECT="$LORC_SSL_INSECURE_PORT_REDIRECT"
 DEFAULT_RABBITMQ_USER="$LORC_RABBITMQ_USER"
@@ -61,22 +65,10 @@ case $key in
     shift # past argument
     shift # past value
     ;;
-	--file-system-storage)
-	export LORC_STORAGE_URL=""
-	export LORC_STORAGE_ACCESS=""
-	export LORC_STORAGE_SECRET=""
-	shift
-	;;
-  --local-database)
+  --db-local)
   export LORC_DB_HOST=""
   shift
   ;;
-#    --media-dir)
-#    LORC_MEDIA_DIR=$(realpath "$2")
-#    export LORC_MEDIA_DIR
-#    shift # past argument
-#    shift # past value
-#    ;;
     --db-dir)
     LORC_DB_DIR=$(realpath "$2")
     export LORC_DB_DIR
@@ -96,8 +88,50 @@ case $key in
     shift # past value
     ;;
     --db-pass)
-    LORC_DB_PASSWORD=$(realpath "$2")
-    export LORC_DB_PASSWORD
+    LORC_DB_PASS=$(realpath "$2")
+    export LORC_DB_PASS
+    shift # past argument
+    shift # past value
+    ;;
+    --db-port)
+    LORC_DB_PORT=$(realpath "$2")
+    export LORC_DB_PORT
+    shift # past argument
+    shift # past value
+    ;;
+	--storage-local)
+	export LORC_STORAGE_HOST=""
+	export LORC_STORAGE_ACCESS=""
+	export LORC_STORAGE_SECRET=""
+	shift
+	;;
+    --storage-dir)
+    LORC_STORAGE_DIR=$(realpath "$2")
+    export LORC_STORAGE_DIR
+    shift # past argument
+    shift # past value
+    ;;
+	--storage-host)
+    LORC_STORAGE_HOST=$(realpath "$2")
+    export LORC_STORAGE_HOST
+    shift # past argument
+    shift # past value
+    ;;
+	--storage-port)
+    LORC_STORAGE_PORT=$(realpath "$2")
+    export LORC_STORAGE_PORT
+    shift # past argument
+    shift # past value
+    ;;
+    --storage-user)
+    LORC_STORAGE_ACCESS=$(realpath "$2")
+    export LORC_STORAGE_ACCESS
+    shift # past argument
+    shift # past value
+    ;;
+    --storage-pass)
+    LORC_STORAGE_SECRET=$(realpath "$2")
+    export LORC_STORAGE_SECRET
     shift # past argument
     shift # past value
     ;;
@@ -137,10 +171,10 @@ case $key in
 #    shift # past argument
 #    shift # past value
 #    ;;
-#    --debug)
-#    export LORC_DEBUG=YES
-#    shift # past argument
-#    ;;
+    --debug)
+    export LORC_DEBUG=YES
+    shift # past argument
+    ;;
 #    --dev)
 #    export LORC_DEBUG=YES
 #    export LORC_DEV=YES
@@ -152,21 +186,10 @@ case $key in
 #    shift # past argument
 #    shift # past value
 #    ;;
-#    --no-default-node)
-#    echo "ATTENTION: --no-default-node is deprecated. Use --default-nodes instead."
-#    export WO_DEFAULT_NODES=0
-#    shift # past argument
-#    ;;
     --detached)
     detached=true
     shift # past argument
     ;;
-#    --settings)
-#    LORC_SETTINGS=$(realpath "$2")
-#    export WO_SETTINGS
-#    shift # past argument
-#    shift # past value
-#    ;;
     *)    # unknown option
     POSITIONAL+=("$1") # save it in an array for later
     shift # past argument
@@ -183,40 +206,43 @@ usage(){
   echo "We recommend that you read the full documentation of docker at https://docs.docker.com if you want to customize your setup."
   echo
   echo "Command list:"
-  echo "        start [options]         Start LiveORC"
-  echo "        stop                    Stop LiveORC"
-  echo "        down                    Stop and remove LiveORC's docker containers"
+  echo "        ▶️ start [options]         Start LiveORC"
+  echo "        🛑 stop                    Stop LiveORC"
+  echo "        🔽 down                    Stop and remove LiveORC's docker containers"
 #  echo "        update                  Update LiveORC to the latest release"
 #  echo "        liveupdate              Update LiveORC to the latest release without stopping it"
-  echo "        rebuild                 Rebuild all docker containers and perform cleanups"
+  echo "        ⏳ rebuild                 Rebuild all docker containers and perform cleanups"
 #  echo "        checkenv                Do an environment check and install missing components"
 #  echo "        test                    Run the unit test suite (developers only)"
-#  echo "        resetadminpassword \"<new password>\"   Reset the administrator's password to a new one. LiveORC must be running when executing this command and the password must be enclosed in double quotes."
+  echo "        🔑 resetadminpassword	   \"<new password>\"   Reset the administrator's password to a new one."
+  echo "                                   LiveORC must be running when executing this command and the password must be enclosed in double quotes."
   echo ""
   echo "Options:"
-  echo "        --port  <port>  Set the port that LiveORC should bind to (default: $DEFAULT_PORT)"
-  echo "        --file-system-storage	Set storage volume to a local storage instead of (default) a S3 bucket"
   echo "        --hostname      <hostname>      Set the hostname that LiveORC will be accessible from (default: $DEFAULT_HOST)"
-  echo "        --db-local   Use a local Spatialite database instead of a service-based PostGreSQL / PostGIS database"
-  echo "        --db-host <hostname>    Set the remote Postgis database host that LiveORC will be using (default: $DEFAULT_DB_HOST)"
-  echo "        --db-user <username>    Set the remote Postgis username that LiveORC will be using (default: $DEFAULT_DB_USER)"
-  echo "        --db-pass <password>    Set the remote Postgis password host that LiveORC will be using (default: $DEFAULT_DB_PASSWORD)"
+  echo "        --port  <port>  Set the port that LiveORC should bind to (default: $DEFAULT_PORT)"
+  echo "        --db-local   	Use a local Spatialite database instead of a service-based PostGreSQL / PostGIS database"
+  echo "        --db-host 		<hostname>      Set the remote Postgis database host that LiveORC will be using (default: $DEFAULT_DB_HOST)"
+  echo "        --db-port 		<port>    	Set the remote Postgis database port number that LiveORC will be using (default: $DEFAULT_DB_PORT)"
+  echo "        --db-user 		<username>      Set the remote Postgis username that LiveORC will be using (default: $DEFAULT_DB_USER)"
+  echo "        --db-pass 		<password>    	Set the remote Postgis password host that LiveORC will be using (default: $DEFAULT_DB_PASS)"
 #  echo "        --media-dir     <path>  Path where processing results will be stored to (default: $DEFAULT_MEDIA_DIR (docker named volume))"
-  echo "        --db-dir        <path>  Path where the Spatialite database will be stored to, only used with --db-local (default: $DEFAULT_DB_DIR (docker named volume))"
+  echo "        --db-dir		<path>  	Path where the database files are stored. This path must be empty when defined for the first time. (default: $DEFAULT_DB_DIR docker volume)"
+  echo "        --storage-local	Set storage volume to a local storage instead of (default) a S3 bucket"
+  echo "        --storage-host  	<hostname>	Set the remote S3 storage host including protocol prefix such as s3:// or https:// (default: $DEFAULT_STORAGE_HOST)"
+  echo "        --storage-port  	<port>		Set the remote S3 storage port number (default: $DEFAULT_STORAGE_PORT)"
+  echo "        --storage-user 		<username>      Set the remote S3 username that LiveORC will be using (default: $DEFAULT_STORAGE_USER)."
+  echo "        --storage-pass 		<password>    	Set the remote Postgis password host that LiveORC will be using (default: $DEFAULT_STORAGE_PASS)"
+  echo "        --storage-dir		<path>		Path where storage volume is mounted (default: $DEFAULT_STORAGE_DIR docker volume) a S3 bucket"
 #  echo "        --default-nodes The amount of default NodeORC nodes attached to LiveORC on startup (default: $DEFAULT_NODES)"
-#  echo "        --with-micmac   Create a NodeMICMAC node attached to LiveORC on startup. Experimental! (default: disabled)"
-  echo "        --ssl   Enable SSL and automatically request and install a certificate from letsencrypt.org. (default: $DEFAULT_SSL)"
-  echo "        --ssl-key       <path>  Manually specify a path to the private key file (.pem) to use with nginx to enable SSL (default: None)"
-  echo "        --ssl-cert      <path>  Manually specify a path to the certificate file (.pem) to use with nginx to enable SSL (default: None)"
+  echo "        --ssl   	Enable SSL and automatically request and install a certificate from letsencrypt.org. (default: $DEFAULT_SSL)"
+  echo "        --ssl-key       	<path>  Manually specify a path to the private key file (.pem) to use with nginx to enable SSL (default: None)"
+  echo "        --ssl-cert      	<path>  Manually specify a path to the certificate file (.pem) to use with nginx to enable SSL (default: None)"
   echo "        --ssl-insecure-port-redirect    <port>  Insecure port number to redirect from when SSL is enabled (default: $DEFAULT_SSL_INSECURE_PORT_REDIRECT)"
-  echo "        --debug Enable debug for development environments (default: disabled)"
+  echo "        --debug 	Enable debug for development environments (default: disabled)"
 #  echo "        --dev   Enable development mode. In development mode you can make modifications to LiveORC source files and changes will be reflected live. (default: disabled)"
 #  echo "        --dev-watch-plugins     Automatically build plugins while in dev mode. (default: disabled)"
 #  echo "        --broker        Set the URL used to connect to the celery broker (default: $DEFAULT_BROKER)"
   echo "        --detached      Run LiveORC in detached mode. This means LiveORC will run in the background, without blocking the terminal (default: disabled)"
-#  echo "        --settings      Path to a settings.py file to enable modifications of system settings (default: None)"
-#  echo "        --worker-memory Maximum amount of memory allocated for the worker process (default: unlimited)"
-#  echo "        --worker-cpus   Maximum number of CPUs allocated for the worker process (default: all)"
 #  echo "        --rabbitmq-url  <url>  Set the url for rabbitmq (default: $DEFAULT_RABBITMQ_URL)"
 #  echo "        --rabbitmq-user  <username>  Set the username for rabbitmq (default: $DEFAULT_RABBITMQ_USER)"
 #  echo "        --rabbitmq-pass  <password>  Set the password for rabbitmq (default: $DEFAULT_RABBITMQ_PASS)"
@@ -247,22 +273,21 @@ start(){
 	# retrieve a secret key
 	get_secret
 
-
-	echo "Starting LiveORC..."
+	echo ""
+	echo "Starting LiveORC... ⏳ "
 	echo ""
 	echo "Using the following environment:"
 	echo "================================"
-	echo "Host: $LORC_HOST"
-	echo "Port: $LORC_PORT"
-	if [ "$LORC_STORAGE_URL" = "" ]; then
-		echo "Storage volume: $LORC_MEDIA_DIR"
+	echo "LiveORC hosted at: $LORC_HOST:$LORC_PORT"
+	if [ "$LORC_STORAGE_HOST" = "" ]; then
+		echo "Storage: local volume at: $LORC_STORAGE_DIR"
 	else
-		echo "Storage volume: $LORC_STORAGE_URL"
+		echo "Storage: S3 volume at: $LORC_STORAGE_HOST:$LORC_STORAGE_PORT"
 	fi
 	if [ "$LORC_DB_HOST" = "" ]; then
-		echo "Database: Spatialite stored at $LORC_DB_DIR"
+		echo "Database: Spatialite at $LORC_DB_DIR"
 	else
-		echo "Database: Postgis at $LORC_DB_HOST"
+		echo "Database: Postgis at $LORC_DB_HOST:$LORC_DB_PORT"
 	fi
 #	echo "Media directory: $LORC_MEDIA_DIR"
 #	echo "Postgres DB directory: $LORC_DB_DIR"
@@ -277,7 +302,7 @@ start(){
 
 	# assemble a command, extended with options further onwards
 	command="docker compose -f docker-compose.yml"
-	if [ -n "$LORC_STORAGE_URL" ]; then
+	if [ -n "$LORC_STORAGE_HOST" ]; then
 		enable_s3
 	fi
 	if [ -n "$LORC_DB_HOST" ]; then
@@ -286,7 +311,7 @@ start(){
 	  enable_spatialite
 	fi
 
-	if [ -n "$LORC_RABBITMQ_URL" = "YES" ]; then
+	if [ "$LORC_RABBITMQ_URL" = "YES" ]; then
 	  command+=" -f docker-compose.rabbitmq.yml"
 	fi
 
@@ -301,14 +326,14 @@ start(){
 	run "${command}"
 }
 down(){
-	command="docker compose -f docker-compose.yml down"
+	command="docker compose -f docker-compose.yml -f docker-compose.postgis.yml -f docker-compose.spatialite.yml -f docker-compose.s3.yml down"
 	run "${command}"
 }
 
 stop(){
-	echo "Stopping LiveORC..."
+	echo "Stopping LiveORC... 🐢 "
 
-	command="docker compose -f docker-compose.yml"
+	command="docker compose -f docker-compose.yml -f docker-compose.postgis.yml -f docker-compose.spatialite.yml -f docker-compose.s3.yml"
 	command+=" stop"
 	run "${command}"
 
@@ -316,8 +341,28 @@ stop(){
 rebuild(){
 	run "docker compose down --remove-orphans"
 	run "docker compose -f docker-compose.yml build --no-cache"
-	echo -e "\033[1mDone!\033[0m You can now start LiveORC by running $0 start"
+	echo -e "\033[1mDone! ✅ \033[0m You can now start LiveORC by running $0 start"
 }
+
+resetpassword(){
+	newpass=$1
+
+	if [[ -n "$newpass" ]]; then
+		container_hash=$(docker ps -q --filter "name=liveopenrivercam")
+		if [[ -z "$container_hash" ]]; then
+			echo -e "\033[91mCannot find liveopenrivercam docker container. Is LiveORC running?\033[39m"
+			exit 1
+		fi
+		if docker exec -e DJANGO_SETTINGS_MODULE=LiveORC.settings "$container_hash" bash -c "echo \"from users.models import User;from django.contrib.auth.hashers import make_password;u=User.objects.filter(is_superuser=True)[0];u.password=make_password('$newpass');u.save();print('The following user (email) was changed: {} ({})'.format(u.name, u.email));\" | python manage.py shell"; then
+			echo -e "\033[1mPassword changed! 🔑 \033[0m"
+		else
+			echo -e "\033[91mCould not change administrator password. If you need help, please visit https://github.com/localdevices/LiveORC/issues/ \033[39m"
+		fi
+	else
+		usage
+	fi
+}
+
 
 enable_s3(){
 	if [ -z "$LORC_STORAGE_ACCESS" ]; then
@@ -336,8 +381,8 @@ enable_postgis(){
       echo -e "\033[91mPostgis user name does not exist. Configure as environment variable LORC_DB_USER\033[39m"
       exit 1
   fi
-  if [ -z "$LORC_DB_PASSWORD" ]; then
-      echo -e "\033[91mPostgis password does not exist. Configure as environment variable LORC_DB_PASSWORD\033[39m"
+  if [ -z "$LORC_DB_PASS" ]; then
+      echo -e "\033[91mPostgis password does not exist. Configure as environment variable LORC_DB_PASS\033[39m"
       exit 1
   fi
   command+=" -f docker-compose.postgis.yml"
@@ -401,6 +446,8 @@ elif [[ $1 = "rebuild" ]]; then
 #	down
 #	update
 #	echo -e "\033[1mDone!\033[0m You can now start LiveORC by running $0 start"
+elif [[ $1 = "resetadminpassword" ]]; then
+	resetpassword "$2"
 else
 	usage
 fi

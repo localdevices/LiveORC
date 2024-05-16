@@ -31,10 +31,10 @@ if not DBASE_DIR:
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "some-secret-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "NO").lower() == "YES".lower()
+DEBUG = os.getenv("LORC_DEBUG", "NO").lower() == "YES".lower()
 
 if DEBUG:
-    print(f"STARTING SERVER IN DEBUG MODE")
+    print(f"LiveORC is in DEBUG mode. WARNING! DEBUG model is not suitable and secure for production.")
 
 HOSTS = os.getenv("LORC_HOST")
 ALLOWED_HOSTS = [] if HOSTS is None else HOSTS.split(",")
@@ -132,15 +132,15 @@ WSGI_APPLICATION = 'LiveORC.wsgi.application'
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
-if os.getenv("DATABASE_HOST"):
+if os.getenv("LORC_DB_HOST"):
     DATABASES = {
         'default': {
-            'ENGINE': os.getenv('DATABASE_ENGINE', 'django.contrib.gis.db.backends.postgis'),
-            'NAME': os.getenv('DATABASE_NAME', 'liveorc_db'),
-            'USER': os.getenv('DATABASE_USER'),
-            'PASSWORD': os.getenv('DATABASE_PASSWORD'),
-            'HOST': os.getenv('DATABASE_HOST', 'db'),
-            'PORT': os.getenv('DATABASE_PORT', '5432'),
+            'ENGINE': os.getenv('LORC_DB_ENGINE', 'django.contrib.gis.db.backends.postgis'),
+            'NAME': 'liveorc',
+            'USER': os.getenv('LORC_DB_USER'),
+            'PASSWORD': os.getenv('LORC_DB_PASS'),
+            'HOST': os.getenv('LORC_DB_HOST', 'db'),
+            'PORT': os.getenv('LORC_DB_PORT', '5432'),
         }
     }
 else:
@@ -205,7 +205,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 AUTH_USER_MODEL = "users.User"
 
-storage_url = os.getenv("LORC_STORAGE_URL")
+storage_url = os.getenv("LORC_STORAGE_HOST")
+storage_port = os.getenv("LORC_STORAGE_PORT", 9000)
 
 STORAGES = {
     # default storage is used for media files of installed apps (not our own)
@@ -226,7 +227,7 @@ if storage_url:
     STORAGES["media"] = {
         "BACKEND": "storages.backends.s3.S3Storage",
         "OPTIONS": {
-            "endpoint_url": storage_url,
+            "endpoint_url": f"{storage_url}:{storage_port}",
             "access_key": os.getenv("LORC_STORAGE_ACCESS"),
             "secret_key": os.getenv("LORC_STORAGE_SECRET"),
             "bucket_name": "media"

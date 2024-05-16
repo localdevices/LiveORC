@@ -16,21 +16,21 @@ congrats(){
 
     if [[ "$status" = "200" ]]; then
         echo -e "\033[92m"
-        echo "Congratulations! └@(･◡･)@┐"
-        echo ==========================
+        echo "Congratulations! 🤩 "
+        echo "==================="
         echo -e "\033[39m"
         echo "If there are no errors, LiveORC should be up and running!"
     else
         echo -e "\033[93m"
-        echo "Something doesn't look right! ¯\_(ツ)_/¯"
+        echo "Something doesn't look right! 🥺 "
         echo "The server returned a status code of $status when we tried to reach it."
-        echo ==========================
+        echo "======================================================================="
         echo -e "\033[39m"
         echo "Check if LiveORC is running, maybe we tried to reach it too soon."
     fi
 
     echo -e "\033[93m"
-    echo Open a web browser and navigate to $proto://$LORC_HOST:$LORC_PORT
+    echo "Open a web browser and navigate to $proto://$LORC_HOST:$LORC_PORT 🌎 "
     echo -e "\033[39m") &
 }
 

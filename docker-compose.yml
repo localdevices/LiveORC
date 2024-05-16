@@ -9,8 +9,7 @@ services:
     restart: unless-stopped
     volumes:
       - .:/liveorc:z
-#      - lorc_data:/liveorc/data:z
-      - lorc_media:/liveorc/data/media:z
+      - ${LORC_STORAGE_DIR}:/liveorc/data/media:z
       - lorc_static:/liveorc/static
       - lorc_migration_users:/liveorc/users/migrations:z
       - lorc_migration_api:/liveorc/api/migrations:z
@@ -21,15 +20,17 @@ services:
       - LORC_PORT
       - LORC_HOST
       - LORC_SECRET_KEY
-      - LORC_STORAGE_URL
+      - LORC_STORAGE_HOST
+      - LORC_STORAGE_PORT
       - LORC_STORAGE_ACCESS
       - LORC_STORAGE_SECRET
-      - DEBUG
+      - LORC_DB_HOST
+      - LORC_DB_PORT
+      - LORC_DB_USER
+      - LORC_DB_PASS
+      - LORC_DEBUG
     ports:
       - "${LORC_PORT}:8000"
-#    depends_on:
-#      - db:
-#          condition: service_healthy
 volumes:
   lorc_data:
   lorc_media:

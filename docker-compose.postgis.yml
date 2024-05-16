@@ -2,7 +2,7 @@
 services:
   webapp:
     depends_on:
-      - db:
+      db:
         condition: service_healthy
   db:
     image: postgis/postgis
@@ -11,10 +11,16 @@ services:
       - ${LORC_DB_PORT}:5432
     environment:
       POSTGRES_USER: "${LORC_DB_USER}"
-      POSTGRES_PASSWORD: "${LORC_DB_PASSWORD}"
+      POSTGRES_PASSWORD: "${LORC_DB_PASS}"
       POSTGRES_DB: "liveorc"
     volumes:
       - ${LORC_DB_DIR}:/var/lib/postgresql/data:Z
     restart: unless-stopped
+    healthcheck:
+      test: pg_isready -U ${LORC_DB_USER} -d liveorc
+      interval: 1s
+      timeout: 20s
+      retries: 10
+      start_period: 5s
 volumes:
   lorc_data:
