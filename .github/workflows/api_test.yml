@@ -1,4 +1,4 @@
-name: Django CI
+name: API Tests
 
 on:
   push:
@@ -24,6 +24,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install Dependencies
       run: |
+        sudo apt update
+        sudo apt install libgl1 libegl1 linopengl0 libgdal-dev libsqlite3-mod-spatialite
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Run Tests
