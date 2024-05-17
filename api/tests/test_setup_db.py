@@ -43,7 +43,7 @@ def cleanup():
     """
     Clean up any temporary file storage
     """
-    print("Clean up S3 storage before test. Not implemented yet.")
+    pass
 
 
 class InitTestCase(TestCase):
