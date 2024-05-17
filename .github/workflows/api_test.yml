@@ -25,7 +25,7 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt update
-        sudo apt install libgl1 libegl1 linopengl0 libgdal-dev libsqlite3-mod-spatialite
+        sudo apt install libgl1 libegl1 libopengl0 libgdal-dev libsqlite3-mod-spatialite
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Run Tests
