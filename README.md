@@ -7,10 +7,19 @@
 > 
 > - [camera configuration](https://localdevices.github.io/pyorc/user-guide/camera_config/index.html)
 > - [processing recipes](https://localdevices.github.io/pyorc/user-guide/cli.html). Scroll down until you find 
-    > information on building recipes
+    information on building recipes.
 
 # LiveORC
 Web-based, professional and scalable velocimetry analysis for operational river monitoring with videos
+
+What is LiveOpenRiverCam
+========================
+
+LiveOpenRiverCam allows you to run operational measurement stations that estimate river discharge from videos.
+
+LiveOpenRiverCam is being developed in the TEMBO Africa project. The TEMBO Africa project has received funding from the
+European Union's Horizon Europe research and innovation programme under greant agreement No. 101086209.
+
 
 # Installation
 By far the easiest way to start working with LiveORC is to use docker and the liveorc.sh bash script bundled with 
@@ -241,7 +250,8 @@ and make yourself owner of that institute.
 Once the institute is created, you can also make a new site. You can give a site a name, an approximate coordinate 
 (by clicking on the interactive map), and you must associate the site with an institute that you own.
 
-> [!NOTE] You can also become a *member* of an institute, without owning it. In that case you can view all assets
+> [!NOTE]
+> You can also become a *member* of an institute, without owning it. In that case you can view all assets
 > that belong to an institute, but you cannot add, modify or delete any of these assets. This is ideal e.g. if 
 > you want to provide access to the data by an external user, that needs the data, but is not part of your team,
 > or an external system that requires automated access to your data through the REST API. Delft-FEWS forecasting 
@@ -287,11 +297,69 @@ Recipes describe from top to bottom how a video is treated. They describe in ord
 Resolution and (for LSPIV) window size are also essential parameters, but as these are typically more site specific
 these are defined in the camera configuration for a given site.
 
->!NOTE A full recipe is provided in this file. You can directly upload and use this.
+> [!NOTE]
+> A full recipe is provided in this file. You can directly upload and use this.
 
 In most cases, you will not have to change a lot of things in the recipe. Below you can find a list of typical 
-conditions that may require that you do change the recipe. In that case, edit the file to accomodate the changes, 
-and make a new recipe with the updated file.
+conditions that may require that you do change the recipe. We recommend to use our template as starting point, and 
+dependent on your case conditions, alter the file as needed. We describe some specific cases only. If you need more 
+options and guidance please visit the [recipe section](https://localdevices.github.io/pyorc/user-guide/cli.html)
+in the pyopenrivercam documentation. 
 
+> [!WARNING]
+> When changing the yaml file, make sure the YAML-syntax is followed everywhere. This means subsections (and 
+> subsubsections) must be indented accurately, and double colons are used to indicate the start of a subsection. If 
+> you do not follow this accurately your recipe cannot be rendered, and you'll receive errors. 
+
+## Specify the frames and framerate that should be used
+
+In some cases you may want to have control over the frames that are used for the analysis. By default, all frames 
+available are used and framerate is read from the video metadata. Cases where you may want more control are e.g. 
+follows:
+
+* You may record long videos, and only want to use a specified set of frames
+* You want to ensure that each treated video uses the same amount of frames always (in case of variable amount of 
+  frames per video). 
+* The first seconds may be garbage, e.g. because the camera requires autofocus, or because the camera is still 
+  starting up. 
+* The camera's firmware writes incorrect frames per second to the metadata (Believe us: this happens!!).
+
+In this case, change the `video` section as follows:
+
+```yaml
+video:
+  start_frame: 50  # 
+  end_frame: 200
+  fps: 25
+```
+Here we set the start and end frame to 50 and 200 respectively, and enforce that the software assumes the videos are 
+25 frames per second.
+
+## add preprocessing filters to enhance videos
+
+The default recipe uses a temporal difference with some thresholding to remove background noise and enhance features.
+This can be seen in the `frames` section. In most cases this makes moving features much, much more distinct, and you 
+don't have to change a great deal. However, there are a large number of additional preprocessors available if you 
+would like to use these. The rule is that you add these in subsections, with the required arguments below these 
+subsections. For instance:
+
+```yaml
+frames:
+  time_diff:
+    abs: false
+    thres: 0
+  minmax:
+    min: 5
+  edge_detect:
+    wdw_1: 2
+    wdw_2: 4
+```
+
+will apply an extra edge detection step by applying a so-called "band convolution" on each frame. Basically this 
+applies a smoothing using a window of 2 grid cells, and with 4 grid cells, and then subtracts the two smoothed 
+results. If your tracers consist of larger patches of materials, like floating plants, this may be a useful filter.
+
+The full list of preprocessors and how they can be applied are provided on the pyOpenRiverCam user guide in the 
+[frames section](https://localdevices.github.io/pyorc/user-guide/frames/index.html).
 
 
