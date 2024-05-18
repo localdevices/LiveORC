@@ -257,7 +257,7 @@ Once the institute is created, you can also make a new site. You can give a site
 > or an external system that requires automated access to your data through the REST API. Delft-FEWS forecasting 
 > systems for instance can directly ingest LiveORC data.
 
-INSERT SITE PAGE
+![add_site](https://github.com/localdevices/LiveORC/assets/7658673/739805ea-31c2-4598-99f4-59bbea49b26d)
 
 ## Make a first recipe
 
@@ -269,6 +269,45 @@ recipes and a full working example, we refer to the [recipe](#recipes) section.
 
 ![add_recipe](https://github.com/localdevices/LiveORC/assets/7658673/4407a981-b4fd-4c22-b683-493bc92b31d9)
 
+## Make your first camera configuration
+
+A camera configuration contains all information about the camera perspective, lens characteristics, video 
+resolution, and also the resolution of orthorectification. For geographical displaying, it also holds the
+coordinate reference system of any coordinates used (not mandatory).
+
+Currently, camera configuration cannot yet be made directly in the web interface. This is a high priority 
+for future developments. Instead, you must use pyOpenRiverCam to prepare the camera configuration. We recommend
+to use the command-line interface of pyOpenRiverCam to do this. We refer to the 
+[camera configuration user guide](https://localdevices.github.io/pyorc/user-guide/camera_config/index.html) for
+further information.
+
+Once a camera configuration is prepared, it should be stored in a `.json` file. You can then upload this into a
+new camera configuration in LiveOpenRiverCam. Go to Camera Configs and make a new one by clicking on the ➕ Add 
+button in the menu. 
+
+Besides the camera configuration itself, you can, and in most cases should provide additional details.
+You can provide a name an end validity date (currently only for your own reference, in 
+case you wish to move the camera or change the camera at the same site later). Also you can provide an allowed difference
+in time stamp between a video that is processed with the camera configuration, and the water level associated with
+the video. In case no water level is available that has a time stamp that is near enough to the video time stamp,
+the video will not be processed.
+
+You can (and should) also provide a recipe and a profile (see earlier sections) to go with the camera configuration.
+And finally, you must upload the camera configuration, prepared through pyOpenRiverCam. This in total gives you
+all the information required to process videos at a given site.
+
+![add_cameraconfig](https://github.com/localdevices/LiveORC/assets/7658673/eec52ea2-5def-4635-b60a-b6aa0e0ff2cd)
+
+Once done you can click on "Save", which brings you back to an overview of all camera configurations, managed
+by you. If you want to see the result, then select the new camera configuration. You can then also see a 
+geographical overview of the situation, including the bounding box of the camera configuration, and the cross
+section. The cross section should overlap with your bounding box and they of course should be positioned
+over the expected river section. If that is not the case, something is wrong in either the camera configuration
+file or the measurements of the cross section. Carefully check if the coordinate reference system provided
+with any coordinates is correct.
+
+![change_cameraconfig](https://github.com/localdevices/LiveORC/assets/7658673/6ff13635-3821-4968-a606-428a179d7d49)
+
 # REST API
 
 LiveORC has a full REST API behind the scenes. This is necessary to allow external devices and applications
@@ -279,7 +318,6 @@ to build your own web interface around OpenRiverCam for a specific user or with 
 mind this is in principle possible! The API documentation is also disclosed automatically when you start
 LiveORC. If you are on `localhost:8000`, you can find it by browsing to `http://localhost:8000/api/docs`.
 The api calls are available on `http://localhost:8000/api`.
-
 
 # Recipes
 
