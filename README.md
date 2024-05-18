@@ -210,7 +210,7 @@ liveopenrivercam  |
 In this case, LiveORC was run without ``--hostname`` and therefore the url is served entirely locally. Browse
 to http://localhost:8000 to get to the first page.
 
-INSERT_START_PAGE
+![first_user](https://github.com/localdevices/LiveORC/assets/7658673/e368e728-aa42-4904-bc6d-c22d380c008f)
 
 You will only see this page the very first time. It is meant to make an initial superuser! The username and password
 you create here have all possibilities. Only superusers can create new users and new institutes. Superusers can also
@@ -234,7 +234,7 @@ logically, a measurement site, and everything that belongs to the measurement si
 Therefore, the first thing you must do, before setting up sites and things that belong to that, is set up an institute
 and make yourself owner of that institute.
 
-INSERT INSTITUTE PAGE
+![add_institute](https://github.com/localdevices/LiveORC/assets/7658673/6b632b62-2e69-440f-b7d7-2d0a221e597d)
 
 ## Make your first site
 
@@ -257,6 +257,7 @@ LiveORC as callback. This requires a so-called "recipe", which you need to assem
 pyOpenRivercam at this moment, as we do not yet have a web interface to construct them. For further guidance on 
 recipes and a full working example, we refer to the [recipe](#recipes) section.
 
+![add_recipe](https://github.com/localdevices/LiveORC/assets/7658673/4407a981-b4fd-4c22-b683-493bc92b31d9)
 
 # REST API
 
