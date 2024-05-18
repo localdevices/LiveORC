@@ -39,13 +39,22 @@ if [ "$LORC_SSL" = "YES" ]; then
     proto="https"
 fi
 
+# perform migrations if any
 python manage.py migrate
+# set the settings module for allowing to search for the LiveORC style
+# check if there is a record already
+export DJANGO_SETTINGS_MODULE=LiveORC.settings
+liveorc_style=$(bash -c "echo \"from admin_interface.models import Theme;print(len(Theme.objects.filter(name='LiveOpenRiverCam')));\" | python manage.py shell";)
+if [ $liveorc_style = "0" ];then
+	echo "LiveORC style does not yet exist, uploading style ..."
+	python3 manage.py loaddata ./django-admin-interface/admin_interface_theme_liveorc.json
+fi
 if [ "$1" = "--no-gunicorn" ]; then
-    echo "Running LiveORC locally"
+    echo "Running LiveORC locally 🛖 "
     congrats
     python manage.py runserver 0.0.0.0:8000
 else
-    echo "Running LiveORC with gunicorn"
+    echo "Running LiveORC with gunicorn 🦄 "
     if [ -e /liveorc ] && [ ! -e /liveorc/static ]; then
        echo -e "\033[91mWARN:\033[39m /liveorc/static does not exist, CSS, JS and other files might not be available."
     fi

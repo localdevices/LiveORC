@@ -3,7 +3,7 @@
     "model": "admin_interface.theme",
     "pk": 2,
     "fields": {
-        "name": "LiveOpenRivercam",
+        "name": "LiveOpenRiverCam",
         "active": true,
         "title": "LiveOpenRiverCam",
         "title_color": "#F5DD5D",

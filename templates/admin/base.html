@@ -1,0 +1,6 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+{% block welcome-msg %}
+    V{{ APP_VERSION }} - {% translate 'Welcome,' %}
+    <strong>{% firstof user.get_short_name user.get_username %}</strong>.
+{% endblock %}
