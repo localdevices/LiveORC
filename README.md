@@ -400,4 +400,50 @@ results. If your tracers consist of larger patches of materials, like floating p
 The full list of preprocessors and how they can be applied are provided on the pyOpenRiverCam user guide in the 
 [frames section](https://localdevices.github.io/pyorc/user-guide/frames/index.html).
 
+## Masking of spurious velocimetry results
 
+After velocimetry results are processed, spurious results should be masked out. There are many filters available to 
+do this. Filters can even be applied several times, by applying mask groups as shown below. These filters usually work
+well, but under certain conditions, you may decide to alter them. Some guidance is provided below.
+
+* `minmax`: If only very low velocities occur, we suggest to alter `s_max` to a lower value. `s_max` is the maximum 
+  velocity 
+  you expect to occur anywhere in m/s.
+* `angle`: This filter removes velocity values that are outside a certain angle tolerance. Below, the expected direction
+  is set to zero (default) and the angle tolerance is 1.57 radians (90 degrees). Any velocity beyond 1.57 radians 
+  will be filtered out.
+* `count`: this filter counts how frequently a valid velocity is found in a given pixel. If (after all previous 
+  filters) only 20% (`tolerance: 0.2`) is left, the value is assumed to be unreliable and removed. In cases where 
+  very little tracers are observed, but tracers that appear are very clear, you may try to lower this value.
+* `window_mean`: checks if the window average (with window size defined by `wdw`) deviates a lot from the value in the 
+  cell itself. In case it deviates a lot (default is 0.7 or more, i.e. 70%), then the value is masked out. The 
+  tolerance can be set with `tolerance: 0.5` to make it stricter and set it to 50%.
+* `window_nan`: masks on neighbourhoods by checking how much of the neighbouring cells are missing values. By 
+  default this is set to 0.7, i.e. a minimum of 70% of the surrounding cells should have values. Typically this mask 
+  is applied as one of the last masks so that the other masks give a good impression of the availability of 
+  information for this final mask.
+
+```yaml
+mask:
+  write: True
+  mask_group1:
+    minmax:
+      s_max: 3.0
+  mask_group2:
+    outliers:
+      mode: and
+  mask_group3:
+    angle:
+      angle_tolerance: 1.57
+  mask_group4:
+    count:
+      tolerance: 0.2
+  mask_group5:
+    window_mean:
+      wdw: 2
+      reduce_time: True
+  mask_group6:
+    window_nan:
+      wdw: 1
+      reduce_time: True
+```
