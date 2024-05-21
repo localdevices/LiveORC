@@ -1,5 +1,28 @@
 ![Version](https://img.shields.io/github/v/release/localdevices/LiveORC)
 
+
+# LiveORC
+Web-based, professional and scalable velocimetry analysis for operational river monitoring with videos.
+
+What is LiveOpenRiverCam
+========================
+
+LiveOpenRiverCam allows you to run operational measurement stations that estimate river discharge from videos.
+It is meant for National or HydroMeteorological Societies (NHMS), hydropower authorities, waterboards, or service 
+providers of such entities, who wish to establish their own services for such users. 
+It is meant to provide fully automated data streams from operational camera/water level feeds that record videos at set 
+time intervals. The platform can either receive raw videos which are then orchestrated for processing on cloud nodes 
+or receive already processed videos, which are processed on-site ("edge processing"). The processing is performed by 
+[NodeOpenRiverCam](https://github.com/localdevice/nodeorc), the node processing tool around OpenRiverCam.
+The processing methods read videos, selects frames, enhances features, orthorectifies and estimates surface velocity 
+and discharge using state-of-the-art velocimetry methods, all fully automated.
+
+> [!NOTE] 
+> LiveOpenRiverCam is being developed in the TEMBO Africa project. The TEMBO Africa project has received 
+> funding from the European Union's Horizon Europe research and innovation programme under grant agreement No.101086209.  
+> We have also received funding from the WMO HydroHub program. This funding was used to conceptualise and pilot 
+> OpenRiverCam.
+
 > [!IMPORTANT]
 > LiveORC is still in development. Features such as interactive selection of ground control points, assembling a camera 
 > configuration and making of recipes is not yet available. To make a camera configuration, and guidance on how to 
@@ -9,33 +32,35 @@
 > - [processing recipes](https://localdevices.github.io/pyorc/user-guide/cli.html). Scroll down until you find 
     information on building recipes.
 
-# LiveORC
-Web-based, professional and scalable velocimetry analysis for operational river monitoring with videos
-
-What is LiveOpenRiverCam
-========================
-
-LiveOpenRiverCam allows you to run operational measurement stations that estimate river discharge from videos.
-
-LiveOpenRiverCam is being developed in the TEMBO Africa project. The TEMBO Africa project has received funding from the
-European Union's Horizon Europe research and innovation programme under greant agreement No. 101086209.
-
-
 # Installation
-By far the easiest way to start working with LiveORC is to use docker and the liveorc.sh bash script bundled with 
-the code. To use this script you will need a bash environment. Under most linux environments and macOS this is  
-available as is in any terminal window you may open. Under windows, you can use the script e.g. under git bash or in 
+By far the easiest way to start working with LiveORC is to use docker and the `liveorc.sh` bash script bundled with 
+the code. To use this script you will need a so-called bash environment. Under most linux environments and macOS this 
+is available as is in any terminal window you may open. Under windows, you can use the script e.g. under git bash or in 
 the Windows Subsystem for Linux environment (WSL).
+
+The idea of this script is that as a user, you do not need to know all the details about the services that are 
+required to set up the LiveORC. These services include:
+- the web dashboard
+- the database (storing sites, time series, video metadata, but also users, institutes and their accessibility to 
+  videos, time series and any other assets.)
+- compute nodes, equipped with [NodeOpenRiverCam](https://github.com/localdevices/nodeorc). The more you have the 
+  more videos can be processed at the same time.
+- a cloud storage volume
+
+Without any additional arguments, `liveorc.sh` automatically sets up all these services in a virtualized manner on your 
+machine using the `Docker` ecosystem. Once you are ready to scale your operations by hosting all services on 
+dedicated machines, and not locally but in the cloud, you can do so by providing additional arguments in the 
+`liveorc.sh` script. 
 
 ## Prerequisites
 
 To install LiveORC we recommend to use Docker and the `liveorc.sh` script that comes with the code. To install 
-LiveORC you will need to install the following applications (if you do not already have these).
+LiveORC you will need to install the following applications first (if you do not already have these).
 
-- Git
-- Docker
-- Docker-compose
-- Windows Subsystem for Linux (WSL 2) enabled (recommended)
+- (For Windows users only:) Windows Subsystem for Linux (WSL 2) enabled (recommended)
+- [Git](https://git-scm.com/downloads)
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker-compose](https://docs.docker.com/compose/install/)
 
 Windows users should install Docker Desktop, and we recommend to use the 
 [WSL 2 backend](https://docs.docker.com/desktop/wsl/). If you cannot use WSL 2, then you should give enough resources 
