@@ -1,11 +1,35 @@
 ![Version](https://img.shields.io/github/v/release/localdevices/LiveORC)
 
+* [What is LiveOpenRiverCam](#what-is-liveopenrivercam)
+* [Installation](#installation)
+  * [Prerequisites](#prerequisites)
+  * [Local use](#local-use)
+  * [Additional options for installation](#additional-options-for-installation)
+  * [Stopping or rebuilding](#stopping-or-rebuilding)
+* [Getting started](#getting-started)
+  * [Your first user](#your-first-user)
+  * [Your first institute](#your-first-institute)
+  * [Make your first site](#make-your-first-site)
+  * [Make a first recipe](#make-a-first-recipe)
+  * [Make your first camera configuration](#make-your-first-camera-configuration)
+  * [Set up a field camera](#set-up-a-field-camera)
+* [REST API](#rest-api)
+* [Recipes](#recipes)
+
 
 # LiveORC
 Web-based, professional and scalable velocimetry analysis for operational river monitoring with videos.
 
-What is LiveOpenRiverCam
-========================
+> [!IMPORTANT]
+> LiveORC is still in development. Features such as interactive selection of ground control points, assembling a camera 
+> configuration and making of recipes is not yet available. To make a camera configuration, and guidance on how to 
+> establish a recipe, please use pyOpenRiverCam and continue to the following sections of the user guide:
+> 
+> - [camera configuration](https://localdevices.github.io/pyorc/user-guide/camera_config/index.html)
+> - [processing recipes](https://localdevices.github.io/pyorc/user-guide/cli.html). Scroll down until you find 
+    information on building recipes.
+
+# What is LiveOpenRiverCam
 
 LiveOpenRiverCam allows you to run operational measurement stations that estimate river discharge from videos.
 It is meant for National or HydroMeteorological Societies (NHMS), hydropower authorities, waterboards, or service 
@@ -17,20 +41,13 @@ or receive already processed videos, which are processed on-site ("edge processi
 The processing methods read videos, selects frames, enhances features, orthorectifies and estimates surface velocity 
 and discharge using state-of-the-art velocimetry methods, all fully automated.
 
+# Acknowledgements
+
 > [!NOTE] 
 > LiveOpenRiverCam is being developed in the TEMBO Africa project. The TEMBO Africa project has received 
 > funding from the European Union's Horizon Europe research and innovation programme under grant agreement No.101086209.  
 > We have also received funding from the WMO HydroHub program. This funding was used to conceptualise and pilot 
 > OpenRiverCam.
-
-> [!IMPORTANT]
-> LiveORC is still in development. Features such as interactive selection of ground control points, assembling a camera 
-> configuration and making of recipes is not yet available. To make a camera configuration, and guidance on how to 
-> establish a recipe, please use pyOpenRiverCam and continue to the following sections of the user guide:
-> 
-> - [camera configuration](https://localdevices.github.io/pyorc/user-guide/camera_config/index.html)
-> - [processing recipes](https://localdevices.github.io/pyorc/user-guide/cli.html). Scroll down until you find 
-    information on building recipes.
 
 # Installation
 By far the easiest way to start working with LiveORC is to use docker and the `liveorc.sh` bash script bundled with 
@@ -64,7 +81,7 @@ LiveORC you will need to install the following applications first (if you do not
 
 Windows users should install Docker Desktop, and we recommend to use the 
 [WSL 2 backend](https://docs.docker.com/desktop/wsl/). If you cannot use WSL 2, then you should give enough resources 
-to run LiveORC. Normally, 4GB memory should be sufficient unless you expect many users at the same time on the web  
+to run LiveORC. Normally, 4GB memory should be sufficient unless you expect many users at the same time on the web 
 server. Disk storage should be set to a satisfactory amount to store the expected videos, thumbnails and keyframes.  
 Note that one short video can easily be 10MB!
 
@@ -373,7 +390,7 @@ LiveORC. If you are on `localhost:8000`, you can find it by browsing to `http://
 The api calls are available on `http://localhost:8000/api`.
 
 # Recipes
-
+b
 Recipes describe from top to bottom how a video is treated. They describe in order:
 * the video - what frames to use, what the actual water level during the recording was and if frames must be stabilized
 * frame preprocessing and orthorectification - several preprocessing methods can be applied to enhance 
