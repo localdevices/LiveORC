@@ -200,7 +200,6 @@ class CameraConfigAdmin(BaseAdmin):
                 #     # content_type="application/json"
                 # )
 
-        print("HELLO THERE")
 
     def save_model(self, request, obj, form, change):
         request._files["json_file"].seek(0)
