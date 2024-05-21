@@ -324,6 +324,8 @@ do the following:
 - select your newly made camera configuration
 - scroll all the way to the bottom. There you will see an option to select a device, and callbacks for video and 
   time series. The callbacks that you select will be executed every time after a video is treated.
+  
+![post_taskform](https://github.com/localdevices/LiveORC/assets/7658673/bb33c910-cefd-4ce7-b99d-ea036f1ba8e6)
 
 When you click on `SEND`, the configuration will be stored under `Task forms`. If you click on `Task forms` you will 
 see that the task is waiting to be picked up by the device. The device will check every 5 minutes, and before 
