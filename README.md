@@ -1,5 +1,8 @@
 ![Version](https://img.shields.io/github/v/release/localdevices/LiveORC)
 
+# LiveORC
+Web-based, professional and scalable velocimetry analysis for operational river monitoring with videos.
+
 * [What is LiveOpenRiverCam](#what-is-liveopenrivercam)
 * [Installation](#installation)
   * [Prerequisites](#prerequisites)
@@ -15,10 +18,6 @@
   * [Set up a field camera](#set-up-a-field-camera)
 * [REST API](#rest-api)
 * [Recipes](#recipes)
-
-
-# LiveORC
-Web-based, professional and scalable velocimetry analysis for operational river monitoring with videos.
 
 > [!IMPORTANT]
 > LiveORC is still in development. Features such as interactive selection of ground control points, assembling a camera 
