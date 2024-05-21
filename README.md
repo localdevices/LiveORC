@@ -300,13 +300,39 @@ all the information required to process videos at a given site.
 
 Once done you can click on "Save", which brings you back to an overview of all camera configurations, managed
 by you. If you want to see the result, then select the new camera configuration. You can then also see a 
-geographical overview of the situation, including the bounding box of the camera configuration, and the cross
-section. The cross section should overlap with your bounding box and they of course should be positioned
+geographical overview of the situation, including the bounding box of the camera configuration, and the 
+cross-section. The cross-section should overlap with your bounding box and they of course should be positioned
 over the expected river section. If that is not the case, something is wrong in either the camera configuration
-file or the measurements of the cross section. Carefully check if the coordinate reference system provided
+file or the measurements of the cross-section. Carefully check if the coordinate reference system provided
 with any coordinates is correct.
 
 ![change_cameraconfig](https://github.com/localdevices/LiveORC/assets/7658673/6ff13635-3821-4968-a606-428a179d7d49)
+
+## Set up a field camera
+
+To use the recipe in the field, you have to set up a camera device on your measurement location.
+The device should have a linux based operating system, have NodeOpenRiverCam (NodeORC) installed and regularly receive 
+videos in a predefined location, configured in NodeORC. For information on how to set up NodeORC, please visit
+the [NodeORC](https://github.com/localdevices/nodeorc) project page. During installation, you will be able to enter 
+a LiveORC server location and provide your username and password. If you do this, NodeORC can report results 
+directly to LiveORC. If you have exposed LiveORC on the internet, e.g. through use of the `--hostname` and `--ssl` 
+flags, you will get a connection, and the Device will appear under the `Devices` menu item.
+
+Once the device has appeared, you can start sending camera configurations to that device. To send a task to a device 
+do the following:
+- go to `Camera configs`
+- select your newly made camera configuration
+- scroll all the way to the bottom. There you will see an option to select a device, and callbacks for video and 
+  time series. The callbacks that you select will be executed every time after a video is treated.
+
+When you click on `SEND`, the configuration will be stored under `Task forms`. If you click on `Task forms` you will 
+see that the task is waiting to be picked up by the device. The device will check every 5 minutes, and before 
+treating a new video, if a new task is prepared, and will validate and replace it if a new one is found. 
+
+> [!NOTE]
+> A camera configuration MUST have a profile and a recipe attached to it, before you can send it through.
+> We may expand tasks to optical water level measurements or other tasks at a later stage.
+
 
 # REST API
 
@@ -419,7 +445,7 @@ well, but under certain conditions, you may decide to alter them. Some guidance 
   cell itself. In case it deviates a lot (default is 0.7 or more, i.e. 70%), then the value is masked out. The 
   tolerance can be set with `tolerance: 0.5` to make it stricter and set it to 50%.
 * `window_nan`: masks on neighbourhoods by checking how much of the neighbouring cells are missing values. By 
-  default this is set to 0.7, i.e. a minimum of 70% of the surrounding cells should have values. Typically this mask 
+  default, this is set to 0.7, i.e. a minimum of 70% of the surrounding cells should have values. Typically this mask 
   is applied as one of the last masks so that the other masks give a good impression of the availability of 
   information for this final mask.
 
