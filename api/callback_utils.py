@@ -79,7 +79,7 @@ def get_task_callback_discharge_patch(instance):
 
 
 def get_form_callback_discharge_post(instance):
-    """Send the resulting discharge as a time series object (currently the only time series callback available).
+    """Post the resulting discharge as a time series object (currently the only time series callback available).
 
     Parameters
     ----------
@@ -104,8 +104,7 @@ def get_form_callback_discharge_post(instance):
 
 
 def get_form_callback_video_post(instance):
-    """Send the results of a video, in a plot, include the video itself for further situational awareness or enabling of
-    reanalysis and research."""
+    """Post the plot results of a video including the video itself for further situational awareness or research."""
     return models.Callback(
         func_name="video",
         request_type="POST",
@@ -120,8 +119,7 @@ def get_form_callback_video_post(instance):
 
 
 def get_form_callback_video_no_file_post(instance):
-    """Send the results of a video, in a plot, but do not send over the video. Use this callback when storage is
-    limited and/or when bandwidth to send results is limited."""
+    """Post the plot results of a video excluding the video itself (e.g. to save storage or bandwidth)."""
     return models.Callback(
         func_name="video_no_file",
         request_type="POST",
