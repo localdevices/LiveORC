@@ -20,6 +20,7 @@ class BaseModel(models.Model):
     def institute(self):
         return self.site.institute
 
+
 class BaseModelNoInstitute(models.Model):
 
     creator = models.ForeignKey(
@@ -30,7 +31,6 @@ class BaseModelNoInstitute(models.Model):
 
     class Meta:
         abstract = True
-
 
 
 class BaseInstituteModel(models.Model):

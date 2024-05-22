@@ -1,5 +1,24 @@
 ![Version](https://img.shields.io/github/v/release/localdevices/LiveORC)
 
+# LiveORC
+Web-based, professional and scalable velocimetry analysis for operational river monitoring with videos.
+
+* [What is LiveOpenRiverCam](#what-is-liveopenrivercam)
+* [Installation](#installation)
+  * [Prerequisites](#prerequisites)
+  * [Local use](#local-use)
+  * [Additional options for installation](#additional-options-for-installation)
+  * [Stopping or rebuilding](#stopping-or-rebuilding)
+* [Getting started](#getting-started)
+  * [Your first user](#your-first-user)
+  * [Your first institute](#your-first-institute)
+  * [Make your first site](#make-your-first-site)
+  * [Make a first recipe](#make-a-first-recipe)
+  * [Make your first camera configuration](#make-your-first-camera-configuration)
+  * [Set up a field camera](#set-up-a-field-camera)
+* [REST API](#rest-api)
+* [Recipes](#recipes)
+
 > [!IMPORTANT]
 > LiveORC is still in development. Features such as interactive selection of ground control points, assembling a camera 
 > configuration and making of recipes is not yet available. To make a camera configuration, and guidance on how to 
@@ -7,30 +26,67 @@
 > 
 > - [camera configuration](https://localdevices.github.io/pyorc/user-guide/camera_config/index.html)
 > - [processing recipes](https://localdevices.github.io/pyorc/user-guide/cli.html). Scroll down until you find 
-    > information on building recipes
+    information on building recipes.
 
-# LiveORC
-Web-based, professional and scalable velocimetry analysis for operational river monitoring with videos
+# What is LiveOpenRiverCam
+
+LiveOpenRiverCam allows you to run operational measurement stations that estimate river discharge from videos.
+It is meant for e.g. National HydroMeteorological Societies (NHMS), hydropower authorities, waterboards, or service 
+providers of such entities, who wish to establish their own services for such users. 
+LiveORC will provide you with the following functionalities:
+* A administration-style front end for managing sites, configuration, videos and time series.
+* Visualization of time series and video analyses.
+* Fully automated data streaming from operational camera/water level feeds in the field with "edge processing".
+* Per-video processing through "cloud processing". 
+* A very fast and easy start to this all, through convenient virtualization of services and a very easy to use set up 
+  script.
+
+Processing on sites ("edge processing") or on cloud nodes ("cloud processing") is performed by
+[NodeOpenRiverCam](https://github.com/localdevice/nodeorc), the node processing tool around OpenRiverCam. The 
+processing methods read videos, select frames, enhance features, orthorectify and estimates surface velocity 
+and discharge using state-of-the-art velocimetry methods.
+
+# Acknowledgements
+
+> [!NOTE] 
+> LiveOpenRiverCam is being developed in the TEMBO Africa project. The TEMBO Africa project has received 
+> funding from the European Union's Horizon Europe research and innovation programme under grant agreement No.101086209.  
+> We have also received funding from the WMO HydroHub program. This funding was used to conceptualise and pilot 
+> OpenRiverCam.
 
 # Installation
-By far the easiest way to start working with LiveORC is to use docker and the liveorc.sh bash script bundled with 
-the code. To use this script you will need a bash environment. Under most linux environments and macOS this is  
-available as is in any terminal window you may open. Under windows, you can use the script e.g. under git bash or in 
+By far the easiest way to start working with LiveORC is to use docker and the `liveorc.sh` bash script bundled with 
+the code. To use this script you will need a so-called bash environment. Under most linux environments and macOS this 
+is available as is in any terminal window you may open. Under windows, you can use the script e.g. under git bash or in 
 the Windows Subsystem for Linux environment (WSL).
+
+The idea of this script is that as a user, you do not need to know all the details about the services that are 
+required to set up the LiveORC. These services include:
+- the web dashboard
+- the database (storing sites, time series, video metadata, but also users, institutes and their accessibility to 
+  videos, time series and any other assets.)
+- compute nodes, equipped with [NodeOpenRiverCam](https://github.com/localdevices/nodeorc). The more you have the 
+  more videos can be processed at the same time.
+- a cloud storage volume
+
+Without any additional arguments, `liveorc.sh` automatically sets up all these services in a virtualized manner on your 
+machine using the `Docker` ecosystem. Once you are ready to scale your operations by hosting all services on 
+dedicated machines, and not locally but in the cloud, you can do so by providing additional arguments in the 
+`liveorc.sh` script. 
 
 ## Prerequisites
 
 To install LiveORC we recommend to use Docker and the `liveorc.sh` script that comes with the code. To install 
-LiveORC you will need to install the following applications (if you do not already have these).
+LiveORC you will need to install the following applications first (if you do not already have these).
 
-- Git
-- Docker
-- Docker-compose
-- Windows Subsystem for Linux (WSL 2) enabled (recommended)
+- (For Windows users only:) Windows Subsystem for Linux (WSL 2) enabled (recommended)
+- [Git](https://git-scm.com/downloads)
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker-compose](https://docs.docker.com/compose/install/)
 
 Windows users should install Docker Desktop, and we recommend to use the 
 [WSL 2 backend](https://docs.docker.com/desktop/wsl/). If you cannot use WSL 2, then you should give enough resources 
-to run LiveORC. Normally, 4GB memory should be sufficient unless you expect many users at the same time on the web  
+to run LiveORC. Normally, 4GB memory should be sufficient unless you expect many users at the same time on the web 
 server. Disk storage should be set to a satisfactory amount to store the expected videos, thumbnails and keyframes.  
 Note that one short video can easily be 10MB!
 
@@ -210,7 +266,7 @@ liveopenrivercam  |
 In this case, LiveORC was run without ``--hostname`` and therefore the url is served entirely locally. Browse
 to http://localhost:8000 to get to the first page.
 
-INSERT_START_PAGE
+![first_user](https://github.com/localdevices/LiveORC/assets/7658673/e368e728-aa42-4904-bc6d-c22d380c008f)
 
 You will only see this page the very first time. It is meant to make an initial superuser! The username and password
 you create here have all possibilities. Only superusers can create new users and new institutes. Superusers can also
@@ -234,20 +290,21 @@ logically, a measurement site, and everything that belongs to the measurement si
 Therefore, the first thing you must do, before setting up sites and things that belong to that, is set up an institute
 and make yourself owner of that institute.
 
-INSERT INSTITUTE PAGE
+![add_institute](https://github.com/localdevices/LiveORC/assets/7658673/6b632b62-2e69-440f-b7d7-2d0a221e597d)
 
 ## Make your first site
 
 Once the institute is created, you can also make a new site. You can give a site a name, an approximate coordinate 
 (by clicking on the interactive map), and you must associate the site with an institute that you own.
 
-> [!NOTE] You can also become a *member* of an institute, without owning it. In that case you can view all assets
+> [!NOTE]
+> You can also become a *member* of an institute, without owning it. In that case you can view all assets
 > that belong to an institute, but you cannot add, modify or delete any of these assets. This is ideal e.g. if 
 > you want to provide access to the data by an external user, that needs the data, but is not part of your team,
 > or an external system that requires automated access to your data through the REST API. Delft-FEWS forecasting 
 > systems for instance can directly ingest LiveORC data.
 
-INSERT SITE PAGE
+![add_site](https://github.com/localdevices/LiveORC/assets/7658673/739805ea-31c2-4598-99f4-59bbea49b26d)
 
 ## Make a first recipe
 
@@ -256,6 +313,74 @@ LiveORC as callback. This requires a so-called "recipe", which you need to assem
 [pyOpenRiverCam](https://localdevices.github.io/pyorc). In fact, we recommend to construct and test them in 
 pyOpenRivercam at this moment, as we do not yet have a web interface to construct them. For further guidance on 
 recipes and a full working example, we refer to the [recipe](#recipes) section.
+
+![add_recipe](https://github.com/localdevices/LiveORC/assets/7658673/4407a981-b4fd-4c22-b683-493bc92b31d9)
+
+## Make your first camera configuration
+
+A camera configuration contains all information about the camera perspective, lens characteristics, video 
+resolution, and also the resolution of orthorectification. For geographical displaying, it also holds the
+coordinate reference system of any coordinates used (not mandatory).
+
+Currently, camera configuration cannot yet be made directly in the web interface. This is a high priority 
+for future developments. Instead, you must use pyOpenRiverCam to prepare the camera configuration. We recommend
+to use the command-line interface of pyOpenRiverCam to do this. We refer to the 
+[camera configuration user guide](https://localdevices.github.io/pyorc/user-guide/camera_config/index.html) for
+further information.
+
+Once a camera configuration is prepared, it should be stored in a `.json` file. You can then upload this into a
+new camera configuration in LiveOpenRiverCam. Go to Camera Configs and make a new one by clicking on the ➕ Add 
+button in the menu. 
+
+Besides the camera configuration itself, you can, and in most cases should provide additional details.
+You can provide a name an end validity date (currently only for your own reference, in 
+case you wish to move the camera or change the camera at the same site later). Also you can provide an allowed difference
+in time stamp between a video that is processed with the camera configuration, and the water level associated with
+the video. In case no water level is available that has a time stamp that is near enough to the video time stamp,
+the video will not be processed.
+
+You can (and should) also provide a recipe and a profile (see earlier sections) to go with the camera configuration.
+And finally, you must upload the camera configuration, prepared through pyOpenRiverCam. This in total gives you
+all the information required to process videos at a given site.
+
+![add_cameraconfig](https://github.com/localdevices/LiveORC/assets/7658673/eec52ea2-5def-4635-b60a-b6aa0e0ff2cd)
+
+Once done you can click on "Save", which brings you back to an overview of all camera configurations, managed
+by you. If you want to see the result, then select the new camera configuration. You can then also see a 
+geographical overview of the situation, including the bounding box of the camera configuration, and the 
+cross-section. The cross-section should overlap with your bounding box and they of course should be positioned
+over the expected river section. If that is not the case, something is wrong in either the camera configuration
+file or the measurements of the cross-section. Carefully check if the coordinate reference system provided
+with any coordinates is correct.
+
+![change_cameraconfig](https://github.com/localdevices/LiveORC/assets/7658673/6ff13635-3821-4968-a606-428a179d7d49)
+
+## Set up a field camera
+
+To use the recipe in the field, you have to set up a camera device on your measurement location.
+The device should have a linux based operating system, have NodeOpenRiverCam (NodeORC) installed and regularly receive 
+videos in a predefined location, configured in NodeORC. For information on how to set up NodeORC, please visit
+the [NodeORC](https://github.com/localdevices/nodeorc) project page. During installation, you will be able to enter 
+a LiveORC server location and provide your username and password. If you do this, NodeORC can report results 
+directly to LiveORC. If you have exposed LiveORC on the internet, e.g. through use of the `--hostname` and `--ssl` 
+flags, you will get a connection, and the Device will appear under the `Devices` menu item.
+
+Once the device has appeared, you can start sending camera configurations to that device. To send a task to a device 
+do the following:
+- go to `Camera configs`
+- select your newly made camera configuration
+- scroll all the way to the bottom. There you will see an option to select a device, and callbacks for video and 
+  time series. The callbacks that you select will be executed every time after a video is treated.
+  
+![post_taskform](https://github.com/localdevices/LiveORC/assets/7658673/bb33c910-cefd-4ce7-b99d-ea036f1ba8e6)
+
+When you click on `SEND`, the configuration will be stored under `Task forms`. If you click on `Task forms` you will 
+see that the task is waiting to be picked up by the device. The device will check every 5 minutes, and before 
+treating a new video, if a new task is prepared, and will validate and replace it if a new one is found. 
+
+> [!NOTE]
+> A camera configuration MUST have a profile and a recipe attached to it, before you can send it through.
+> We may expand tasks to optical water level measurements or other tasks at a later stage.
 
 
 # REST API
@@ -266,9 +391,10 @@ to report on LiveORC. NodeORC makes ample use of the REST API for callbacks of r
 The REST API also allows you to develop your own applications on top of LiveORC. For instance, if you wish
 to build your own web interface around OpenRiverCam for a specific user or with a specific application in 
 mind this is in principle possible! The API documentation is also disclosed automatically when you start
-LiveORC. If you are on `localhost:8000`, you can find it by browsing to `http://localhost:8000/api/docs`.
-The api calls are available on `http://localhost:8000/api`.
-
+LiveORC. If you are on `localhost:8000`, you can find it by browsing to `http://localhost:8000/api/docs`. This gives 
+the documentation per API end point in . If you prefer a swagger layout, you can also browse to 
+`http://localhost:8000/api/docs_swagger`. The api calls are available on `http://localhost:8000/api`. Replace your 
+hostname by the one you have configured if necessary.
 
 # Recipes
 
@@ -286,11 +412,115 @@ Recipes describe from top to bottom how a video is treated. They describe in ord
 Resolution and (for LSPIV) window size are also essential parameters, but as these are typically more site specific
 these are defined in the camera configuration for a given site.
 
->!NOTE A full recipe is provided in this file. You can directly upload and use this.
+> [!NOTE]
+> A full recipe is provided in this file. You can directly upload and use this.
 
 In most cases, you will not have to change a lot of things in the recipe. Below you can find a list of typical 
-conditions that may require that you do change the recipe. In that case, edit the file to accomodate the changes, 
-and make a new recipe with the updated file.
+conditions that may require that you do change the recipe. We recommend to use our template as starting point, and 
+dependent on your case conditions, alter the file as needed. We describe some specific cases only. If you need more 
+options and guidance please visit the [recipe section](https://localdevices.github.io/pyorc/user-guide/cli.html)
+in the pyopenrivercam documentation. 
 
+> [!WARNING]
+> When changing the yaml file, make sure the YAML-syntax is followed everywhere. This means subsections (and 
+> subsubsections) must be indented accurately, and double colons are used to indicate the start of a subsection. If 
+> you do not follow this accurately your recipe cannot be rendered, and you'll receive errors. 
 
+## Specify the frames and framerate that should be used
 
+In some cases you may want to have control over the frames that are used for the analysis. By default, all frames 
+available are used and framerate is read from the video metadata. Cases where you may want more control are e.g. 
+follows:
+
+* You may record long videos, and only want to use a specified set of frames
+* You want to ensure that each treated video uses the same amount of frames always (in case of variable amount of 
+  frames per video). 
+* The first seconds may be garbage, e.g. because the camera requires autofocus, or because the camera is still 
+  starting up. 
+* The camera's firmware writes incorrect frames per second to the metadata (Believe us: this happens!!).
+
+In this case, change the `video` section as follows:
+
+```yaml
+video:
+  start_frame: 50  # 
+  end_frame: 200
+  fps: 25
+```
+Here we set the start and end frame to 50 and 200 respectively, and enforce that the software assumes the videos are 
+25 frames per second.
+
+## add preprocessing filters to enhance videos
+
+The default recipe uses a temporal difference with some thresholding to remove background noise and enhance features.
+This can be seen in the `frames` section. In most cases this makes moving features much, much more distinct, and you 
+don't have to change a great deal. However, there are a large number of additional preprocessors available if you 
+would like to use these. The rule is that you add these in subsections, with the required arguments below these 
+subsections. For instance:
+
+```yaml
+frames:
+  time_diff:
+    abs: false
+    thres: 0
+  minmax:
+    min: 5
+  edge_detect:
+    wdw_1: 2
+    wdw_2: 4
+```
+
+will apply an extra edge detection step by applying a so-called "band convolution" on each frame. Basically this 
+applies a smoothing using a window of 2 grid cells, and with 4 grid cells, and then subtracts the two smoothed 
+results. If your tracers consist of larger patches of materials, like floating plants, this may be a useful filter.
+
+The full list of preprocessors and how they can be applied are provided on the pyOpenRiverCam user guide in the 
+[frames section](https://localdevices.github.io/pyorc/user-guide/frames/index.html).
+
+## Masking of spurious velocimetry results
+
+After velocimetry results are processed, spurious results should be masked out. There are many filters available to 
+do this. Filters can even be applied several times, by applying mask groups as shown below. These filters usually work
+well, but under certain conditions, you may decide to alter them. Some guidance is provided below.
+
+* `minmax`: If only very low velocities occur, we suggest to alter `s_max` to a lower value. `s_max` is the maximum 
+  velocity 
+  you expect to occur anywhere in m/s.
+* `angle`: This filter removes velocity values that are outside a certain angle tolerance. Below, the expected direction
+  is set to zero (default) and the angle tolerance is 1.57 radians (90 degrees). Any velocity beyond 1.57 radians 
+  will be filtered out.
+* `count`: this filter counts how frequently a valid velocity is found in a given pixel. If (after all previous 
+  filters) only 20% (`tolerance: 0.2`) is left, the value is assumed to be unreliable and removed. In cases where 
+  very little tracers are observed, but tracers that appear are very clear, you may try to lower this value.
+* `window_mean`: checks if the window average (with window size defined by `wdw`) deviates a lot from the value in the 
+  cell itself. In case it deviates a lot (default is 0.7 or more, i.e. 70%), then the value is masked out. The 
+  tolerance can be set with `tolerance: 0.5` to make it stricter and set it to 50%.
+* `window_nan`: masks on neighbourhoods by checking how much of the neighbouring cells are missing values. By 
+  default, this is set to 0.7, i.e. a minimum of 70% of the surrounding cells should have values. Typically this mask 
+  is applied as one of the last masks so that the other masks give a good impression of the availability of 
+  information for this final mask.
+
+```yaml
+mask:
+  write: True
+  mask_group1:
+    minmax:
+      s_max: 3.0
+  mask_group2:
+    outliers:
+      mode: and
+  mask_group3:
+    angle:
+      angle_tolerance: 1.57
+  mask_group4:
+    count:
+      tolerance: 0.2
+  mask_group5:
+    window_mean:
+      wdw: 2
+      reduce_time: True
+  mask_group6:
+    window_nan:
+      wdw: 1
+      reduce_time: True
+```

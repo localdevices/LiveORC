@@ -128,8 +128,6 @@ class CameraConfigViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
                 content_type="application/json"
             )
-
-
         task_form = get_task_form(instance, query_callbacks)
         record = TaskForm(
             id=task_form["id"],

@@ -108,7 +108,11 @@
                             <label>
                                 <input type="radio" name="discharge" value="{{ choice.value }}" required>
                                 {{ choice.name }}
-                            </label><br>
+                            </label>
+                            <div id="id_{{ choice.value }}_helptext" style="font-size: 10px">
+                            {{ choice.docstring }}
+                            </div>
+                            <br>
                         {% endfor %}
                     </div>
                 </div>
@@ -125,7 +129,11 @@
                             <label>
                                 <input type="radio" name="video" value="{{ choice.value }}" required>
                                 {{ choice.name }}
-                            </label><br>
+                            </label>
+                            <div id="id_{{ choice.value }}_helptext" style="font-size: 10px">
+                            {{ choice.docstring }}
+                            </div>
+                            <br>
                         {% endfor %}
                     </div>
                 </div>

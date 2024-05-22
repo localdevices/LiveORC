@@ -5,18 +5,40 @@ from django.http import HttpResponseBadRequest, HttpResponseForbidden, HttpRespo
 from django.urls import path
 from django.shortcuts import redirect, reverse
 
+from api import callback_utils
 from api.models import CameraConfig, Video, Device, TaskForm, TaskFormStatus
 from api.admin import BaseAdmin, SiteUserFilter, BaseForm
 from api.task_utils import get_task_form
 from api.views.camera_config import CALLBACK_FUNCTIONS_FORM
 
-callback_options = [{"name": c.lstrip("get_form_callback_"), "value": c} for c in CALLBACK_FUNCTIONS_FORM]
-
-callback_discharge = [{"name": c["name"].replace("_", " ").capitalize(), "value": c["value"]} for c in callback_options if c["name"].startswith("discharge")]
-callback_video = [{"name": c["name"].replace("_", " ").capitalize(), "value": c["value"]} for c in callback_options if c["name"].startswith("video")]
-
 import json
 import pyorc
+
+
+callback_options = [
+    {
+        "name": c.lstrip("get_form_callback_"),
+        "value": c,
+        "docstring": getattr(callback_utils, c).__doc__.split("Parameters")[0].strip()
+    } for c in CALLBACK_FUNCTIONS_FORM
+]
+
+callback_discharge = [
+    {
+        "name": c["name"].replace("_", " ").capitalize(),
+        "value": c["value"],
+        "docstring": c["docstring"]
+    } for c in callback_options if c["name"].startswith("discharge")
+]
+
+callback_video = [
+    {
+        "name": c["name"].replace("_", " ").capitalize(),
+        "value": c["value"],
+        "docstring": c["docstring"]
+    } for c in callback_options if c["name"].startswith("video")
+]
+
 
 
 # Register your models here.
@@ -200,7 +222,6 @@ class CameraConfigAdmin(BaseAdmin):
                 #     # content_type="application/json"
                 # )
 
-        print("HELLO THERE")
 
     def save_model(self, request, obj, form, change):
         request._files["json_file"].seek(0)
