@@ -60,7 +60,6 @@ class TimeSeries(BaseModel):
                 # video_closest.status = VideoStatus.QUEUE
                 video_closest.save()
 
-
     class Meta:
         indexes = [models.Index(fields=['site', 'timestamp'])]
         verbose_name_plural = "time series"

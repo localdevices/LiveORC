@@ -31,14 +31,20 @@ Web-based, professional and scalable velocimetry analysis for operational river 
 # What is LiveOpenRiverCam
 
 LiveOpenRiverCam allows you to run operational measurement stations that estimate river discharge from videos.
-It is meant for National or HydroMeteorological Societies (NHMS), hydropower authorities, waterboards, or service 
+It is meant for e.g. National HydroMeteorological Societies (NHMS), hydropower authorities, waterboards, or service 
 providers of such entities, who wish to establish their own services for such users. 
-It is meant to provide fully automated data streams from operational camera/water level feeds that record videos at set 
-time intervals. The platform can either receive raw videos which are then orchestrated for processing on cloud nodes 
-or receive already processed videos, which are processed on-site ("edge processing"). The processing is performed by 
-[NodeOpenRiverCam](https://github.com/localdevice/nodeorc), the node processing tool around OpenRiverCam.
-The processing methods read videos, selects frames, enhances features, orthorectifies and estimates surface velocity 
-and discharge using state-of-the-art velocimetry methods, all fully automated.
+LiveORC will provide you with the following functionalities:
+* A administration-style front end for managing sites, configuration, videos and time series.
+* Visualization of time series and video analyses.
+* Fully automated data streaming from operational camera/water level feeds in the field with "edge processing".
+* Per-video processing through "cloud processing". 
+* A very fast and easy start to this all, through convenient virtualization of services and a very easy to use set up 
+  script.
+
+Processing on sites ("edge processing") or on cloud nodes ("cloud processing") is performed by
+[NodeOpenRiverCam](https://github.com/localdevice/nodeorc), the node processing tool around OpenRiverCam. The 
+processing methods read videos, select frames, enhance features, orthorectify and estimates surface velocity 
+and discharge using state-of-the-art velocimetry methods.
 
 # Acknowledgements
 
@@ -385,11 +391,13 @@ to report on LiveORC. NodeORC makes ample use of the REST API for callbacks of r
 The REST API also allows you to develop your own applications on top of LiveORC. For instance, if you wish
 to build your own web interface around OpenRiverCam for a specific user or with a specific application in 
 mind this is in principle possible! The API documentation is also disclosed automatically when you start
-LiveORC. If you are on `localhost:8000`, you can find it by browsing to `http://localhost:8000/api/docs`.
-The api calls are available on `http://localhost:8000/api`.
+LiveORC. If you are on `localhost:8000`, you can find it by browsing to `http://localhost:8000/api/docs`. This gives 
+the documentation per API end point in . If you prefer a swagger layout, you can also browse to 
+`http://localhost:8000/api/docs_swagger`. The api calls are available on `http://localhost:8000/api`. Replace your 
+hostname by the one you have configured if necessary.
 
 # Recipes
-b
+
 Recipes describe from top to bottom how a video is treated. They describe in order:
 * the video - what frames to use, what the actual water level during the recording was and if frames must be stabilized
 * frame preprocessing and orthorectification - several preprocessing methods can be applied to enhance 

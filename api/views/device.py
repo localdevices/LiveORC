@@ -18,6 +18,7 @@ def get_client_ip_address(request):
         ip_addr = req_headers.get('REMOTE_ADDR')
     return ip_addr
 
+
 class DeviceViewSet(BaseModelViewSet):
     """
     API endpoints that allows devices to be viewed or edited.
@@ -27,7 +28,6 @@ class DeviceViewSet(BaseModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ["get", "post", "delete", "patch"]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['institute']
 
     def get_queryset(self):
         """
