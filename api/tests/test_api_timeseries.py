@@ -68,14 +68,12 @@ class TimeSeriesViewTests(InitTestCase):
         )
         self.assertEquals(r.status_code, status.HTTP_403_FORBIDDEN)
 
-
-
     def test_add_longer_timeseries_and_query(self):
         client = APIClient()
         client.login(username='user@institute1.com', password='test1234')
         # create a camera config on site
         # make a date range
-        dr = pd.date_range("2000-01-01", "2000-01-02", freq="H")
+        dr = pd.date_range("2000-01-01", "2000-01-02", freq="h")
         for n, ts in enumerate(dr):
             r = client.post(
                 '/api/site/1/timeseries/',
