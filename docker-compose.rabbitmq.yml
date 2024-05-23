@@ -1,4 +1,7 @@
 services:
+  webapp:
+    depends_on:
+      - rabbitmq
   rabbitmq:
     image: rabbitmq:management
     container_name: rabbitmq

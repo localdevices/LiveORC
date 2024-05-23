@@ -93,6 +93,14 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
 }
 
+# Celery Configuration Options
+CELERY_BROKER_URL = f'amqp://{os.getenv("LORC_RABBITMQ_USER")}:{os.getenv("LORC_RABBITMQ_PASS")}@{os.getenv("LORC_RABBITMQ_HOST")}:5672/'
+CELERY_RESULT_BACKEND = f'rcp://{os.getenv("LORC_RABBITMQ_USER")}:{os.getenv("LORC_RABBITMQ_PASS")}@{os.getenv("LORC_RABBITMQ_HOST")}:5672/'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
 # use modals instead of popups for django-admin-interface
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
