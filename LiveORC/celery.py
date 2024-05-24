@@ -15,4 +15,4 @@ app = Celery(
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # Load task modules from all registered nodeorc tasks.
-app.autodiscover_tasks(['nodeorc.tasks.cloud_task'])
+app.autodiscover_tasks()

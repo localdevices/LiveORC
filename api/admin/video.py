@@ -7,7 +7,7 @@ from api.models import Video, VideoStatus, Task
 from api.task_utils import get_task
 from api.admin import BaseAdmin, BaseForm
 from api.admin import VideoSiteUserFilter, datetimefilter
-
+from api.tasks import run_nodeorc
 
 class VideoForm(BaseForm):
     class Meta:
@@ -34,20 +34,24 @@ class VideoInline(admin.TabularInline):
 class VideoAdmin(DjangoObjectActions, BaseAdmin):
     @action(
         label="Queue task",  # optional
-        description="Click to queue a task" # optional
+        description="Click to queue a task"  # optional
     )
     def toolfunc(self, request, obj):
         # create a new task for this video
         if obj.is_ready_for_task:
             # launch creation of a new task
             task_body = get_task(obj, request, serialize=False)
+            # send over validated task to worker
+            job = run_nodeorc.delay(obj.pk, task_body)
             task = {
-                "id": task_body["id"],
+                "id": job.id,
                 "task_body": task_body,
                 "video": obj,
                 "creator": request.user
             }
+            # validation
             Task.objects.create(**task)
+
         # once the task is set, change the status of the video
         obj.status = VideoStatus.QUEUE
         obj.save()
@@ -96,6 +100,7 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
             "fields": [
                 "get_site_name",
                 "file",
+                "status",
                 "camera_config",
                 "timestamp",
                 "image_preview",

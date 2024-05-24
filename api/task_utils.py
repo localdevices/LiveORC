@@ -1,3 +1,5 @@
+import os
+
 from django.conf import settings
 from django.urls import reverse
 # helper functions to develop tasks from models
@@ -46,6 +48,7 @@ OUTPUT_FILES_ALL_TEMPLATE = {
 
 }
 
+
 def get_task_form(
     instance,
     query_callbacks,
@@ -83,24 +86,78 @@ def get_task_form(
     return task_form.to_json(serialize=serialize)
 
 
-def get_task(instance, request, serialize=True, *args, **kwargs):
+def get_task(
+        instance,
+        request,
+        query_callbacks=(
+            "get_form_callback_video_no_file_post",
+            "get_form_callback_discharge_post",
+        ),
+        serialize=True,
+        *args,
+        **kwargs
+):
     """
     Make a full task dict from the current video
 
     Parameters
     ----------
-    instance
+    instance : Video
+        Video object for which to create a single task
+    request : request
+    query_callbacks : list[str]
+        callback functions to apply after the task is computed
+    serialize : bool
+        Defines whether to serialize the task or leave it as a nodeorc Task Object
+    *args : list
+        additional args to parse
+    **kwargs : dict
+        additional kwargs to parse
 
     Returns
     -------
+    dict (serialized) or nodeorc.models.Task (not serialized)
 
     """
-    subtasks = get_subtasks(instance)
     storage = get_storage(instance)
-    output_files = OUTPUT_FILES_ALL
+    subpath = os.path.dirname(str(instance.file))
+    datetimestr = os.path.splitext(os.path.basename(str(instance.file)))[0]
+    output_files = {
+        "piv": {
+            "remote_name": os.path.join(subpath, f"piv_{datetimestr}.nc"),
+            "tmp_name": "OUTPUT/piv.nc"
+        },
+        "transect": {
+            "remote_name": os.path.join(subpath, f"transect_1_{datetimestr}.nc"),
+            "tmp_name": "OUTPUT/transect_transect_1.nc"
+        },
+        "piv_mask": {
+            "remote_name": os.path.join(subpath, f"piv_mask_{datetimestr}.nc"),
+            "tmp_name": "OUTPUT/piv_mask.nc"
+        },
+        "jpg": {
+            "remote_name": os.path.join(subpath, f"plot_quiver_{datetimestr}.jpg"),
+            "tmp_name": "OUTPUT/plot_quiver.jpg"
+        }
+
+    }
+    # output_files = OUTPUT_FILES_ALL
+    input_files = {
+        "videofile": models.File(
+            remote_name=str(instance.file),
+            tmp_name=str(instance.file)
+        )
+    }
+    subtasks = get_subtasks(instance, output_files=output_files)
     callbacks = []
+    # callbacks = get_callbacks(
+    #     instance.camera_config,
+    #     query_callbacks
+    # )
+
     task = models.Task(
         subtasks=subtasks,
+        input_files=input_files,
         output_files=output_files,
         callbacks=callbacks,
         storage=storage
@@ -134,17 +191,23 @@ def get_storage(instance):
     -------
 
     """
-    url = settings.MEDIA_ROOT
-    bucket_name = reverse(
-        "api:site-video-detail",
-        args=([str(instance.camera_config.site.id), str(instance.id)])
-    )
+
+    if "FileSystemStorage" in str(instance.file.storage):
+        file_path = instance.file.path.split(str(instance.file))[0]
+        url, bucket_name = os.path.split(os.path.normpath(file_path))
+    else:
+        raise NotImplementedError("S3 storage not yet implemented")
+        # TODO: implement S3 storage option
+    # url = settings.MEDIA_ROOT
+    # bucket_name = reverse(
+    #     "api:site-video-detail",
+    #     args=([str(instance.camera_config.site.id), str(instance.id)])
+    # )
 
     return models.Storage(
         url=url,
         bucket_name=bucket_name
     )
-    # TODO: make storage agnostic for cloud storage options
 
 def get_subtasks_form(instance):
     camera_config = instance
@@ -156,7 +219,7 @@ def get_subtasks_form(instance):
     return [subtask]
 
 
-def get_subtasks(instance):
+def get_subtasks(instance, output_files=OUTPUT_FILES_ALL):
     """
     Translates video object into a full list of subtasks. The list of subtasks can be defined or automatically
     derived form the structure of the video.
@@ -188,7 +251,7 @@ def get_subtasks(instance):
 
     # now dependent on the available data, prepare a task
     if task_type == "all":
-        subtask = get_subtask_all(camera_config=camera_config, video=video)
+        subtask = get_subtask_all(camera_config=camera_config, video=video, output_files=output_files)
     else:
         raise NotImplementedError("2D only tasks are not yet supported. Add a profile to the Camera Config to allow for processing this task.")
     # we provide a list back so that we can later extend this to hold several subtasks, e.g. one per cross section
@@ -204,6 +267,7 @@ def get_callbacks(instance, query_callbacks):
 def get_subtask_all(
         camera_config,
         video,
+        output_files=OUTPUT_FILES_ALL
 ):
     """
     Makes a full subtask using the entire recipe, including getting profiles ready for processing where needed
@@ -240,7 +304,6 @@ def get_subtask_all(
                 "tmp_name": "video.mp4"
             }
         }
-    output_files = OUTPUT_FILES_ALL  # hard-coded output file names, typical for this task
     # remove the geojson and shapefile parts
     recipe = recipe_update_profile(recipe, profile)
 
@@ -251,7 +314,9 @@ def get_subtask_all(
         "h_a": h_a,
         "cameraconfig": cameraconfig,
         "recipe": recipe,
-        "output": "./tmp/OUTPUT",  # TODO revisit this so it is not dependent on the tmp location
+        # "output": os.path.dirname(videofile),
+        "output": os.path.join(settings.TEMP_FOLDER, os.path.dirname(videofile), "OUTPUT"),
+        # "output": "./tmp/OUTPUT",  # TODO revisit this so it is not dependent on the tmp location
         "prefix": ""
     }
     subtask = models.Subtask(

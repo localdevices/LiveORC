@@ -1,5 +1,10 @@
 {% extends "admin/base.html" %}
 {% load i18n static %}
+{% block extrahead %}
+{{ block.super }}
+<link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+{% endblock %}
 {% block welcome-msg %}
     V{{ APP_VERSION }} - {% translate 'Welcome,' %}
     <strong>{% firstof user.get_short_name user.get_username %}</strong>.
