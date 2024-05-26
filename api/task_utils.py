@@ -125,19 +125,19 @@ def get_task(
     output_files = {
         "piv": {
             "remote_name": os.path.join(subpath, f"piv_{datetimestr}.nc"),
-            "tmp_name": "OUTPUT/piv.nc"
+            "tmp_name": os.path.join(subpath, "OUTPUT/piv.nc"),
         },
         "transect": {
             "remote_name": os.path.join(subpath, f"transect_1_{datetimestr}.nc"),
-            "tmp_name": "OUTPUT/transect_transect_1.nc"
+            "tmp_name": os.path.join(subpath, "OUTPUT/transect_transect_1.nc"),
         },
         "piv_mask": {
             "remote_name": os.path.join(subpath, f"piv_mask_{datetimestr}.nc"),
-            "tmp_name": "OUTPUT/piv_mask.nc"
+            "tmp_name": os.path.join(subpath, "OUTPUT/piv_mask.nc"),
         },
         "jpg": {
             "remote_name": os.path.join(subpath, f"plot_quiver_{datetimestr}.jpg"),
-            "tmp_name": "OUTPUT/plot_quiver.jpg"
+            "tmp_name": os.path.join(subpath, "OUTPUT/plot_quiver.jpg"),
         }
 
     }
