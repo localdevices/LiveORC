@@ -5,12 +5,27 @@ from django.conf import settings
 
 from nodeorc.models import Task, Storage
 from .models import Video, VideoStatus
-import time
-
+from .models.video import add_frame_to_model
 
 
 @shared_task(track_started=True)
 def run_nodeorc(pk, task_body):
+    """
+    run nodeorc task through worker.
+
+    Parameters
+    ----------
+    pk : int
+        video primary key
+    task_body : dict
+        deserialized task in dictionary
+
+    Returns
+    -------
+    True
+
+
+    """
     print(f"I received a task with task id: {task_body['id']}")
     task = Task(**task_body)
     storage = task.storage
@@ -21,31 +36,32 @@ def run_nodeorc(pk, task_body):
     storage.download_file(task.input_files["videofile"].remote_name, trg, keep_src=True)
     # download file to tmp location
     task.execute(tmp="/tmp/nodeorc", keep_src=True)  #os.path.dirname(trg))
-    print("PLEASE CHECK IF I HAVE BEEN RUNNING")
     return True
 
 
 @signals.task_prerun.connect(sender=run_nodeorc)
 def task_prerun_handler(sender, args=None, **kwargs):
-    print("RECEIVED TASK {task_body['id'], UPDATE VIDEO STATUS")
+    """Update video status to RUNNING upon initialization of task. """
+
     pk, task_body = args
-    print(f"VIDEO ID: {pk}")
     video = Video.objects.get(pk=pk)
     video.status = VideoStatus.TASK
     video.save()
 
 
 @signals.task_postrun.connect(sender=run_nodeorc)
-def task_postrun_handler(sender=None, args=None, state=None, retval=None, **kwargs): #task_id=None, task=None, args=None, kwargs=None, retval=None, state=None):
-    print(retval)
-    print(state)
-    pk = args[0]
+def task_postrun_handler(sender=None, args=None, state=None, retval=None, **kwargs):
+    """Update video status and file fields after running task. """
+
+    pk, task = args
     video = Video.objects.get(pk=pk)
+    video.image = task["output_files"]["jpg"]["remote_name"]
+    add_frame_to_model(video.image, video.thumbnail, suffix="_thumb", thumb=True)
     if state == "SUCCESS":
-    # pk = kwargs['args'][0]  # assuming the first argument is some_parameter
         video.status = VideoStatus.DONE
     else:
         video.status = VideoStatus.ERROR
+        # TODO: add a traceback
     video.save()
 
 
