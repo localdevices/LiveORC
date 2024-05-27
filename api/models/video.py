@@ -261,7 +261,7 @@ class Video(models.Model):
     def is_ready_for_task(self):
         if not(self.time_series):
             return False
-        return self.status == VideoStatus.NEW and self.time_series.q_50 is None and self.time_series.h is not None
+        return (self.status == VideoStatus.NEW or self.status == VideoStatus.ERROR) and self.time_series.q_50 is None and self.time_series.h is not None
 
     @property
     def video_preview(self):

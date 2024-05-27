@@ -44,7 +44,8 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
             # send over validated task to worker
             job = run_nodeorc.delay(obj.pk, task_body)
             task = {
-                "id": job.id,
+                "id": task_body["id"],
+                "broker_id": job.id,
                 "task_body": task_body,
                 "video": obj,
                 "creator": request.user

@@ -26,7 +26,7 @@ class TaskAdmin(BaseAdmin):
         #     return True
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        return True
 
     form = TaskForm
     ordering = ["-video__timestamp"]
@@ -37,7 +37,8 @@ class TaskAdmin(BaseAdmin):
         "thumbnail_preview",
         "get_video_timestamp",
         "progress_bar",
-        "video_status"
+        "video_status",
+        "traceback"
     ]
 
     def thumbnail_preview(self, obj):
