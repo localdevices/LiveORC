@@ -1,20 +1,27 @@
+import io
+import mimetypes
+import os
+
+import cv2
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.core.files.storage import storages
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect, reverse
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import mark_safe
 from django.core.files.base import ContentFile
-from PIL import Image
-import io
-import mimetypes
-import os
-import cv2
 import numpy as np
-from django.conf import settings
+from PIL import Image
 
-from api.models import BaseModel, CameraConfig, Project, TimeSeries
+from api.models import CameraConfig, Project, TimeSeries, Task
+from api.task_utils import get_task
+from api.tasks import run_nodeorc
+
 
 VIDEO_EXTENSIONS = ["MOV", "MKV", "MP4", "AVI", "M4V"]
 
@@ -328,6 +335,26 @@ class Video(models.Model):
     @property
     def institute(self):
         return self.camera_config.institute
+
+    def create_task(self, request, *args, **kwargs):
+        # launch creation of a new task
+        task_body = get_task(self, request, serialize=False, *args, **kwargs)
+        # send over validated task to worker
+        job = run_nodeorc.delay(self.pk, task_body)
+        task = {
+            "id": task_body["id"],
+            "broker_id": job.id,
+            "task_body": task_body,
+            "video": self,
+            "creator": request.user
+        }
+        # validation
+        Task.objects.create(**task)
+
+        # once the task is set, change the status of the video
+        self.status = VideoStatus.QUEUE
+        self.save()
+
 
     class Meta:
         # organize tables along the camera config id and then per time stamp

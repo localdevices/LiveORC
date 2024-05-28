@@ -62,7 +62,7 @@ def task_postrun_handler(sender=None, args=None, state=None, retval=None, **kwar
     if state == "SUCCESS":
         video.status = VideoStatus.DONE
         task_db.progress = 1.0
-        task_db.traceback = "Completed successfully"
+        task_db.status_msg = "Completed successfully"
     else:
         video.status = VideoStatus.ERROR
         # TODO: add a traceback
@@ -78,8 +78,7 @@ def task_failure_handler(sender=None, task_id=None, exception=None, args=None, t
     video = Video.objects.get(pk=pk)
     task_db = TaskDB.objects.get(id=task["id"])
     video.status = VideoStatus.ERROR
-    task_db.traceback = exception
+    task_db.status_msg = exception
     task_db.progress = 0.0
-    # TODO: add a traceback
     video.save()
     task_db.save()

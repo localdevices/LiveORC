@@ -40,7 +40,7 @@ class Task(BaseModel):
     )
     task_body = models.JSONField(help_text="task body used to perform task by available node.", default=dict)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
-    traceback = models.CharField(max_length=5000, help_text="Error messages from back end in case processing failed.")
+    status_msg = models.CharField(max_length=5000, help_text="Error messages from back end in case processing failed.")
 
     def save(self, *args, **kwargs):
         super(Task, self).save(*args, **kwargs)

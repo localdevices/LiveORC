@@ -1,7 +1,9 @@
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.http import HttpResponseRedirect
+
 from django_object_actions import DjangoObjectActions, action
-from django.shortcuts import redirect
+from django.shortcuts import redirect, reverse
 
 from api.models import Video, VideoStatus, Task
 from api.task_utils import get_task
@@ -39,25 +41,31 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
     def toolfunc(self, request, obj):
         # create a new task for this video
         if obj.is_ready_for_task:
-            # launch creation of a new task
-            task_body = get_task(obj, request, serialize=False)
-            # send over validated task to worker
-            job = run_nodeorc.delay(obj.pk, task_body)
-            task = {
-                "id": task_body["id"],
-                "broker_id": job.id,
-                "task_body": task_body,
-                "video": obj,
-                "creator": request.user
-            }
-            # validation
-            Task.objects.create(**task)
+            obj.create_task()
+        #     # launch creation of a new task
+        #     task_body = get_task(obj, request, serialize=False)
+        #     # send over validated task to worker
+        #     job = run_nodeorc.delayF(obj.pk, task_body)
+        #     task = {
+        #         "id": task_body["id"],
+        #         "broker_id": job.id,
+        #         "task_body": task_body,
+        #         "video": obj,
+        #         "creator": request.user
+        #     }
+        #     # validation
+        #     Task.objects.create(**task)
+        #
+        #     # once the task is set, change the status of the video
+        #     obj.status = VideoStatus.QUEUE
+        #     obj.save()
+            return redirect('/admin/api/video')
+        elif not(obj.time_series):
+            messages.error(request, f"Video {obj.id} does not yet have a water level at associated time stamp. ")
+        elif obj.status == VideoStatus.QUEUE:
+            messages.error(request, f"Video {obj.id} is already in the processing queue. ")
+        return HttpResponseRedirect(reverse("admin:api_video_change", args=(obj.pk,)))
 
-        # once the task is set, change the status of the video
-        obj.status = VideoStatus.QUEUE
-        obj.save()
-        # TODO: ensure that task and video statusses are updated using AMQP status
-        return redirect('/admin/api/video')
 
     change_actions = ('toolfunc', )
 
