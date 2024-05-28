@@ -62,8 +62,8 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
             return redirect('/admin/api/video')
         elif not(obj.time_series):
             messages.error(request, f"Video {obj.id} does not yet have a water level at associated time stamp. ")
-        elif obj.status == VideoStatus.QUEUE:
-            messages.error(request, f"Video {obj.id} is already in the processing queue. ")
+        elif obj.status == VideoStatus.QUEUE or obj.status == VideoStatus.TASK:
+            messages.error(request, f"Video {obj.id} is already queued or being processed. ")
         return HttpResponseRedirect(reverse("admin:api_video_change", args=(obj.pk,)))
 
 

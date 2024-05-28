@@ -38,7 +38,7 @@ class TaskAdmin(BaseAdmin):
         "get_video_timestamp",
         "progress_bar",
         "video_status",
-        "traceback"
+        "status_msg"
     ]
 
     def thumbnail_preview(self, obj):

@@ -234,13 +234,13 @@ def get_subtasks(instance, output_files=OUTPUT_FILES_ALL):
         set of nodeorc.models.Subtask types
     """
     error_msg = "No water level or time series associated with video"
-    if not(instance.time_series):
+    if not instance.time_series:
         raise Exception(error_msg)
-    if not(instance.time_series.h):
+    if not instance.time_series.h:
         raise Exception(error_msg)
     camera_config = instance.camera_config
     video = instance
-    if not(camera_config.recipe):
+    if not camera_config.recipe:
         raise Exception("Cannot create task, no recipe available")
     # we assume first that only 2d is processed
     task_type = "2d_only"
@@ -253,7 +253,9 @@ def get_subtasks(instance, output_files=OUTPUT_FILES_ALL):
     if task_type == "all":
         subtask = get_subtask_all(camera_config=camera_config, video=video, output_files=output_files)
     else:
-        raise NotImplementedError("2D only tasks are not yet supported. Add a profile to the Camera Config to allow for processing this task.")
+        raise NotImplementedError(
+            "2D only tasks are not yet supported. Add a profile to the Camera Config to allow for processing this task."
+        )
     # we provide a list back so that we can later extend this to hold several subtasks, e.g. one per cross section
     # if we have more than one.
     return [subtask]

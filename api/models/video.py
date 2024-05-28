@@ -18,9 +18,7 @@ from django.core.files.base import ContentFile
 import numpy as np
 from PIL import Image
 
-from api.models import CameraConfig, Project, TimeSeries, Task
-from api.task_utils import get_task
-from api.tasks import run_nodeorc
+from api.models import CameraConfig, Project, TimeSeries
 
 
 VIDEO_EXTENSIONS = ["MOV", "MKV", "MP4", "AVI", "M4V"]
@@ -337,6 +335,10 @@ class Video(models.Model):
         return self.camera_config.institute
 
     def create_task(self, request, *args, **kwargs):
+        from api.models import Task
+        from api.task_utils import get_task
+        from api.tasks import run_nodeorc
+
         # launch creation of a new task
         task_body = get_task(self, request, serialize=False, *args, **kwargs)
         # send over validated task to worker
