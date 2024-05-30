@@ -195,19 +195,26 @@ def get_storage(instance):
     if "FileSystemStorage" in str(instance.file.storage):
         file_path = instance.file.path.split(str(instance.file))[0]
         url, bucket_name = os.path.split(os.path.normpath(file_path))
+        storage_data = {
+            "url": url,
+            "bucket_name": bucket_name
+        }
     else:
-        raise NotImplementedError("S3 storage not yet implemented")
-        # TODO: implement S3 storage option
-    # url = settings.MEDIA_ROOT
-    # bucket_name = reverse(
-    #     "api:site-video-detail",
-    #     args=([str(instance.camera_config.site.id), str(instance.id)])
-    # )
+        storage_options = settings.STORAGES["media"]["OPTIONS"]
+        storage_data = {
+            "url": storage_options["endpoint_url"],
+            "bucket_name":  storage_options["bucket_name"],
+            "options": {
+                "access_key": storage_options["access_key"],
+                "secret_key": storage_options["secret_key"],
+            }
+        }
 
-    return models.Storage(
-        url=url,
-        bucket_name=bucket_name
+    storage = models.get_storage(
+        **storage_data
     )
+    return storage
+
 
 def get_subtasks_form(instance):
     camera_config = instance

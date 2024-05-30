@@ -13,6 +13,7 @@ import os
 import datetime
 from pathlib import Path
 import sys
+import boto3
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # try to get BASE_DIR from env variable
@@ -105,7 +106,6 @@ TEMP_FOLDER = "/tmp/nodeorc"
 
 # use modals instead of popups for django-admin-interface
 X_FRAME_OPTIONS = "SAMEORIGIN"
-
 
 ROOT_URLCONF = 'LiveORC.urls'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -244,6 +244,21 @@ if storage_url:
             "bucket_name": "media"
         },
     }
+    # create media bucket if it does not yet exist
+    s3 = boto3.resource(
+        "s3",
+        endpoint_url=f"{storage_url}:{storage_port}",
+        aws_access_key_id=os.getenv("LORC_STORAGE_ACCESS"),
+        aws_secret_access_key=os.getenv("LORC_STORAGE_SECRET")
+    )
+    # list the available bucket names
+    r = s3.meta.client.list_buckets()
+    bucket_names = [bucket["Name"] for bucket in r["Buckets"]]
+    if not "media" in bucket_names:
+        # bucket does not exist, create!
+        s3.create_bucket(Bucket="media")
+
+    #
 else:
     # use the same as default
     STORAGES["media"] = STORAGES["default"]

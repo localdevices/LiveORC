@@ -1,6 +1,7 @@
 import io
 import mimetypes
 import os
+import urllib
 
 import cv2
 from django.conf import settings
@@ -56,23 +57,31 @@ def add_frame_to_model(video_field, img_field, frame_nr=0, suffix="", thumb=Fals
         Set to True to resize the image, settings.THUMBSIZE is used for the size settings
     """
     if "ImageFieldFile" in repr(video_field):
-        image = cv2.imread(storage_path(video_field))
+        if "://" in storage_path(video_field):
+            # url requires an explicit opening of the url
+            img = Image.open(
+                urllib.request.urlopen(
+                    storage_path(video_field)
+                )
+            )
+        else:
+            img = Image.open(storage_path(video_field))
     elif "FieldFile" in repr(video_field):
         # a video is passed, so use opencv to get the key frame
         cap = cv2.VideoCapture(storage_path(video_field))
         if frame_nr != 0:
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame_nr)
         res, image = cap.read()
-    # turn into RGB
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # turn into RGB
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # turn into PIL object
+        img = Image.fromarray(image, "RGB")
     img_name, video_extension = os.path.splitext(os.path.basename(video_field.name))
     img_extension = ".jpg"
     FTYPE = 'JPEG'
     img_filename = img_name + suffix + img_extension
     # Save thumbnail to in-memory file as StringIO
-    img = Image.fromarray(image, "RGB")
     if thumb:
-    # thumb = Image.fromarray(image, "RGB")
         img.thumbnail((settings.THUMBSIZE, settings.THUMBSIZE), Image.LANCZOS)
     temp_img = io.BytesIO()
     img.save(temp_img, FTYPE)

@@ -58,7 +58,14 @@ def task_postrun_handler(sender=None, args=None, state=None, retval=None, **kwar
     video = Video.objects.get(pk=pk)
     task_db = TaskDB.objects.get(id=task["id"])
     video.image = task["output_files"]["jpg"]["remote_name"]
-    add_frame_to_model(video.image, video.thumbnail, suffix="_thumb", thumb=True)
+    video.save()
+    video = Video.objects.get(pk=pk)
+    add_frame_to_model(
+        video.image,
+        video.thumbnail,
+        suffix="_thumb",
+        thumb=True
+    )
     if state == "SUCCESS":
         video.status = VideoStatus.DONE
         task_db.progress = 1.0
