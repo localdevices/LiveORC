@@ -296,6 +296,7 @@ start(){
 	echo "SSL certificate: $LORC_SSL_CERT"
 	echo "SSL insecure port redirect: $LORC_SSL_INSECURE_PORT_REDIRECT"
 	echo "RabbitMQ hostname: $LORC_RABBITMQ_HOST"
+	echo "Debug mode: $LORC_DEBUG"
 	echo "================================"
 	echo "Make sure to issue a $0 down if you decide to change the environment."
 	echo ""

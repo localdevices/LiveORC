@@ -45,7 +45,7 @@ python manage.py migrate
 # check if there is a record already
 export DJANGO_SETTINGS_MODULE=LiveORC.settings
 liveorc_style=$(bash -c "echo \"from admin_interface.models import Theme;print(len(Theme.objects.filter(name='LiveOpenRiverCam')));\" | python manage.py shell";)
-if [ $liveorc_style = "0" ];then
+if [ ${liveorc_style:0-1} = "0" ];then
 	echo "LiveORC style does not yet exist, uploading style ..."
 	python3 manage.py loaddata ./django-admin-interface/admin_interface_theme_liveorc.json
 fi
