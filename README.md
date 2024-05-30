@@ -48,11 +48,12 @@ and discharge using state-of-the-art velocimetry methods.
 
 # Acknowledgements
 
-> [!NOTE] 
+> [!IMPORTANT] 
 > LiveOpenRiverCam is being developed in the TEMBO Africa project. The TEMBO Africa project has received 
 > funding from the European Union's Horizon Europe research and innovation programme under grant agreement No.101086209.  
 > We have also received funding from the WMO HydroHub program. This funding was used to conceptualise and pilot 
-> OpenRiverCam.
+> OpenRiverCam. Finally, the test dataset was collected in close collaboration with the Waterboard Limburg. We 
+> greatly appreciate the continuing collaboration with the waterboard.
 
 # Installation
 By far the easiest way to start working with LiveORC is to use docker and the `liveorc.sh` bash script bundled with 
@@ -290,19 +291,29 @@ logically, a measurement site, and everything that belongs to the measurement si
 Therefore, the first thing you must do, before setting up sites and things that belong to that, is set up an institute
 and make yourself owner of that institute.
 
+> [!NOTE]
+> Under the "Users and institutes" menu section, click on the ➕ Add button of the "Institutes" menu item. Create an 
+> institute by selecting yourself as an owner, and by providing a name with your institute. 
+
+
 ![add_institute](https://github.com/localdevices/LiveORC/assets/7658673/6b632b62-2e69-440f-b7d7-2d0a221e597d)
+
+> [!TIP]
+> You can also become a *member* of an institute, or (as super user) make another user member of an institute, without 
+> owning it. In that case you can view all assets that belong to an institute, but you cannot add, modify or delete any
+> of these assets. This is ideal e.g. if you want to provide access to the data by an external user, that needs the 
+> data, but is not part of your team, or an external system that requires automated access to your data through the 
+> REST API. Delft-FEWS forecasting systems for instance can directly ingest LiveORC data.
 
 ## Make your first site
 
-Once the institute is created, you can also make a new site. You can give a site a name, an approximate coordinate 
-(by clicking on the interactive map), and you must associate the site with an institute that you own.
+Once the institute is created, you must also make a new site, as any video, camera configuration object, or time series
+must belong to a site eventually. 
 
 > [!NOTE]
-> You can also become a *member* of an institute, without owning it. In that case you can view all assets
-> that belong to an institute, but you cannot add, modify or delete any of these assets. This is ideal e.g. if 
-> you want to provide access to the data by an external user, that needs the data, but is not part of your team,
-> or an external system that requires automated access to your data through the REST API. Delft-FEWS forecasting 
-> systems for instance can directly ingest LiveORC data.
+> Under the "Assets" menu section, clikc on the ➕ Add button of the "Sites" menu item. You can give a site a name, an 
+> approximate coordinate (by clicking on the interactive map), and you must associate the site with an institute 
+> that you own. Select the institute you just created.
 
 ![add_site](https://github.com/localdevices/LiveORC/assets/7658673/739805ea-31c2-4598-99f4-59bbea49b26d)
 
@@ -311,10 +322,31 @@ Once the institute is created, you can also make a new site. You can give a site
 Eventually you wish to instruct a device in the field what to do with a video, and what information to return to 
 LiveORC as callback. This requires a so-called "recipe", which you need to assemble. Recipes are also used in 
 [pyOpenRiverCam](https://localdevices.github.io/pyorc). In fact, we recommend to construct and test them in 
-pyOpenRivercam at this moment, as we do not yet have a web interface to construct them. For further guidance on 
+pyOpenRiverCam at this moment, as we do not yet have a web interface to construct them. For further guidance on 
 recipes and a full working example, we refer to the [recipe](#recipes) section.
 
 ![add_recipe](https://github.com/localdevices/LiveORC/assets/7658673/4407a981-b4fd-4c22-b683-493bc92b31d9)
+
+> [!NOTE]
+> Under the "Assets" menu section, click on the ➕ Add button of the "Recipes" menu item. You can give a recipe a name,
+> associate it with an institute that you own and select the recipe file (.YAML formatted). Here, use the file 
+> `recipe.yml`, provided in the test dataset. 
+
+## Add a first profile
+
+In a very similar way, you can also add a profile. The profile consists of a set of x, y, z points describing the 
+cross-section of the stream you are observing. The cross-section naturally has to be located as much as possible within 
+the objective that your camera is looking at, and must be measured using the same coordinate system as your control 
+points. Note that also the vertical datum MUST be the same. It is not a problem if a part of the profile is 
+partly outside the objective. In fact, this can easily occur in rivers with a very wide floodplain, that only 
+occasionally inundates. This then means that if those sections become inundated, velocity in those sections will 
+be estimated through infilling techniques.
+
+> [!NOTE]
+> Under the "Assets" menu section, click on the ➕ Add button of the "Profiles" menu item. You can give a profile a name,
+> associate it with a site that you own and select the profile file (.geojson formatted). Here, use the file 
+> `profile.geojson`, provided in the test dataset. Once you click "SAVE" you will see a new profile in the menu. If 
+> you click it you can inspect the profile on a geographical map. 
 
 ## Make your first camera configuration
 
@@ -325,48 +357,145 @@ coordinate reference system of any coordinates used (not mandatory).
 Currently, camera configuration cannot yet be made directly in the web interface. This is a high priority 
 for future developments. Instead, you must use pyOpenRiverCam to prepare the camera configuration. We recommend
 to use the command-line interface of pyOpenRiverCam to do this. We refer to the 
-[camera configuration user guide](https://localdevices.github.io/pyorc/user-guide/camera_config/index.html) for
+[camera configuration user guide](https://localdevices.github.io/pyorc/user-guide/camera_config/index.html) for 
 further information.
 
-Once a camera configuration is prepared, it should be stored in a `.json` file. You can then upload this into a
-new camera configuration in LiveOpenRiverCam. Go to Camera Configs and make a new one by clicking on the ➕ Add 
-button in the menu. 
+Once a camera configuration is prepared, it is stored in a `.json` file. You can then upload this into a
+new camera configuration in LiveOpenRiverCam. 
 
-Besides the camera configuration itself, you can, and in most cases should provide additional details.
-You can provide a name an end validity date (currently only for your own reference, in 
-case you wish to move the camera or change the camera at the same site later). Also you can provide an allowed difference
-in time stamp between a video that is processed with the camera configuration, and the water level associated with
-the video. In case no water level is available that has a time stamp that is near enough to the video time stamp,
-the video will not be processed.
-
-You can (and should) also provide a recipe and a profile (see earlier sections) to go with the camera configuration.
-And finally, you must upload the camera configuration, prepared through pyOpenRiverCam. This in total gives you
-all the information required to process videos at a given site.
+> [!NOTE]
+> Under the "Assets" menu section, click on the ➕ Add button of the "Camera configs" menu item. You can give a 
+> camera configuration a name (easy to recognise) and associate it with a site. Through the site, it will also 
+> become associated with the institute owning that site. Besides the camera configuration itself, you can, and in most
+> cases should provide additional details.
+> You can provide a name an end validity date (currently only for your own reference, in 
+> case you wish to move the camera or change the camera at the same site later). Also you can provide an allowed 
+> difference in time stamp between a video that is processed with the camera configuration, and the water level 
+> associated with the video. In case no water level is available that has a time stamp that is near enough to the 
+> video time stamp, the video cannot yet be processed as a water level is essential for processing a video.
+> You can (and should) also provide a recipe and a profile (see earlier sections) to go with the camera configuration.
+> And finally, you must upload the camera configuration, prepared through pyOpenRiverCam. Here provide the file 
+> `cameraconfig.json` from the test dataset. This in total gives you all the information required to process videos at 
+> a given site. Click on "SAVE" to store your selections.
 
 ![add_cameraconfig](https://github.com/localdevices/LiveORC/assets/7658673/eec52ea2-5def-4635-b60a-b6aa0e0ff2cd)
 
-Once done you can click on "Save", which brings you back to an overview of all camera configurations, managed
+Once done you will be brought back to an overview of all camera configurations, managed
 by you. If you want to see the result, then select the new camera configuration. You can then also see a 
 geographical overview of the situation, including the bounding box of the camera configuration, and the 
 cross-section. The cross-section should overlap with your bounding box and they of course should be positioned
 over the expected river section. If that is not the case, something is wrong in either the camera configuration
 file or the measurements of the cross-section. Carefully check if the coordinate reference system provided
-with any coordinates is correct.
+with any coordinates is correct. Again, also ensure that the vertical datum of ground control points and cross 
+section is the same! This is a typical error made, and essential to correct in order to get good results.
 
 ![change_cameraconfig](https://github.com/localdevices/LiveORC/assets/7658673/6ff13635-3821-4968-a606-428a179d7d49)
 
+## Upload a new video for processing
+
+You are now ready to upload videos into LiveORC, which are aware of the site and camera configuration they apply to.
+
+> [!NOTE]
+> Under the "Assets" menu section, click on the ➕ Add button in the "Video" menu item. Now select the video file from 
+> the sample dataset `schedule_20220830_133706.mp4` and select you newly made camera configuration. You must also 
+> select a time. For this demonstration you can simply click on "Today" and "Now" to select the current time as the 
+> time associated with the video. Click on "SAVE" to store the video.
+
+INSERT IMAGE
+
+You will return to the main video view with all your videos. There is only one now, but once you have many for many 
+sites, you can use the filters on the right-hand side to only show videos of a specific site and a specific time 
+range. You will also see that there is no water level associated with the video yet. A water level is always needed 
+with a video before it can be processed. Click on your new video to inspect it in more detail.
+
+## Adding a water level to the video
+
+Water levels are typically measured in a locally selected datum. In this example, the datum is the Dutch N.A.P. 
+level, but this may also be a local staff gauge or any other logical datum. In the camera configuration, the 
+relationship between the datum of water level measurements, and the datum of the vertical coordinates of ground 
+control points (GCP) is already set, by defining the water level during the survey in both the local datum and the 
+GCP datum. This is essential to do correctly in order to ensure LiveORC understands how to map camera coordinates 
+to real-world coordinates during the video processing.
+
+To provide a water level, click on the ➕ Add button in the Time series menu item. Select your newly made site and 
+"Today" and "Now". Then supply the water level as 92.36. This is the water level in "Normaal Amsterdams Peil" (N.A.P.
+) a.k.a. Amsterdam Ordnance Datum, as measured by our partner the Waterboard of Limburg.
+
+INSERT IMAGE
+
+Because you have selected "Today" and "Now" and you have selected the same site as the one you uploaded the video 
+for, the water level will be automatically coupled to the video, as long as they are not too far apart. Remember 
+that this was set in the "Allowed difference in time stamp" setting in the camera configuration.
+
+## Processing your video
+
+Now that a water level is present, we are ready to process the video. Processing occurs in a so-called asynchronous 
+background process. Basically, a process is sent off to a "worker node" running NodeOpenRiverCam, which is 
+continuously waiting for tasks. Once the worker node is free, it will process the task. This also means you can 
+start up many tasks at the same time, and you can also have multiple workers to process tasks for you. If no worker 
+is available, tasks will simply remain in the queue until a worker is free.
+
+To process you video, go back to the Videos menu. You will see that the RUN/STATUS now shows a Play ▶️ button
+with "Click to queue". Click on it and the work will commence. On a normal PC it should take only a minute or a few 
+minutes to complete. If you refresh the page (Ctrl+R), you will see the status changing from "Click to queue", to 
+"Processing", and once done to "Done".
+
+INSERT IMAGE
+
+## Results
+
+Once done, click on the Thumbnail of the video to check out the results. You can here play the video itself, and see 
+a graphical interpretation of the results with the profile you have uploaded, and plots of the velocity field and 
+extracted velocities over the cross-section. The text will show the water level and the median discharge also.
+
+You can also now go to the time series menu and see the individual time series object. You will see that it also 
+contains information on the variance of the velocimetry results through 5 different quantiles (e.g. due to natural 
+variability but also instabilities in the frame rate of the camera). Furthermore the fraction of the discharge that 
+has been resolved optically is also shown. This is a good measure of uncertainty. OpenRiverCam uses infilling 
+techniques to fill in missing velocities in the cross-section. If the fraction velocimetry value is high (e.g. 85%) 
+it means that a lot of the discharge amount was actually observed optically and only a small portion (15%) comes 
+from interpolated surface velocities.
+
+Finally, if you go to the "Sites" menu and click on your only site so far, you will also see a time series view with 
+only one red dot (water level) and one cyan dot (discharge). If you start adding more videos at different moments in 
+time, this time series view will extend. If you click on a time series point, the associated video analysis will 
+open, so that you can easily navigate through the results.
+
+## What next
+
+Congratulations! You have now processed your first video in LiveOpenRiverCam. We hope that you have understood that 
+in LiveOpenRiverCam, you can entirely organize all your videos around sites, maintain camera configurations, change 
+these as you might change your setup in the field, check out time series and more. REmember that if you have many 
+videos on the same site, taken with the same camera at a fixed location and orientation, you only need to add a new 
+video, and a new water level, and reuse the camera configuration you've already made for your first video. 
+
+Of course, adding videos manually can be very useful for smaller sets, but it is also quite some work, and perhaps 
+not very efficient once you want to process a lot of them. Furthermore you may want to start setting up a field site, 
+that processes on-site ("edge processing") and sends over results to your LiveORC server entirely automatically. 
+LiveORC is meant to automate as much as possible so that operational use cases and services become feasible. This is 
+all possible thanks to the underlying REST API of LiveORC, and the possibility to install NodeORC on an edge device 
+that runs in the field. To understand how this works, please read on. 
+
 ## Set up a field camera
 
-To use the recipe in the field, you have to set up a camera device on your measurement location.
-The device should have a linux based operating system, have NodeOpenRiverCam (NodeORC) installed and regularly receive 
-videos in a predefined location, configured in NodeORC. For information on how to set up NodeORC, please visit
+Once you have established a camera configuration in LiveORC, you can deploy this configuration in the field, to 
+process videos in the field, and only send over results. This is called "edge processing". LiveORC and NodeORC in 
+combination can do this for you in a secure manner. First of all, you have to set up a camera device on your 
+measurement location. The device should have a linux based operating system, and have NodeOpenRiverCam (NodeORC) 
+installed. For information on how to set up NodeORC on your device, please visit
 the [NodeORC](https://github.com/localdevices/nodeorc) project page. During installation, you will be able to enter 
 a LiveORC server location and provide your username and password. If you do this, NodeORC can report results 
 directly to LiveORC. If you have exposed LiveORC on the internet, e.g. through use of the `--hostname` and `--ssl` 
-flags, you will get a connection, and the Device will appear under the `Devices` menu item.
+flags, you will get a connection, and the Device will appear under the `Devices` menu item in the LiveORC front end. 
+This only happens if the NodeORC instance uses the same username and password as your login username and password.
 
-Once the device has appeared, you can start sending camera configurations to that device. To send a task to a device 
-do the following:
+The second thing needed, is that you have a camera on that site, which is configured to regularly record videos and 
+store these in files that follow a template filename containing the date and time. THese files must be stored under 
+the "incoming" folder, configured during installation of NodeORC. This folder is continuously monitored by the 
+NodeORC instance.
+
+Once the device has appeared in LiveORC, you can start sending camera configurations to that device. To send a task 
+to a device do the following:
 - go to `Camera configs`
 - select your newly made camera configuration
 - scroll all the way to the bottom. There you will see an option to select a device, and callbacks for video and 
@@ -376,27 +505,33 @@ do the following:
 
 When you click on `SEND`, the configuration will be stored under `Task forms`. If you click on `Task forms` you will 
 see that the task is waiting to be picked up by the device. The device will check every 5 minutes, and before 
-treating a new video, if a new task is prepared, and will validate and replace it if a new one is found. 
+treating a new video, if a new task is prepared, and will validate and replace it if a new one is found. Once 
+validated it will notify LiveORC that the task form is accepted. As soon as a task form is present on the NodeORC 
+instance, it will start processing any video appearing in the "incoming" folder. You just have to make sure that 
+camera recordings appear in the right place, and processing will then occur automatically. 
 
-> [!NOTE]
+> [!IMPORTANT]
 > A camera configuration MUST have a profile and a recipe attached to it, before you can send it through.
-> We may expand tasks to optical water level measurements or other tasks at a later stage.
-
+> We may expand tasks to optical water level measurements or other tasks at a later stage so that water levels can 
+> be automatically estimated from a video as well.
 
 # REST API
 
 LiveORC has a full REST API behind the scenes. This is necessary to allow external devices and applications
-to report on LiveORC. NodeORC makes ample use of the REST API for callbacks of results of video analyses.
+to report on LiveORC. NodeORC makes ample use of the REST API for callbacks of results of video analyses, and to 
+report its own status back to LiveORC. 
 
 The REST API also allows you to develop your own applications on top of LiveORC. For instance, if you wish
 to build your own web interface around OpenRiverCam for a specific user or with a specific application in 
 mind this is in principle possible! The API documentation is also disclosed automatically when you start
 LiveORC. If you are on `localhost:8000`, you can find it by browsing to `http://localhost:8000/api/docs`. This gives 
-the documentation per API end point in . If you prefer a swagger layout, you can also browse to 
+the documentation per API end point in Redoc format. If you prefer a Swagger layout, you can also browse to 
 `http://localhost:8000/api/docs_swagger`. The api calls are available on `http://localhost:8000/api`. Replace your 
-hostname by the one you have configured if necessary.
+hostname by the one you have configured if necessary. We refer to this automated documentation for further reference.
 
 # Recipes
+
+This section describes some more information on recipes.
 
 Recipes describe from top to bottom how a video is treated. They describe in order:
 * the video - what frames to use, what the actual water level during the recording was and if frames must be stabilized
@@ -410,9 +545,11 @@ Recipes describe from top to bottom how a video is treated. They describe in ord
   estimates. A user can decide if the figure is presented as orthorectified or camera perspective.
 
 Resolution and (for LSPIV) window size are also essential parameters, but as these are typically more site specific
-these are defined in the camera configuration for a given site.
+these are defined in the camera configuration for a given site. Note that the camera configuration only stores 
+information that is very specific to a site, camera, the perspective that the camera sees and the coordinate system 
+used to understand the geolocation and vertical datum. 
 
-> [!NOTE]
+> [!TIP]
 > A full recipe is provided in this file. You can directly upload and use this.
 
 In most cases, you will not have to change a lot of things in the recipe. Below you can find a list of typical 
