@@ -7,6 +7,7 @@ from nodeorc import models
 from api.models import Video, CameraConfig
 from api import callback_utils
 
+
 OUTPUT_FILES_ALL = {
     "piv": {
         "remote_name": "piv.nc",
@@ -164,20 +165,6 @@ def get_task(
     )
     return task.to_json(serialize=serialize)
 
-
-def get_recipe(instance):
-    """
-    Serializes recipe to dict form, acceptable by nodeorc
-
-    Parameters
-    ----------
-    instance : recipe model instance
-
-    Returns
-    -------
-    nodeorc.models...
-
-    """
 
 def get_storage(instance):
     """
@@ -337,7 +324,6 @@ def get_subtask_all(
     return subtask
 
 
-
 def recipe_update_profile(recipe, profile):
     """
     Replaces any profile related information in the recipe with the provided profile instance.
@@ -400,30 +386,6 @@ def recipe_update_profile(recipe, profile):
     return recipe
 
 
-def get_callback_url(request):
-    """
-    Dynamically generates the main end point with token where any sub callback should go to
-
-    Returns
-    -------
-
-    """
-    # get the end point for retrieving refresh tokens once expired
-    token_refresh_end_point = reverse('api:token_refresh')
-    url = request.build_absolute_uri("/")
-    # collect refresh tokens for the requesting user
-    tokens = get_tokens_for_user(request.user)
-    if url[0:4] != "http":
-        # try to add http to the url to ensure pydantic validates it.
-        url = "http://" + url
-    # TODO replace once we make a real create_task call
-    callback_url = models.callback_url.CallbackUrl(
-        url=url,
-        token_refresh_end_point=token_refresh_end_point,
-        **tokens
-    )
-    return callback_url
-
 def get_callback_discharge_patch(instance):
     """
     Creates callback for patching the time_series instance attached to video with discharge values
@@ -465,6 +427,3 @@ def get_callback_video_patch(instance):
             ])
         )
     )
-
-
-

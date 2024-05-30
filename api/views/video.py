@@ -79,7 +79,6 @@ class VideoViewSet(BaseModelViewSet):
     def create_task(self, request, *args, **kwargs):
         instance = self.get_object()
         task = get_task(instance, request, *args, **kwargs)
-        # print(f"URL: {request.build_absolute_uri(reverse('video'))}")
         return redirect('api:video-list')
 
 

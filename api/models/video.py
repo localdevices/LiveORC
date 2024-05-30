@@ -5,13 +5,10 @@ import urllib
 
 import cv2
 from django.conf import settings
-from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.core.files.storage import storages
 from django.core.validators import FileExtensionValidator
 from django.db import models
-from django.http import HttpResponseRedirect
-from django.shortcuts import redirect, reverse
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import mark_safe
@@ -273,9 +270,9 @@ class Video(models.Model):
 
     @property
     def is_ready_for_task(self):
-        if not(self.time_series):
+        if not self.time_series:
             return False
-        return (self.status == VideoStatus.NEW or self.status == VideoStatus.ERROR) and self.time_series.q_50 is None and self.time_series.h is not None
+        return (self.status == VideoStatus.NEW or self.status == VideoStatus.ERROR) and self.time_series.h is not None
 
     @property
     def video_preview(self):
@@ -371,7 +368,3 @@ class Video(models.Model):
         # organize tables along the camera config id and then per time stamp
         indexes = [models.Index(fields=['camera_config', 'timestamp'])]
 
-
-    # TODO: Organize settings.py for choice local or S3.
-    # TODO: when timestamp not provided, assume it must be harvested from the file time stamp
-    # TODO: when task complete, status change to ERROR or FINISHED

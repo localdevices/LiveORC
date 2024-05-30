@@ -15,6 +15,8 @@ from pathlib import Path
 import sys
 import boto3
 
+# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # try to get BASE_DIR from env variable
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,10 +25,6 @@ DBASE_DIR = os.getenv("DJANGO_DBASE_DIR")
 
 if not DBASE_DIR:
     DBASE_DIR = os.path.join(BASE_DIR, 'data')
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "some-secret-key")
@@ -48,7 +46,6 @@ INSTALLED_APPS = [
     'users',
     "admin_interface",
     "colorfield",
-    # 'django.contrib.admin',
     'LiveORC.admin.CustomAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -136,13 +133,6 @@ WSGI_APPLICATION = 'LiveORC.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 if os.getenv("LORC_DB_HOST"):
     DATABASES = {
         'default': {
@@ -211,10 +201,11 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 AUTH_USER_MODEL = "users.User"
+
+# Storage locations
 
 storage_url = os.getenv("LORC_STORAGE_HOST")
 storage_port = os.getenv("LORC_STORAGE_PORT", 9000)
@@ -263,5 +254,6 @@ else:
     # use the same as default
     STORAGES["media"] = STORAGES["default"]
 
+# Windows-specific GDAL setting
 if "win" in sys.platform:
     GDAL_LIBRARY_PATH = "gdal"
