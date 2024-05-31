@@ -14,8 +14,14 @@ Web-based, professional and scalable velocimetry analysis for operational river 
   * [Your first institute](#your-first-institute)
   * [Make your first site](#make-your-first-site)
   * [Make a first recipe](#make-a-first-recipe)
+  * [Add a first profile](#add-a-first-profile)
   * [Make your first camera configuration](#make-your-first-camera-configuration)
-  * [Set up a field camera](#set-up-a-field-camera)
+  * [Upload a new video for processing](#upload-a-new-video-for-processing)
+  * [Adding a water level to the video](#adding-a-water-level-to-the-video)
+  * [Processing your video](#processing-your-video)
+  * [Results](#results)
+  * [What next](#what-next)
+* [Set up a field camera](#set-up-a-field-camera)
 * [REST API](#rest-api)
 * [Recipes](#recipes)
 
@@ -347,7 +353,7 @@ Once the institute is created, you must also make a new site, as any video, came
 must belong to a site eventually. 
 
 > [!NOTE]
-> Under the "Assets" menu section, clikc on the ➕ Add button of the "Sites" menu item. You can give a site a name, an 
+> Under the "Assets" menu section, click on the ➕ Add button of the "Sites" menu item. You can give a site a name, an 
 > approximate coordinate (by clicking on the interactive map), and you must associate the site with an institute 
 > that you own. Select the institute you just created.
 
@@ -361,12 +367,12 @@ LiveORC as callback. This requires a so-called "recipe", which you need to assem
 pyOpenRiverCam at this moment, as we do not yet have a web interface to construct them. For further guidance on 
 recipes and a full working example, we refer to the [recipe](#recipes) section.
 
-![add_recipe](https://github.com/localdevices/LiveORC/assets/7658673/4407a981-b4fd-4c22-b683-493bc92b31d9)
-
 > [!NOTE]
 > Under the "Assets" menu section, click on the ➕ Add button of the "Recipes" menu item. You can give a recipe a name,
 > associate it with an institute that you own and select the recipe file (.YAML formatted). Here, use the file 
 > `recipe.yml`, provided in the test dataset. 
+
+![add_recipe](https://github.com/localdevices/LiveORC/assets/7658673/4407a981-b4fd-4c22-b683-493bc92b31d9)
 
 ## Add a first profile
 
@@ -435,15 +441,18 @@ You are now ready to upload videos into LiveORC, which are aware of the site and
 > [!NOTE]
 > Under the "Assets" menu section, click on the ➕ Add button in the "Video" menu item. Now select the video file from 
 > the sample dataset `schedule_20220830_133706.mp4` and select you newly made camera configuration. You must also 
-> select a time. For this demonstration you can simply click on "Today" and "Now" to select the current time as the 
-> time associated with the video. Click on "SAVE" to store the video.
+> select a date and time. For this demonstration you can simply click on "Today" and "Now" to select the current time
+> as the time associated with the video. Click on "SAVE" to store the video.
 
-INSERT IMAGE
+![add_video](https://github.com/localdevices/LiveORC/assets/7658673/1b075f86-356a-45cf-8d74-dee91ae4d525)
 
 You will return to the main video view with all your videos. There is only one now, but once you have many for many 
 sites, you can use the filters on the right-hand side to only show videos of a specific site and a specific time 
 range. You will also see that there is no water level associated with the video yet. A water level is always needed 
-with a video before it can be processed. Click on your new video to inspect it in more detail.
+with a video before it can be processed. Click on your new video to inspect it in more detail. You can for instance
+play the video if you scroll a little bit down. 
+
+![change_video](https://github.com/localdevices/LiveORC/assets/7658673/febe7260-f8e3-43f0-ae1a-46136b29433c)
 
 ## Adding a water level to the video
 
@@ -460,7 +469,7 @@ to real-world coordinates during the video processing.
 > Peil" (N.A.P.) a.k.a. Amsterdam Ordnance Datum, as measured by our partner the Waterboard of Limburg. Click on 
 > "SAVE" to store the water level.
 
-INSERT IMAGE
+![add_time-series](https://github.com/localdevices/LiveORC/assets/7658673/5c4eda98-4063-40e4-9a0b-3979303072c2)
 
 Because you have selected "Today" and "Now" and you have selected the same site as the one you uploaded the video 
 for, the water level will be automatically coupled to the video, as long as they are not too far apart. Remember 
@@ -480,7 +489,7 @@ with "Click to queue". Click on it and the work will commence. On a normal PC it
 minutes to complete. If you refresh the page (Ctrl+R), you will see the status changing from "Click to queue", to 
 "Processing", and once done to "Done".
 
-INSERT IMAGE
+![list_video](https://github.com/localdevices/LiveORC/assets/7658673/2d69439c-3a26-4a2f-9354-6581ad373c94)
 
 ## Results
 
@@ -488,7 +497,9 @@ Once done, click on the Thumbnail of the video to check out the results. You can
 a graphical interpretation of the results with the profile you have uploaded, and plots of the velocity field and 
 extracted velocities over the cross-section. The text will show the water level and the median discharge also.
 
-You can also now go to the time series menu and see the individual time series object. You will see that it also 
+![change_video2](https://github.com/localdevices/LiveORC/assets/7658673/21ee03c3-f95a-4699-87d5-b0639b40c279)
+
+You can now also go to the time series menu and see the individual time series object. You will see that it also 
 contains information on the variance of the velocimetry results through 5 different quantiles (e.g. due to natural 
 variability but also instabilities in the frame rate of the camera). Furthermore the fraction of the discharge that 
 has been resolved optically is also shown. This is a good measure of uncertainty. OpenRiverCam uses infilling 
@@ -501,11 +512,13 @@ only one red dot (water level) and one cyan dot (discharge). If you start adding
 time, this time series view will extend. If you click on a time series point, the associated video analysis will 
 open, so that you can easily navigate through the results.
 
+![change_site](https://github.com/localdevices/LiveORC/assets/7658673/aadc9718-fe88-4291-be77-937708038ac1)
+
 ## What next
 
 Congratulations! You have now processed your first video in LiveOpenRiverCam. We hope that you have understood that 
 in LiveOpenRiverCam, you can entirely organize all your videos around sites, maintain camera configurations, change 
-these as you might change your setup in the field, check out time series and more. REmember that if you have many 
+these as you might change your setup in the field, check out time series and more. Remember that if you have many 
 videos on the same site, taken with the same camera at a fixed location and orientation, you only need to add a new 
 video, and a new water level, and reuse the camera configuration you've already made for your first video. 
 
@@ -516,7 +529,7 @@ LiveORC is meant to automate as much as possible so that operational use cases a
 all possible thanks to the underlying REST API of LiveORC, and the possibility to install NodeORC on an edge device 
 that runs in the field. To understand how this works, please read on. 
 
-## Set up a field camera
+# Set up a field camera
 
 Once you have established a camera configuration in LiveORC, you can deploy this configuration in the field, to 
 process videos in the field, and only send over results. This is called "edge processing". LiveORC and NodeORC in 
