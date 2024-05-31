@@ -246,6 +246,37 @@ the persistent volumes.
 
 # Getting started
 
+Let's get started! You want to get a feel of what LiveORC can do for you. We are going through a top-to-bottom 
+process of making your first user, site, camera configuration and a first processed video. It is important to 
+understand that the intention of LiveORC is to do end-to-end processing, but also to allow processing of many videos 
+on the same site, taken with the same camera with the same perspective. Therefore, the steps of creating a user, an 
+institute, a site, a profile (for measuring cross-section discharge), a recipe and a camera configuration, only need 
+to be done once for a single site with a fixed camera. After that you can simply feed videos manually or through the 
+API or (with a device in the field, more about that later) from NodeOpenRiverCam.
+
+Please download the test dataset by clicking HERE!
+
+From here onwards, we assume that you have started the entire stack locally with the following command.
+
+```shell
+./liveorc.sh start --detached
+```
+With this, your server components all start in the background. Remember that the services will keep on running, even 
+if you reboot your machine!! If you want to stop the services until the next reboot, please issue:
+```shell
+./liveorc.sh stop
+```
+
+When you want to permanently shut down the services until you actively start them again issue:
+```shell
+./liveorc.sh down
+```
+
+> [!NOTE]
+> From here onwards, if you want to really quickly get an impression without being bothered by explanations, please 
+> only look at the blocks of text, that are highlighted with a NOTE indicator, such as this text. If you want to 
+> properly understand what's going, then please also read all intermediate texts.
+
 ## Your first user
 Once you have set up LiveOpenRiverCam, you should see a message as provided below.
 
@@ -273,10 +304,15 @@ You will only see this page the very first time. It is meant to make an initial 
 you create here have all possibilities. Only superusers can create new users and new institutes. Superusers can also
 create new superusers. Superusers can see, change or delete datasets created by any user, also users that do not 
 belong to the institute of that superuser. Therefore, be careful with the creation of too many superusers.
-Superuser accounts are typically needed for administrators only.
+Superuser accounts are typically needed for administrators only, and can be the cause of vulnerabilities of your 
+infrastructure.
+
+> [!NOTE]
+> Create your first super user by filling in the details in the very first start screen. You will not see this 
+> screen again (unless you entirely delete your database 😉). Your email address will be your username. 
 
 Once you have created one superuser, you will go to the main page. When you log off (see top right) you will go to a
-login screen, where you can log in again with your earlier made username and password.
+login screen, where you can log in again with your earlier made username (email) and password.
 
 ## Your first institute
 As a user, you can:
@@ -360,8 +396,9 @@ to use the command-line interface of pyOpenRiverCam to do this. We refer to the
 [camera configuration user guide](https://localdevices.github.io/pyorc/user-guide/camera_config/index.html) for 
 further information.
 
-Once a camera configuration is prepared, it is stored in a `.json` file. You can then upload this into a
-new camera configuration in LiveOpenRiverCam. 
+Once a camera configuration is prepared within pyOpenRiverCam, it is stored in a `.json` file. You can then upload this 
+into a new camera configuration in LiveOpenRiverCam. The test dataset contains a camera config .json file that was 
+made for the camera view of the video of the test dataset. 
 
 > [!NOTE]
 > Under the "Assets" menu section, click on the ➕ Add button of the "Camera configs" menu item. You can give a 
@@ -417,9 +454,11 @@ control points (GCP) is already set, by defining the water level during the surv
 GCP datum. This is essential to do correctly in order to ensure LiveORC understands how to map camera coordinates 
 to real-world coordinates during the video processing.
 
-To provide a water level, click on the ➕ Add button in the Time series menu item. Select your newly made site and 
-"Today" and "Now". Then supply the water level as 92.36. This is the water level in "Normaal Amsterdams Peil" (N.A.P.
-) a.k.a. Amsterdam Ordnance Datum, as measured by our partner the Waterboard of Limburg.
+> [!NOTE]
+> Under the "Assets" menu section, click on the ➕ Add button in the "Time series" menu item. Select your newly made  
+> site and "Today" and "Now". Then supply the water level as 92.36. This is the water level in "Normaal Amsterdams  
+> Peil" (N.A.P.) a.k.a. Amsterdam Ordnance Datum, as measured by our partner the Waterboard of Limburg. Click on 
+> "SAVE" to store the water level.
 
 INSERT IMAGE
 
@@ -435,7 +474,8 @@ continuously waiting for tasks. Once the worker node is free, it will process th
 start up many tasks at the same time, and you can also have multiple workers to process tasks for you. If no worker 
 is available, tasks will simply remain in the queue until a worker is free.
 
-To process you video, go back to the Videos menu. You will see that the RUN/STATUS now shows a Play ▶️ button
+> [!NOTE]
+> To process your video, go to the Videos menu. You will see that the RUN/STATUS now shows a Play ▶️ button
 with "Click to queue". Click on it and the work will commence. On a normal PC it should take only a minute or a few 
 minutes to complete. If you refresh the page (Ctrl+R), you will see the status changing from "Click to queue", to 
 "Processing", and once done to "Done".
