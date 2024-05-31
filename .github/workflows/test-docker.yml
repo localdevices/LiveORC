@@ -14,6 +14,5 @@ jobs:
         docker compose -f docker-compose.yml build
         docker compose -f docker-compose.yml up -d
         sleep 20  # wait until compose is up
-        # switch off remote 
         docker compose exec -T webapp /bin/bash -c "python manage.py test"
       
