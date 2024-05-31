@@ -4,15 +4,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: liveopenrivercam
+    image: liveopenrivercam
+    container_name: liveorc_webapp
     entrypoint: /bin/bash -c "/liveorc/start.sh"
     restart: unless-stopped
     volumes:
       - .:/liveorc:z
       - ${LORC_STORAGE_DIR}:/liveorc/data/media:z
-      - lorc_static:/liveorc/static
-      - lorc_migration_users:/liveorc/users/migrations:z
-      - lorc_migration_api:/liveorc/api/migrations:z
     environment:
       - DJANGO_DBASE_DIR=/liveorc/data
       - "${LORC_STORAGE_ACCESS}:MINIO_ROOT_USER"
@@ -35,6 +33,3 @@ services:
 volumes:
   lorc_data:
   lorc_media:
-  lorc_static:
-  lorc_migration_users:
-  lorc_migration_api:
