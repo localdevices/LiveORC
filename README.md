@@ -237,7 +237,12 @@ Once the services have started in detached mode, you can stop the service entire
 ./liveorc.sh stop
 ```
 
-This stops all services including the file server and database server, if these were enabled.
+This stops all services including the file server and database server, if these were enabled. If you restart your
+computer, the services will start again, if you have started them in detached mode. You can also entirely disable 
+the services again by issuing:
+```shell
+./liveorc.sh down
+```
 
 ### Rebuilding
 
@@ -260,7 +265,9 @@ institute, a site, a profile (for measuring cross-section discharge), a recipe a
 to be done once for a single site with a fixed camera. After that you can simply feed videos manually or through the 
 API or (with a device in the field, more about that later) from NodeOpenRiverCam.
 
-Please download the test dataset by clicking HERE!
+Please download the test dataset by downloading this dataset:
+
+[liveorc_sample_data.zip](https://github.com/user-attachments/files/15514803/liveorc_sample_data.zip)
 
 From here onwards, we assume that you have started the entire stack locally with the following command.
 
@@ -269,11 +276,13 @@ From here onwards, we assume that you have started the entire stack locally with
 ```
 With this, your server components all start in the background. Remember that the services will keep on running, even 
 if you reboot your machine!! If you want to stop the services until the next reboot, please issue:
+
 ```shell
 ./liveorc.sh stop
 ```
 
 When you want to permanently shut down the services until you actively start them again issue:
+
 ```shell
 ./liveorc.sh down
 ```
@@ -464,8 +473,8 @@ GCP datum. This is essential to do correctly in order to ensure LiveORC understa
 to real-world coordinates during the video processing.
 
 > [!NOTE]
-> Under the "Assets" menu section, click on the ➕ Add button in the "Time series" menu item. Select your newly made  
-> site and "Today" and "Now". Then supply the water level as 92.36. This is the water level in "Normaal Amsterdams  
+> Under the "Assets" menu section, click on the ➕ Add button in the "Time series" menu item. Select your newly made 
+> site and "Today" and "Now". Then supply the water level as 92.36. This is the water level in "Normaal Amsterdams 
 > Peil" (N.A.P.) a.k.a. Amsterdam Ordnance Datum, as measured by our partner the Waterboard of Limburg. Click on 
 > "SAVE" to store the water level.
 
