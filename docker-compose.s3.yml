@@ -1,5 +1,11 @@
 #version: '3'
 services:
+  webapp:
+    environment:
+      - LORC_STORAGE_HOST
+      - LORC_STORAGE_PORT
+      - LORC_STORAGE_ACCESS
+      - LORC_STORAGE_SECRET
   storage:
     image: minio/minio
     ports:
