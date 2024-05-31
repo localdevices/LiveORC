@@ -13,6 +13,6 @@ jobs:
       run: |
         docker compose -f docker-compose.yml build
         docker compose -f docker-compose.yml up -d
-        sleep 30  # wait until compose is up
-        docker compose exec webapp /bin/bash -c "export LORC_DB_HOST= && python manage.py test"
+        sleep 20  # wait until compose is up
+        docker compose exec -T webapp /bin/bash -c "python manage.py test"
       

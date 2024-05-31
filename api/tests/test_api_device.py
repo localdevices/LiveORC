@@ -19,7 +19,7 @@ def get_device_data():
         "id": str(uuid.uuid4()),
         "name": "TEST_DEVICE",
         "operating_system": platform.platform(),
-        "processor": platform.processor(),
+        "processor": platform.processor() if platform.processor() else "virtual cpu",
         "memory": psutil.virtual_memory().total / (1024**3),
         "ip_address": get_ip(),
         "status": 0,

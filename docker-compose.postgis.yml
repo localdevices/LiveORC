@@ -4,6 +4,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    environment:
+      - LORC_DB_HOST
+      - LORC_DB_PORT
+      - LORC_DB_USER
+      - LORC_DB_PASS
+
   db:
     image: postgis/postgis
     container_name: db

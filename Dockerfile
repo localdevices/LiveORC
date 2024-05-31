@@ -35,7 +35,4 @@ RUN apt update && apt install ffmpeg libsm6 libxext6 libgl1 python3-venv libgdal
 
 
 VOLUME /liveorc/data
-VOLUME /liveorc/static
-VOLUME /liveorc/api/migrations
-VOLUME /liveorc/users/migrations
 

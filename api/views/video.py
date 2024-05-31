@@ -45,14 +45,16 @@ class VideoViewSet(BaseModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """
-        Override create to make sure that if a tiume series with a water level is found, a new task is launched to
-        process the video
+        Override create to make sure that if a time series with a water level is found, a new task is launched to
+        process the video.
 
         Parameters
         ----------
-        request
-        args
-        kwargs
+        request : request
+        args : list
+            pass to get_task
+        kwargs : dict
+            pass to get_task
 
         Returns
         -------
@@ -64,27 +66,19 @@ class VideoViewSet(BaseModelViewSet):
         # self.get_object does not work because a new video is posted on a open end point, without association to a site
         instance = Video.objects.get(id=serializer.data["id"])
         # check if a time series instance was found during creation
+
         if instance.is_ready_for_task:
             # launch creation of a new task
-            task_body = get_task(instance, request, serialize=False,*args, **kwargs)
-            task = {
-                "id": task_body["id"],
-                "task_body": task_body,
-                "video": instance
-            }
-            Task.objects.create(**task)
-            # update the Video instance
-            instance.status = VideoStatus.QUEUE
-            instance.save()
+            instance.create_task(request=request)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 
     @action(detail=True, methods=['post'], renderer_classes=[renderers.StaticHTMLRenderer])
     def create_task(self, request, *args, **kwargs):
         instance = self.get_object()
         task = get_task(instance, request, *args, **kwargs)
-        # print(f"URL: {request.build_absolute_uri(reverse('video'))}")
         return redirect('api:video-list')
 
 

@@ -1,13 +1,15 @@
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.http import HttpResponseRedirect
+
 from django_object_actions import DjangoObjectActions, action
-from django.shortcuts import redirect
+from django.shortcuts import redirect, reverse
 
 from api.models import Video, VideoStatus, Task
 from api.task_utils import get_task
 from api.admin import BaseAdmin, BaseForm
 from api.admin import VideoSiteUserFilter, datetimefilter
-
+from api.tasks import run_nodeorc
 
 class VideoForm(BaseForm):
     class Meta:
@@ -34,25 +36,20 @@ class VideoInline(admin.TabularInline):
 class VideoAdmin(DjangoObjectActions, BaseAdmin):
     @action(
         label="Queue task",  # optional
-        description="Click to queue a task" # optional
+        description="Click to queue a task"  # optional
     )
     def toolfunc(self, request, obj):
         # create a new task for this video
         if obj.is_ready_for_task:
             # launch creation of a new task
-            task_body = get_task(obj, request, serialize=False)
-            task = {
-                "id": task_body["id"],
-                "task_body": task_body,
-                "video": obj,
-                "creator": request.user
-            }
-            Task.objects.create(**task)
-        # once the task is set, change the status of the video
-        obj.status = VideoStatus.QUEUE
-        obj.save()
-        # TODO: ensure that task and video statusses are updated using AMQP status
-        return redirect('/admin/api/video')
+            obj.create_task(request)
+            return redirect('/admin/api/video')
+        elif not obj.time_series:
+            messages.error(request, f"Video {obj.id} does not yet have a water level at associated time stamp. ")
+        elif obj.status == VideoStatus.QUEUE or obj.status == VideoStatus.TASK:
+            messages.error(request, f"Video {obj.id} is already queued or being processed. ")
+        return HttpResponseRedirect(reverse("admin:api_video_change", args=(obj.pk,)))
+
 
     change_actions = ('toolfunc', )
 
@@ -96,6 +93,7 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
             "fields": [
                 "get_site_name",
                 "file",
+                "status",
                 "camera_config",
                 "timestamp",
                 "image_preview",

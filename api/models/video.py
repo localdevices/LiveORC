@@ -1,3 +1,10 @@
+import io
+import mimetypes
+import os
+import urllib
+
+import cv2
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.storage import storages
 from django.core.validators import FileExtensionValidator
@@ -6,15 +13,11 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import mark_safe
 from django.core.files.base import ContentFile
-from PIL import Image
-import io
-import mimetypes
-import os
-import cv2
 import numpy as np
-from django.conf import settings
+from PIL import Image
 
-from api.models import BaseModel, CameraConfig, Project, TimeSeries
+from api.models import CameraConfig, Project, TimeSeries
+
 
 VIDEO_EXTENSIONS = ["MOV", "MKV", "MP4", "AVI", "M4V"]
 
@@ -51,23 +54,31 @@ def add_frame_to_model(video_field, img_field, frame_nr=0, suffix="", thumb=Fals
         Set to True to resize the image, settings.THUMBSIZE is used for the size settings
     """
     if "ImageFieldFile" in repr(video_field):
-        image = cv2.imread(storage_path(video_field))
+        if "://" in storage_path(video_field):
+            # url requires an explicit opening of the url
+            img = Image.open(
+                urllib.request.urlopen(
+                    storage_path(video_field)
+                )
+            )
+        else:
+            img = Image.open(storage_path(video_field))
     elif "FieldFile" in repr(video_field):
         # a video is passed, so use opencv to get the key frame
         cap = cv2.VideoCapture(storage_path(video_field))
         if frame_nr != 0:
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame_nr)
         res, image = cap.read()
-    # turn into RGB
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # turn into RGB
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # turn into PIL object
+        img = Image.fromarray(image, "RGB")
     img_name, video_extension = os.path.splitext(os.path.basename(video_field.name))
     img_extension = ".jpg"
     FTYPE = 'JPEG'
     img_filename = img_name + suffix + img_extension
     # Save thumbnail to in-memory file as StringIO
-    img = Image.fromarray(image, "RGB")
     if thumb:
-    # thumb = Image.fromarray(image, "RGB")
         img.thumbnail((settings.THUMBSIZE, settings.THUMBSIZE), Image.LANCZOS)
     temp_img = io.BytesIO()
     img.save(temp_img, FTYPE)
@@ -259,9 +270,9 @@ class Video(models.Model):
 
     @property
     def is_ready_for_task(self):
-        if not(self.time_series):
+        if not self.time_series:
             return False
-        return self.status == VideoStatus.NEW and self.time_series.q_50 is None and self.time_series.h is not None
+        return (self.status == VideoStatus.NEW or self.status == VideoStatus.ERROR) and self.time_series.h is not None
 
     @property
     def video_preview(self):
@@ -329,11 +340,31 @@ class Video(models.Model):
     def institute(self):
         return self.camera_config.institute
 
+    def create_task(self, request, *args, **kwargs):
+        from api.models import Task
+        from api.task_utils import get_task
+        from api.tasks import run_nodeorc
+
+        # launch creation of a new task
+        task_body = get_task(self, request, serialize=False, *args, **kwargs)
+        # send over validated task to worker
+        job = run_nodeorc.delay(self.pk, task_body)
+        task = {
+            "id": task_body["id"],
+            "broker_id": job.id,
+            "task_body": task_body,
+            "video": self,
+            "creator": request.user
+        }
+        # validation
+        Task.objects.create(**task)
+
+        # once the task is set, change the status of the video
+        self.status = VideoStatus.QUEUE
+        self.save()
+
+
     class Meta:
         # organize tables along the camera config id and then per time stamp
         indexes = [models.Index(fields=['camera_config', 'timestamp'])]
 
-
-    # TODO: Organize settings.py for choice local or S3.
-    # TODO: when timestamp not provided, assume it must be harvested from the file time stamp
-    # TODO: when task complete, status change to ERROR or FINISHED

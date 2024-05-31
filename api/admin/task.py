@@ -1,5 +1,12 @@
-from api.admin import BaseAdmin
+from api.admin import BaseAdmin,BaseForm
 from api.admin import TaskInstituteFilter
+from api.models import Task
+
+
+class TaskForm(BaseForm):
+    class Meta:
+        model = Task
+        fields = "__all__"
 
 
 class TaskAdmin(BaseAdmin):
@@ -12,15 +19,16 @@ class TaskAdmin(BaseAdmin):
     def has_view_permission(self, request, obj=None):
         if request.user.is_superuser:
             return True
-        if obj:
-            if obj.institute in request.user.get_membership_institutes():
-                return True
-        elif len(request.user.get_membership_institutes()) > 0:
-            return True
+        # if obj:
+        #     if obj.institute in request.user.get_membership_institutes():
+        #         return True
+        # elif len(request.user.get_membership_institutes()) > 0:
+        #     return True
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        return True
 
+    form = TaskForm
     ordering = ["-video__timestamp"]
     list_filter = [TaskInstituteFilter]
 
@@ -29,7 +37,8 @@ class TaskAdmin(BaseAdmin):
         "thumbnail_preview",
         "get_video_timestamp",
         "progress_bar",
-        "video_status"
+        "video_status",
+        "status_msg"
     ]
 
     def thumbnail_preview(self, obj):

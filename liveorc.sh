@@ -156,21 +156,21 @@ case $key in
     shift # past argument
     shift # past value
     ;;
-#    --rabbitmq-url)
-#    export $LORC_RABBITMQ_URL="$2"
-#    shift # past argument
-#    shift # past value
-#    ;;
-#  --rabbitmq-user)
-#    export LORC_RABBITMQ_USER="$2"
-#    shift # past argument
-#    shift # past value
-#    ;;
-#  --rabbitmq-pass)
-#    export LORC_RABBITMQ_PASS="$2"
-#    shift # past argument
-#    shift # past value
-#    ;;
+    --rabbitmq-url)
+    export $LORC_RABBITMQ_URL="$2"
+    shift # past argument
+    shift # past value
+    ;;
+  --rabbitmq-user)
+    export LORC_RABBITMQ_USER="$2"
+    shift # past argument
+    shift # past value
+    ;;
+  --rabbitmq-pass)
+    export LORC_RABBITMQ_PASS="$2"
+    shift # past argument
+    shift # past value
+    ;;
     --debug)
     export LORC_DEBUG=YES
     shift # past argument
@@ -243,9 +243,9 @@ usage(){
 #  echo "        --dev-watch-plugins     Automatically build plugins while in dev mode. (default: disabled)"
 #  echo "        --broker        Set the URL used to connect to the celery broker (default: $DEFAULT_BROKER)"
   echo "        --detached      Run LiveORC in detached mode. This means LiveORC will run in the background, without blocking the terminal (default: disabled)"
-#  echo "        --rabbitmq-url  <url>  Set the url for rabbitmq (default: $DEFAULT_RABBITMQ_URL)"
-#  echo "        --rabbitmq-user  <username>  Set the username for rabbitmq (default: $DEFAULT_RABBITMQ_USER)"
-#  echo "        --rabbitmq-pass  <password>  Set the password for rabbitmq (default: $DEFAULT_RABBITMQ_PASS)"
+  echo "        --rabbitmq-url  <url>  Set the url for rabbitmq (default: $DEFAULT_RABBITMQ_URL)"
+  echo "        --rabbitmq-user  <username>  Set the username for rabbitmq (default: $DEFAULT_RABBITMQ_USER)"
+  echo "        --rabbitmq-pass  <password>  Set the password for rabbitmq (default: $DEFAULT_RABBITMQ_PASS)"
 
   exit
 }
@@ -295,7 +295,8 @@ start(){
 	echo "SSL key: $LORC_SSL_KEY"
 	echo "SSL certificate: $LORC_SSL_CERT"
 	echo "SSL insecure port redirect: $LORC_SSL_INSECURE_PORT_REDIRECT"
-#	echo "RabbitMQ URL: $LORC_RABBITMQ_URL"
+	echo "RabbitMQ hostname: $LORC_RABBITMQ_HOST"
+	echo "Debug mode: $LORC_DEBUG"
 	echo "================================"
 	echo "Make sure to issue a $0 down if you decide to change the environment."
 	echo ""
@@ -311,7 +312,7 @@ start(){
 	  enable_spatialite
 	fi
 
-	if [ "$LORC_RABBITMQ_URL" = "YES" ]; then
+	if [ -n "$LORC_RABBITMQ_HOST" ]; then
 	  command+=" -f docker-compose.rabbitmq.yml"
 	fi
 

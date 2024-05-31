@@ -13,6 +13,9 @@ import os
 import datetime
 from pathlib import Path
 import sys
+import boto3
+
+# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # try to get BASE_DIR from env variable
@@ -22,10 +25,6 @@ DBASE_DIR = os.getenv("DJANGO_DBASE_DIR")
 
 if not DBASE_DIR:
     DBASE_DIR = os.path.join(BASE_DIR, 'data')
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "some-secret-key")
@@ -47,7 +46,6 @@ INSTALLED_APPS = [
     'users',
     "admin_interface",
     "colorfield",
-    # 'django.contrib.admin',
     'LiveORC.admin.CustomAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -93,9 +91,18 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
 }
 
+# Celery Configuration Options
+CELERY_BROKER_URL = f'amqp://{os.getenv("LORC_RABBITMQ_USER")}:{os.getenv("LORC_RABBITMQ_PASS")}@{os.getenv("LORC_RABBITMQ_HOST")}:5672/'
+CELERY_RESULT_BACKEND = f'rpc://{os.getenv("LORC_RABBITMQ_USER")}:{os.getenv("LORC_RABBITMQ_PASS")}@{os.getenv("LORC_RABBITMQ_HOST")}:5672/'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+TEMP_FOLDER = "/tmp/nodeorc"
+
 # use modals instead of popups for django-admin-interface
 X_FRAME_OPTIONS = "SAMEORIGIN"
-
 
 ROOT_URLCONF = 'LiveORC.urls'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -126,13 +133,6 @@ WSGI_APPLICATION = 'LiveORC.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 if os.getenv("LORC_DB_HOST"):
     DATABASES = {
         'default': {
@@ -201,10 +201,11 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 AUTH_USER_MODEL = "users.User"
+
+# Storage locations
 
 storage_url = os.getenv("LORC_STORAGE_HOST")
 storage_port = os.getenv("LORC_STORAGE_PORT", 9000)
@@ -234,9 +235,25 @@ if storage_url:
             "bucket_name": "media"
         },
     }
+    # create media bucket if it does not yet exist
+    s3 = boto3.resource(
+        "s3",
+        endpoint_url=f"{storage_url}:{storage_port}",
+        aws_access_key_id=os.getenv("LORC_STORAGE_ACCESS"),
+        aws_secret_access_key=os.getenv("LORC_STORAGE_SECRET")
+    )
+    # list the available bucket names
+    r = s3.meta.client.list_buckets()
+    bucket_names = [bucket["Name"] for bucket in r["Buckets"]]
+    if not "media" in bucket_names:
+        # bucket does not exist, create!
+        s3.create_bucket(Bucket="media")
+
+    #
 else:
     # use the same as default
     STORAGES["media"] = STORAGES["default"]
 
+# Windows-specific GDAL setting
 if "win" in sys.platform:
     GDAL_LIBRARY_PATH = "gdal"

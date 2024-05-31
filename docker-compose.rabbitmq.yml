@@ -1,4 +1,11 @@
 services:
+  webapp:
+    depends_on:
+      - rabbitmq
+    environment:
+      - LORC_RABBITMQ_HOST
+      - LORC_RABBITMQ_PASS
+      - LORC_RABBITMQ_USER
   rabbitmq:
     image: rabbitmq:management
     container_name: rabbitmq
@@ -9,3 +16,24 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+  worker:
+    image: liveopenrivercam
+    depends_on:
+      - webapp
+    container_name: liveorc_worker
+    restart: unless-stopped
+    environment:
+      - LORC_SECRET_KEY
+      - LORC_STORAGE_HOST
+      - LORC_STORAGE_PORT
+      - LORC_STORAGE_ACCESS
+      - LORC_STORAGE_SECRET
+      - LORC_DB_HOST
+      - LORC_DB_PORT
+      - LORC_DB_USER
+      - LORC_DB_PASS
+      - LORC_RABBITMQ_HOST
+      - LORC_RABBITMQ_PASS
+      - LORC_RABBITMQ_USER
+    entrypoint: /bin/bash -c "echo Running LiveORC worker using broker at $LORC_RABBITMQ_HOST && cd /liveorc && celery -A LiveORC worker --loglevel=warning > /dev/null"
+

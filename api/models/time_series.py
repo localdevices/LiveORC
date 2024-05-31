@@ -1,9 +1,10 @@
-from django.contrib.auth import get_user_model
-import numpy as np
 
 from django.db import models
 from django.apps import apps
+import numpy as np
+
 from api.models import BaseModel, Site
+
 
 def get_closest_to_dt(queryset, timestamp):
     greater = queryset.filter(timestamp__gte=timestamp).order_by("timestamp").first()
@@ -39,7 +40,6 @@ class TimeSeries(BaseModel):
     wetted_surface = models.FloatField(help_text="Wetted surface area with given water level [m2]", null=True, blank=True)
     wetted_perimeter = models.FloatField(help_text="Wetted perimeter with given water level [m]", null=True, blank=True)
     fraction_velocimetry = models.FloatField(help_text="Fraction of discharge resolved using velocimetry [-]", null=True, blank=True)
-    # user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
 
     # TODO: create link with videos, filtered on site, to add water level to those videos.
     def save(self, *args, **kwargs):
@@ -65,4 +65,9 @@ class TimeSeries(BaseModel):
         verbose_name_plural = "time series"
 
     def __str__(self):
-        return "{:s} h [m]: {:s}, Q [m3/s]: {:s}, f [-]: {:s}".format(self.timestamp.strftime("%Y-%m-%dT%H:%M:%S"), get_str(self.h, 3), get_str(self.q_50, 2), get_str(self.fraction_velocimetry, 1))
+        return "{:s} h [m]: {:s}, Q [m3/s]: {:s}, f [-]: {:s}".format(
+            self.timestamp.strftime("%Y-%m-%dT%H:%M:%S"),
+            get_str(self.h, 3),
+            get_str(self.q_50, 2),
+            get_str(self.fraction_velocimetry, 1)
+        )

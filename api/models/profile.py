@@ -86,5 +86,9 @@ class Profile(BaseModel):
     @property
     def profile_view(self):
         return mark_safe(
-            map_template.format(self.multipoint.wkt, self.site.geom.x, self.site.geom.y)
+            map_template.format(
+                self.multipoint.wkt,
+                self.multipoint.centroid.x,
+                self.multipoint.centroid.y
+            )
         )
