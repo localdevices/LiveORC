@@ -11,7 +11,7 @@ jobs:
     - uses: actions/checkout@v4
     - name: Build the Docker image
       run: |
-        docker compose -f docker-compose.yml build
+        docker compose -f docker-compose.yml -f docker-compose.build.yml build
         docker compose -f docker-compose.yml up -d
         sleep 20  # wait until compose is up
         docker compose exec -T webapp /bin/bash -c "python manage.py test"

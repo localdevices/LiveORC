@@ -47,6 +47,8 @@ DEFAULT_SSL_INSECURE_PORT_REDIRECT="$LORC_SSL_INSECURE_PORT_REDIRECT"
 DEFAULT_RABBITMQ_USER="$LORC_RABBITMQ_USER"
 DEFAULT_RABBITMQ_PASS="$LORC_RABBITMQ_PASS"
 DEFAULT_RABBITMQ_URL="$LORC_RABBITMQ_URL"
+DEFAULT_NODES="$LORC_DEFAULT_NODES"
+
 
 # Parse args for overrides
 POSITIONAL=()
@@ -171,6 +173,11 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+  --nodes)
+    export LORC_DEFAULT_NODES="$2"
+    shift # past argument
+    shift # past value
+    ;;
     --debug)
     export LORC_DEBUG=YES
     shift # past argument
@@ -219,33 +226,33 @@ usage(){
   echo ""
   echo "Options:"
   echo "        --hostname      <hostname>      Set the hostname that LiveORC will be accessible from (default: $DEFAULT_HOST)"
-  echo "        --port  <port>  Set the port that LiveORC should bind to (default: $DEFAULT_PORT)"
-  echo "        --db-local   	Use a local Spatialite database instead of a service-based PostGreSQL / PostGIS database"
-  echo "        --db-host 		<hostname>      Set the remote Postgis database host that LiveORC will be using (default: $DEFAULT_DB_HOST)"
-  echo "        --db-port 		<port>    	Set the remote Postgis database port number that LiveORC will be using (default: $DEFAULT_DB_PORT)"
-  echo "        --db-user 		<username>      Set the remote Postgis username that LiveORC will be using (default: $DEFAULT_DB_USER)"
-  echo "        --db-pass 		<password>    	Set the remote Postgis password host that LiveORC will be using (default: $DEFAULT_DB_PASS)"
+  echo "        --port          <port>          Set the port that LiveORC should bind to (default: $DEFAULT_PORT)"
+  echo "        --db-local          Use a local Spatialite database instead of a service-based PostGreSQL / PostGIS database"
+  echo "        --db-host 	    <hostname>      Set the remote Postgis database host that LiveORC will be using (default: $DEFAULT_DB_HOST)"
+  echo "        --db-port       <port>          Set the remote Postgis database port number that LiveORC will be using (default: $DEFAULT_DB_PORT)"
+  echo "        --db-user       <username>      Set the remote Postgis username that LiveORC will be using (default: $DEFAULT_DB_USER)"
+  echo "        --db-pass       <password>    	Set the remote Postgis password host that LiveORC will be using (default: $DEFAULT_DB_PASS)"
 #  echo "        --media-dir     <path>  Path where processing results will be stored to (default: $DEFAULT_MEDIA_DIR (docker named volume))"
-  echo "        --db-dir		<path>  	Path where the database files are stored. This path must be empty when defined for the first time. (default: $DEFAULT_DB_DIR docker volume)"
-  echo "        --storage-local	Set storage volume to a local storage instead of (default) a S3 bucket"
-  echo "        --storage-host  	<hostname>	Set the remote S3 storage host including protocol prefix such as s3:// or https:// (default: $DEFAULT_STORAGE_HOST)"
-  echo "        --storage-port  	<port>		Set the remote S3 storage port number (default: $DEFAULT_STORAGE_PORT)"
-  echo "        --storage-user 		<username>      Set the remote S3 username that LiveORC will be using (default: $DEFAULT_STORAGE_USER)."
-  echo "        --storage-pass 		<password>    	Set the remote Postgis password host that LiveORC will be using (default: $DEFAULT_STORAGE_PASS)"
-  echo "        --storage-dir		<path>		Path where storage volume is mounted (default: $DEFAULT_STORAGE_DIR docker volume) a S3 bucket"
-#  echo "        --default-nodes The amount of default NodeORC nodes attached to LiveORC on startup (default: $DEFAULT_NODES)"
-  echo "        --ssl   	Enable SSL and automatically request and install a certificate from letsencrypt.org. (default: $DEFAULT_SSL)"
-  echo "        --ssl-key       	<path>  Manually specify a path to the private key file (.pem) to use with nginx to enable SSL (default: None)"
-  echo "        --ssl-cert      	<path>  Manually specify a path to the certificate file (.pem) to use with nginx to enable SSL (default: None)"
+  echo "        --db-dir         <path>         Path where the database files are stored. This path must be empty when defined for the first time. (default: $DEFAULT_DB_DIR docker volume)"
+  echo "        --storage-local	     Set storage volume to a local storage instead of (default) a S3 bucket"
+  echo "        --storage-host  <hostname>      Set the remote S3 storage host including protocol prefix such as s3:// or https:// (default: $DEFAULT_STORAGE_HOST)"
+  echo "        --storage-port  <port>          Set the remote S3 storage port number (default: $DEFAULT_STORAGE_PORT)"
+  echo "        --storage-user  <username>      Set the remote S3 username that LiveORC will be using (default: $DEFAULT_STORAGE_USER)."
+  echo "        --storage-pass  <password>      Set the remote Postgis password host that LiveORC will be using (default: $DEFAULT_STORAGE_PASS)"
+  echo "        --storage-dir   <path>          Path where storage volume is mounted (default: $DEFAULT_STORAGE_DIR docker volume) a S3 bucket"
+  echo "        --nodes         <amount>        The amount of NodeORC nodes attached to LiveORC on startup (default: $DEFAULT_NODES)"
+  echo "        --ssl               Enable SSL and automatically request and install a certificate from letsencrypt.org. (default: $DEFAULT_SSL)"
+  echo "        --ssl-key       <path>          Manually specify a path to the private key file (.pem) to use with nginx to enable SSL (default: None)"
+  echo "        --ssl-cert      <path>          Manually specify a path to the certificate file (.pem) to use with nginx to enable SSL (default: None)"
   echo "        --ssl-insecure-port-redirect    <port>  Insecure port number to redirect from when SSL is enabled (default: $DEFAULT_SSL_INSECURE_PORT_REDIRECT)"
-  echo "        --debug 	Enable debug for development environments (default: disabled)"
+  echo "        --debug             Enable debug for development environments (default: disabled)"
 #  echo "        --dev   Enable development mode. In development mode you can make modifications to LiveORC source files and changes will be reflected live. (default: disabled)"
 #  echo "        --dev-watch-plugins     Automatically build plugins while in dev mode. (default: disabled)"
 #  echo "        --broker        Set the URL used to connect to the celery broker (default: $DEFAULT_BROKER)"
-  echo "        --detached      Run LiveORC in detached mode. This means LiveORC will run in the background, without blocking the terminal (default: disabled)"
-  echo "        --rabbitmq-url  <url>  Set the url for rabbitmq (default: $DEFAULT_RABBITMQ_URL)"
-  echo "        --rabbitmq-user  <username>  Set the username for rabbitmq (default: $DEFAULT_RABBITMQ_USER)"
-  echo "        --rabbitmq-pass  <password>  Set the password for rabbitmq (default: $DEFAULT_RABBITMQ_PASS)"
+  echo "        --detached          Run LiveORC in detached mode. This means LiveORC will run in the background, without blocking the terminal (default: disabled)"
+  echo "        --rabbitmq-url   <url>          Set the url for rabbitmq (default: $DEFAULT_RABBITMQ_URL)"
+  echo "        --rabbitmq-user  <username>     Set the username for rabbitmq (default: $DEFAULT_RABBITMQ_USER)"
+  echo "        --rabbitmq-pass  <password>     Set the password for rabbitmq (default: $DEFAULT_RABBITMQ_PASS)"
 
   exit
 }
@@ -296,6 +303,7 @@ start(){
 	echo "SSL certificate: $LORC_SSL_CERT"
 	echo "SSL insecure port redirect: $LORC_SSL_INSECURE_PORT_REDIRECT"
 	echo "RabbitMQ hostname: $LORC_RABBITMQ_HOST"
+	echo "Number of processing noded: $LORC_DEFAULT_NODES"
 	echo "Debug mode: $LORC_DEBUG"
 	echo "================================"
 	echo "Make sure to issue a $0 down if you decide to change the environment."
@@ -324,6 +332,10 @@ start(){
 	if [[ $detached = true ]]; then
 			command+=" -d"
 	fi
+	if [[ $LORC_DEFAULT_NODES -gt 0 ]]; then
+		command+=" --scale liveorc_worker=$LORC_DEFAULT_NODES"
+	fi
+
 	run "${command}"
 }
 down(){
@@ -342,7 +354,7 @@ stop(){
 rebuild(){
 	echo "Rebuilding LiveORC services, this may take a while ... 🧋 "
 	run "docker compose down --remove-orphans"
-	run "docker compose -f docker-compose.yml build --no-cache"
+	run "docker compose -f docker-compose.yml -f docker-compose.build.yml build --no-cache"
 	echo -e "\033[1mDone! ✅ \033[0m You can now start LiveORC by running $0 start"
 }
 

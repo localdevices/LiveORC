@@ -58,23 +58,25 @@ and discharge using state-of-the-art velocimetry methods.
 > LiveOpenRiverCam is being developed in the TEMBO Africa project. The TEMBO Africa project has received 
 > funding from the European Union's Horizon Europe research and innovation programme under grant agreement No.101086209.  
 > We have also received funding from the WMO HydroHub program. This funding was used to conceptualise and pilot 
-> OpenRiverCam. Finally, the test dataset was collected in close collaboration with the Waterboard Limburg. We 
-> greatly appreciate the continuing collaboration with the waterboard.
+> OpenRiverCam. The test dataset was collected in close collaboration with the Waterboard Limburg. We 
+> greatly appreciate the continuing collaboration with the waterboard. Finally, our deployment script is based to a 
+> large extent on the great work of the WebOpenDroneMap team. We also acknowledge their great work.
 
 # Installation
 By far the easiest way to start working with LiveORC is to use docker and the `liveorc.sh` bash script bundled with 
-the code. To use this script you will need a so-called bash environment. Under most linux environments and macOS this 
-is available as is in any terminal window you may open. Under windows, you can use the script e.g. under git bash or in 
-the Windows Subsystem for Linux environment (WSL).
+the code. The script is strongly based on the deployment script of 
+[WebOpenDroneMap](https://github.com/OpenDroneMap/WebODM/). To use this script you will need a so-called bash 
+environment. Under most linux environments and macOS this is available as is in any terminal window you may open. 
+Under windows, you can use the script e.g. under git bash or in the Windows Subsystem for Linux environment (WSL).
 
 The idea of this script is that as a user, you do not need to know all the details about the services that are 
 required to set up the LiveORC. These services include:
-- the web dashboard
-- the database (storing sites, time series, video metadata, but also users, institutes and their accessibility to 
-  videos, time series and any other assets.)
+- the web dashboard,
+- the database, storing sites, time series, video metadata, but also users, institutes and their accessibility to 
+  videos, time series and any other assets,
 - compute nodes, equipped with [NodeOpenRiverCam](https://github.com/localdevices/nodeorc). The more you have the 
-  more videos can be processed at the same time.
-- a cloud storage volume
+  more videos can be processed at the same time,
+- a cloud storage volume.
 
 Without any additional arguments, `liveorc.sh` automatically sets up all these services in a virtualized manner on your 
 machine using the `Docker` ecosystem. Once you are ready to scale your operations by hosting all services on 
@@ -206,6 +208,15 @@ This can be done in the same way as the storage settings, with similar arguments
 ```
 In case you want to open, change and review the database directly, e.g. with [pgAdmin](https://www.pgadmin.org/), 
 look for a database with the name `liveorc`.
+
+### More processing nodes
+
+By default, one processing node, equipped with NodeORC is installed on the same machine. You can extend this with the
+option `--nodes` followed by the number of nodes you wish to deploy. You can in principle also deploy nodes remotely 
+but currently we do not yet have a separate API for running these. This means that your entire LiveORC environment 
+details must be present on that remote node, including all passwords. This is potentially a security risk. We have 
+plans to write a separate API for NodeORC so that remote nodes do not need passwords, but can simply be monitored 
+through their own API.
 
 ### Debug mode
 
@@ -529,14 +540,16 @@ Congratulations! You have now processed your first video in LiveOpenRiverCam. We
 in LiveOpenRiverCam, you can entirely organize all your videos around sites, maintain camera configurations, change 
 these as you might change your setup in the field, check out time series and more. Remember that if you have many 
 videos on the same site, taken with the same camera at a fixed location and orientation, you only need to add a new 
-video, and a new water level, and reuse the camera configuration you've already made for your first video. 
+video, and a new water level, and reuse the camera configuration you've already made for your first video.
+
+If you expect to process many videos and want to scale up, remember to look into the ``
 
 Of course, adding videos manually can be very useful for smaller sets, but it is also quite some work, and perhaps 
-not very efficient once you want to process a lot of them. Furthermore you may want to start setting up a field site, 
+not very efficient once you want to process a lot of them. Furthermore, you may want to start setting up a field site, 
 that processes on-site ("edge processing") and sends over results to your LiveORC server entirely automatically. 
 LiveORC is meant to automate as much as possible so that operational use cases and services become feasible. This is 
 all possible thanks to the underlying REST API of LiveORC, and the possibility to install NodeORC on an edge device 
-that runs in the field. To understand how this works, please read on. 
+that runs in the field. To understand how this works, please read on.
 
 # Set up a field camera
 
