@@ -1,10 +1,6 @@
-#version: '3'
 services:
   webapp:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: liveopenrivercam
+    image: localdevices/liveorc
     container_name: liveorc_webapp
     entrypoint: /bin/bash -c "/liveorc/start.sh"
     restart: unless-stopped
