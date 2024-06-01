@@ -112,7 +112,7 @@ is our recommended use. Please take the following into account before starting L
   socket. To allow the non-root user to connect to the socket, run the following to allow access:
 
   ```shell
-  sudo chmod 666 /var/run/docker.sock
+  sudo chmod 660 /var/run/docker.sock
   ```
 
   This assumes the socket runs on `/var/run/docker.sock`. If the location is different, then alter the location.
@@ -132,7 +132,7 @@ a console (in windows, please use a Git Bash console, or a WSL console) download
 calling the orchestration script ``liveorc.sh``. This can be done as follows:
 
 ```shell
-git clone https://github.com/localdevices/LiveORC --config core.autocrlf=input --depth 1
+git clone git@github.com:localdevices/LiveORC.git --config core.autocrlf=input --depth 1
 cd LiveORC
 ./liveorc.sh start
 ```
