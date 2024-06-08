@@ -36,11 +36,16 @@ Web-based, professional and scalable velocimetry analysis for operational river 
 
 # What is LiveOpenRiverCam
 
-LiveOpenRiverCam allows you to run operational measurement stations that estimate river discharge from videos.
-It is meant for e.g. National HydroMeteorological Societies (NHMS), hydropower authorities, waterboards, or service 
-providers of such entities, who wish to establish their own services for such users. 
+LiveOpenRiverCam allows you to run operational measurement stations that estimate river surface velocity and discharge 
+from videos. It is meant for e.g. National HydroMeteorological Societies (NHMS), hydropower authorities, waterboards,
+or service providers of such entities, who wish to establish their own services for such users. It is for anyone who 
+wishes to operationalize image-based river surface velocity and discharge measurements using an entirely
+open source, open scientific transparent approach. You can start working with LiveORC with an internet connection,
+a desktop or laptop computer and one hour of time! You can scale the work to many server instances once being 
+familiarized with the components and methods.
+
 LiveORC will provide you with the following functionalities:
-* A administration-style front end for managing sites, configuration, videos and time series.
+* An administration-style front end for managing sites, configuration, videos and time series.
 * Visualization of time series and video analyses.
 * Fully automated data streaming from operational camera/water level feeds in the field with "edge processing".
 * Per-video processing through "cloud processing". 
@@ -50,7 +55,8 @@ LiveORC will provide you with the following functionalities:
 Processing on sites ("edge processing") or on cloud nodes ("cloud processing") is performed by
 [NodeOpenRiverCam](https://github.com/localdevice/nodeorc), the node processing tool around OpenRiverCam. The 
 processing methods read videos, select frames, enhance features, orthorectify and estimates surface velocity 
-and discharge using state-of-the-art velocimetry methods.
+and discharge using state-of-the-art velocimetry methods. NodeOpenRiverCam is included in LiveORC, so deployment is 
+very easy and automated.
 
 # Acknowledgements
 
