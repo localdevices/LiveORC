@@ -1,9 +1,42 @@
-from django import forms
 from django.contrib import admin
+from django import forms
+from import_export.admin import ExportActionModelAdmin
+from import_export.forms import ExportForm
 
-from api.models import TimeSeries
+from api.models import TimeSeries, Site
 from api.admin import BaseAdmin, BaseForm
 from api.admin import SiteUserFilter
+from api.resources import TimeSeriesResource
+
+
+class CustomExportForm(ExportForm):
+    site = forms.ModelChoiceField(
+        queryset=Site.objects.all(),
+        required=True
+    )
+    start_date = forms.DateTimeField(
+        required=False,
+        widget=forms.DateTimeInput(
+            attrs={'type': 'datetime-local'},
+            required=False,
+            help_text="Start date and time in local timezone"
+        )
+    )
+    end_date = forms.DateTimeField(
+        required=False,
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        help_text="End date and time in local timezone",
+    )
+
+    def clean(self):
+        # check start and end dates on form
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get("start_date")
+        end_date = cleaned_data.get("end_date")
+        if start_date and end_date:
+            if end_date < start_date:
+                raise forms.ValidationError("End date and time cannot be earlier than start date and time.")
+        return cleaned_data
 
 
 class TimeSeriesForm(BaseForm):
@@ -21,8 +54,9 @@ class TimeSeriesInline(admin.TabularInline):
     extra = 5
 
 
-class TimeSeriesAdmin(BaseAdmin):
-
+class TimeSeriesAdmin(ExportActionModelAdmin, BaseAdmin):
+    resource_classes = [TimeSeriesResource]
+    export_form_class = CustomExportForm
     list_display = ["get_site_name", "timestamp", "str_h", "str_fraction_velocimetry", "str_q_50", 'thumbnail_preview']
     list_filter = ["site__name"]
     readonly_fields = (

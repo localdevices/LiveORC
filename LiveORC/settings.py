@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'users',
     "admin_interface",
     "colorfield",
+    "import_export",
     'LiveORC.admin.CustomAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',

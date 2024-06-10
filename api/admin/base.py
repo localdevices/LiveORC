@@ -6,6 +6,7 @@ from users.models import Institute
 
 FOREIGN_KEYS = ["institute", "site", "profile", "camera_config"]
 
+
 class BaseForm(forms.ModelForm):
     class Meta:
         fields = "__all__"
