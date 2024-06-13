@@ -1,9 +1,50 @@
 from django import forms
 from django.contrib import admin
+from django.core.exceptions import PermissionDenied
+from django.template.response import TemplateResponse
+from import_export.admin import ExportActionModelAdmin
+from import_export.forms import ExportForm
 
-from api.models import TimeSeries
+from api.models import TimeSeries, Site
 from api.admin import BaseAdmin, BaseForm
 from api.admin import SiteUserFilter
+from api.resources import TimeSeriesResource
+
+
+class CustomExportForm(ExportForm):
+    site = forms.ModelChoiceField(
+        queryset=Site.objects.all(),
+        required=True
+    )
+    start_date = forms.DateTimeField(
+        required=False,
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        help_text="Start date and time in local timezone"
+    )
+    end_date = forms.DateTimeField(
+        required=False,
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        help_text="End date and time in local timezone",
+    )
+
+    def __init__(self, *args, **kwargs):
+        request = kwargs.pop("request", None)
+        super(CustomExportForm, self).__init__(*args, **kwargs)
+        if request:
+            user = request.user
+            if not user.is_superuser:
+                # only show sites for which logged in user has membership
+                self.fields["site"].queryset = Site.objects.filter(institute__in=user.get_membership_institutes())
+
+    def clean(self):
+        # check start and end dates on form
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get("start_date")
+        end_date = cleaned_data.get("end_date")
+        if start_date and end_date:
+            if end_date < start_date:
+                raise forms.ValidationError("End date and time cannot be earlier than start date and time.")
+        return cleaned_data
 
 
 class TimeSeriesForm(BaseForm):
@@ -21,8 +62,9 @@ class TimeSeriesInline(admin.TabularInline):
     extra = 5
 
 
-class TimeSeriesAdmin(BaseAdmin):
-
+class TimeSeriesAdmin(ExportActionModelAdmin, BaseAdmin):
+    resource_classes = [TimeSeriesResource]
+    export_form_class = CustomExportForm
     list_display = ["get_site_name", "timestamp", "str_h", "str_fraction_velocimetry", "str_q_50", 'thumbnail_preview']
     list_filter = ["site__name"]
     readonly_fields = (
@@ -60,6 +102,30 @@ class TimeSeriesAdmin(BaseAdmin):
     @admin.display(ordering='site__name', description="Site")
     def get_site_name(self, obj):
         return obj.site.name
+
+    def get_export_queryset(self, request):
+        return TimeSeries.objects.filter(site__institute__in=request.user.get_membership_institutes())
+
+    def export_action(self, request):
+        if request.POST:
+            return super().export_action(request)
+
+        if not self.has_export_permission(request):
+            raise PermissionDenied
+
+        form_type = self.get_export_form_class()
+        formats = self.get_export_formats()
+        # with GET request, the form is instantiated with the request, so that we can check which sites belong to user
+        form = form_type(
+            formats,
+            self.get_export_resource_classes(request),
+            data=request.POST or None,
+            request=request  # this arg is added as only difference between the parent export_action method
+        )
+        context = self.init_request_context_data(request, form)
+        request.current_app = self.admin_site.name
+        return TemplateResponse(request, [self.export_template_name], context=context)
+
 
     def get_readonly_fields(self, request, obj=None):
         # prevent that the file or camera config can be changed afterwards. That is very risky and can lead to
