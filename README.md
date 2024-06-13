@@ -36,11 +36,16 @@ Web-based, professional and scalable velocimetry analysis for operational river 
 
 # What is LiveOpenRiverCam
 
-LiveOpenRiverCam allows you to run operational measurement stations that estimate river discharge from videos.
-It is meant for e.g. National HydroMeteorological Societies (NHMS), hydropower authorities, waterboards, or service 
-providers of such entities, who wish to establish their own services for such users. 
+LiveOpenRiverCam allows you to run operational measurement stations that estimate river surface velocity and discharge 
+from videos. It is meant for e.g. National HydroMeteorological Societies (NHMS), hydropower authorities, waterboards,
+or service providers of such entities, who wish to establish their own services for such users. It is for anyone who 
+wishes to operationalize image-based river surface velocity and discharge measurements using an entirely
+open source, open scientific transparent approach. You can start working with LiveORC with an internet connection,
+a desktop or laptop computer and one hour of time! You can scale the work to many server instances once being 
+familiarized with the components and methods.
+
 LiveORC will provide you with the following functionalities:
-* A administration-style front end for managing sites, configuration, videos and time series.
+* An administration-style front end for managing sites, configuration, videos and time series.
 * Visualization of time series and video analyses.
 * Fully automated data streaming from operational camera/water level feeds in the field with "edge processing".
 * Per-video processing through "cloud processing". 
@@ -50,7 +55,8 @@ LiveORC will provide you with the following functionalities:
 Processing on sites ("edge processing") or on cloud nodes ("cloud processing") is performed by
 [NodeOpenRiverCam](https://github.com/localdevice/nodeorc), the node processing tool around OpenRiverCam. The 
 processing methods read videos, select frames, enhance features, orthorectify and estimates surface velocity 
-and discharge using state-of-the-art velocimetry methods.
+and discharge using state-of-the-art velocimetry methods. NodeOpenRiverCam is included in LiveORC, so deployment is 
+very easy and automated.
 
 # Acknowledgements
 
@@ -525,7 +531,9 @@ variability but also instabilities in the frame rate of the camera). Furthermore
 has been resolved optically is also shown. This is a good measure of uncertainty. OpenRiverCam uses infilling 
 techniques to fill in missing velocities in the cross-section. If the fraction velocimetry value is high (e.g. 85%) 
 it means that a lot of the discharge amount was actually observed optically and only a small portion (15%) comes 
-from interpolated surface velocities.
+from interpolated surface velocities. In the time series menu you can also export data to a preferred format using the 
+EXPORT button on the top-right. This may make it easy to analyze longer series in Excel or python scripts, for instance
+to update your stage-discharge relationship on the site or analyze such changes, or investigate time series behaviour.
 
 Finally, if you go to the "Sites" menu and click on your only site so far, you will also see a time series view with 
 only one red dot (water level) and one cyan dot (discharge). If you start adding more videos at different moments in 
@@ -538,11 +546,12 @@ open, so that you can easily navigate through the results.
 
 Congratulations! You have now processed your first video in LiveOpenRiverCam. We hope that you have understood that 
 in LiveOpenRiverCam, you can entirely organize all your videos around sites, maintain camera configurations, change 
-these as you might change your setup in the field, check out time series and more. Remember that if you have many 
+these as you might change your set up in the field, check out time series and more. Remember that if you have many 
 videos on the same site, taken with the same camera at a fixed location and orientation, you only need to add a new 
 video, and a new water level, and reuse the camera configuration you've already made for your first video.
 
-If you expect to process many videos and want to scale up, remember to look into the ``
+If you expect to process many videos and want to scale up, remember to look into the [Installation](#installation) 
+section and in particular the section on extending the amount of [workers](#more-processing-nodes).
 
 Of course, adding videos manually can be very useful for smaller sets, but it is also quite some work, and perhaps 
 not very efficient once you want to process a lot of them. Furthermore, you may want to start setting up a field site, 

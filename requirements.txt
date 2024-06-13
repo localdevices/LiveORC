@@ -10,6 +10,7 @@ django-admin-interface
 django-debug-toolbar
 django-extensions
 django-filter
+django-import-export
 django-json-widget
 django-object-actions
 django-storages
