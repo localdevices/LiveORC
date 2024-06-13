@@ -5,7 +5,6 @@ services:
     entrypoint: /bin/bash -c "/liveorc/start.sh"
     restart: unless-stopped
     volumes:
-      - .:/liveorc:z
       - ${LORC_STORAGE_DIR}:/liveorc/data/media:z
     environment:
       - DJANGO_DBASE_DIR=/liveorc/data
