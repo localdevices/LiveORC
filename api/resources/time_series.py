@@ -18,10 +18,11 @@ class TimeSeriesResource(resources.ModelResource):
         data = kwargs["export_form"].data
         start_date = data.get("start_date", None)
         end_date = data.get("end_date", None)
-
+        site = data.get("site", None)
         if not queryset:
             queryset = self.get_queryset()
 
+        queryset = queryset.filter(site=site)
         if start_date and end_date:
             queryset = queryset.filter(timestamp__range=(start_date, end_date))
         elif start_date:

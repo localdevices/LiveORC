@@ -16,17 +16,23 @@ class CustomExportForm(ExportForm):
     )
     start_date = forms.DateTimeField(
         required=False,
-        widget=forms.DateTimeInput(
-            attrs={'type': 'datetime-local'},
-            required=False,
-            help_text="Start date and time in local timezone"
-        )
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        help_text="Start date and time in local timezone"
     )
     end_date = forms.DateTimeField(
         required=False,
         widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
         help_text="End date and time in local timezone",
     )
+
+    def __init__(self, *args, **kwargs):
+        request = kwargs.pop("request", None)
+        super(CustomExportForm, self).__init__(*args, **kwargs)
+        if request:
+            user = request.user
+            if not user.is_superuser:
+                # only show sites for which logged in user has membership
+                self.fields["site"].queryset = Site.objects.filter(institute__in=user.get_membership_institutes())
 
     def clean(self):
         # check start and end dates on form
@@ -94,6 +100,10 @@ class TimeSeriesAdmin(ExportActionModelAdmin, BaseAdmin):
     @admin.display(ordering='site__name', description="Site")
     def get_site_name(self, obj):
         return obj.site.name
+
+    def get_export_queryset(self, request):
+        return TimeSeries.objects.filter(site__institute__in=request.user.get_membership_institutes())
+        # return super(TimeSeriesAdmin, self).get_export_queryset(request)
 
     def get_readonly_fields(self, request, obj=None):
         # prevent that the file or camera config can be changed afterwards. That is very risky and can lead to
