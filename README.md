@@ -525,7 +525,8 @@ variability but also instabilities in the frame rate of the camera). Furthermore
 has been resolved optically is also shown. This is a good measure of uncertainty. OpenRiverCam uses infilling 
 techniques to fill in missing velocities in the cross-section. If the fraction velocimetry value is high (e.g. 85%) 
 it means that a lot of the discharge amount was actually observed optically and only a small portion (15%) comes 
-from interpolated surface velocities.
+from interpolated surface velocities. In the time series menu you can also export data to a preferred format using the 
+EXPORT button on the top-right. 
 
 Finally, if you go to the "Sites" menu and click on your only site so far, you will also see a time series view with 
 only one red dot (water level) and one cyan dot (discharge). If you start adding more videos at different moments in 
