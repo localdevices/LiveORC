@@ -1,5 +1,7 @@
-from django.contrib import admin
 from django import forms
+from django.contrib import admin
+from django.core.exceptions import PermissionDenied
+from django.template.response import TemplateResponse
 from import_export.admin import ExportActionModelAdmin
 from import_export.forms import ExportForm
 
@@ -103,7 +105,27 @@ class TimeSeriesAdmin(ExportActionModelAdmin, BaseAdmin):
 
     def get_export_queryset(self, request):
         return TimeSeries.objects.filter(site__institute__in=request.user.get_membership_institutes())
-        # return super(TimeSeriesAdmin, self).get_export_queryset(request)
+
+    def export_action(self, request):
+        if request.POST:
+            return super().export_action(request)
+
+        if not self.has_export_permission(request):
+            raise PermissionDenied
+
+        form_type = self.get_export_form_class()
+        formats = self.get_export_formats()
+        # with GET request, the form is instantiated with the request, so that we can check which sites belong to user
+        form = form_type(
+            formats,
+            self.get_export_resource_classes(request),
+            data=request.POST or None,
+            request=request  # this arg is added as only difference between the parent export_action method
+        )
+        context = self.init_request_context_data(request, form)
+        request.current_app = self.admin_site.name
+        return TemplateResponse(request, [self.export_template_name], context=context)
+
 
     def get_readonly_fields(self, request, obj=None):
         # prevent that the file or camera config can be changed afterwards. That is very risky and can lead to

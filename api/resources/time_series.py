@@ -7,12 +7,19 @@ class TimeSeriesResource(resources.ModelResource):
 
     class Meta:
         model = TimeSeries
-        fields = ('id', 'timestamp', 'h', 'q_05', 'q_25', 'q_50', 'q_75', 'q_95', 'fraction_velocimetry')
-        export_order = ('id', 'timestamp', 'h', 'q_05', 'q_25', 'q_50', 'q_75', 'q_95', 'fraction_velocimetry')
+        fields = ('id', 'site__name','timestamp', 'h', 'q_05', 'q_25', 'q_50', 'q_75', 'q_95', 'fraction_velocimetry')
+        export_order = ('id', 'site__name', 'timestamp', 'h', 'q_05', 'q_25', 'q_50', 'q_75', 'q_95', 'fraction_velocimetry')
 
     @classmethod
     def get_display_name(cls):
         return "Time series"  # Customize this display name as needed
+
+    def get_export_headers(self, fields=None):
+        headers = super().get_export_headers(fields=fields)
+        header_mapping = {"site__name": "site"}
+        # Replace the original headers with custom headers
+        custom_headers = [header_mapping.get(header, header) for header in headers]
+        return custom_headers
 
     def export(self, queryset=None, *args, **kwargs):
         data = kwargs["export_form"].data
