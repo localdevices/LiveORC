@@ -33,7 +33,6 @@ class DeviceAdmin(admin.GISModelAdmin):
             return True
         return False
 
-
     form = DeviceForm
     # list_filter = [TaskInstituteFilter]
     #
