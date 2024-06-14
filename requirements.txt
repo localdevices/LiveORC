@@ -17,7 +17,7 @@ django-storages==1.14.3
 drf-nested-routers==0.94.1
 drf-spectacular==0.27.2
 fontawesomefree==6.5.1
-nodeorc==0.1.7
+nodeorc==0.1.8
 pytest-django==4.8.0
 psycopg2-binary==2.9.9
 shortuuid==1.0.13
