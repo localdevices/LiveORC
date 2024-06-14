@@ -46,10 +46,13 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
             return redirect('/admin/api/video')
         elif not obj.time_series:
             messages.error(request, f"Video {obj.id} does not yet have a water level at associated time stamp. ")
+        elif not obj.camera_config.profile:
+            messages.error(request, f"Video {obj.id}'s camera configuration does not have a profile. Add a profile to the camera configuration. ")
+        elif not obj.camera_config.recipe:
+            messages.error(request,f"Video {obj.id}'s camera configuration does not have a recipe. Add a recipe to the camera configuration. ")
         elif obj.status == VideoStatus.QUEUE or obj.status == VideoStatus.TASK:
             messages.error(request, f"Video {obj.id} is already queued or being processed. ")
         return HttpResponseRedirect(reverse("admin:api_video_change", args=(obj.pk,)))
-
 
     change_actions = ('toolfunc', )
 

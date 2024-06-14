@@ -272,6 +272,11 @@ class Video(models.Model):
     def is_ready_for_task(self):
         if not self.time_series:
             return False
+        if not self.camera_config:
+            return False
+        if not (self.camera_config.recipe and self.camera_config.profile):
+            return False
+
         return (self.status == VideoStatus.NEW or self.status == VideoStatus.ERROR) and self.time_series.h is not None
 
     @property
@@ -311,13 +316,33 @@ class Video(models.Model):
         return self
         # return mark_safe('<img src="{}" width="{}" height="{}" />'.format(self.image.url, width, height))
 
+
+
+        # elif not obj.time_series:
+        #     messages.error(request, f"Video {obj.id} does not yet have a water level at associated time stamp. ")
+        # elif not obj.camera_config.profile:
+        #     messages.error(request, f"Video {obj.id}'s camera configuration does not have a profile. Add a profile to the camera configuration. ")
+        # elif not obj.camera_config.recipe:
+        #     messages.error(request,f"Video {obj.id}'s camera configuration does not have a recipe. Add a recipe to the camera configuration. ")
+        # elif obj.status == VideoStatus.QUEUE or obj.status == VideoStatus.TASK:
+        #     messages.error(request, f"Video {obj.id} is already queued or being processed. ")
+
+
     @property
     def play_button(self):
         if self.status == VideoStatus.NEW:
             if self.is_ready_for_task:
                 return get_task_run(self.id)
             else:
-                return mark_safe('<i class="fa-solid fa-circle-play" style="color: #a1a1a1;"></i> Water level missing')
+                if not self.time_series:
+                    queue_msg = "water level missing"
+                elif not self.camera_config.profile:
+                    queue_msg = "no profile"
+                elif not self.camera_config.recipe:
+                    queue_msg = "no recipe"
+                else:
+                    queue_msg = "n/a"
+                return mark_safe(f'<i class="fa-solid fa-circle-play" style="color: #a1a1a1;"></i> {queue_msg} ')
 
         elif self.status == VideoStatus.QUEUE:
             return mark_safe(
