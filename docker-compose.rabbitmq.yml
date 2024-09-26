@@ -7,7 +7,8 @@ services:
       - LORC_RABBITMQ_PASS
       - LORC_RABBITMQ_USER
   rabbitmq:
-    image: rabbitmq:management
+    # rabbitmq >=4 returns an error related to a celery dependency
+    image: rabbitmq:3.13.7
     container_name: rabbitmq
     hostname: rabbitmq
     environment:

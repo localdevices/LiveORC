@@ -34,10 +34,12 @@ Before creating a new release, the following MUST be in place.
 
 - Bump version number (minor: fixes and bugs, medium: small changes in API, added features, major: large breaking 
   changes or major new options and features)
-- Updated CHANGELOG.md
+- Update `CHANGELOG.md`.
 - ensure any new requirements are added to `dev/requirements.txt` without a version number (unless a specific 
   version is required).
-- freeze `requirements.txt` as instructed below
+- Run all tests satisfactorily. This requires an installation on python<3.12, tests fail with python=3.12 because the
+  `assertEquals` changed name.
+- freeze `requirements.txt` as instructed below.
 
 ## How to freeze packages
 
