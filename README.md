@@ -147,7 +147,7 @@ a console (in windows, please use a Git Bash console, or a WSL console) download
 calling the orchestration script ``liveorc.sh``. This can be done as follows:
 
 ```shell
-git clone git@github.com:localdevices/LiveORC.git --config core.autocrlf=input --depth 1
+git clone https://github.com/localdevices/LiveORC --config core.autocrlf=input --depth 1
 cd LiveORC
 ./liveorc.sh start
 ```
