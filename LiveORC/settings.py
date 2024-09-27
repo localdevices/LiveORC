@@ -16,7 +16,7 @@ import sys
 import boto3
 
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-VERSION = "0.1.1"
+VERSION = "0.2.0"
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # try to get BASE_DIR from env variable
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -95,6 +95,7 @@ SIMPLE_JWT = {
 # Celery Configuration Options
 CELERY_BROKER_URL = f'amqp://{os.getenv("LORC_RABBITMQ_USER")}:{os.getenv("LORC_RABBITMQ_PASS")}@{os.getenv("LORC_RABBITMQ_HOST")}:5672/'
 CELERY_RESULT_BACKEND = f'rpc://{os.getenv("LORC_RABBITMQ_USER")}:{os.getenv("LORC_RABBITMQ_PASS")}@{os.getenv("LORC_RABBITMQ_HOST")}:5672/'
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'

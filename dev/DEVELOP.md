@@ -34,10 +34,10 @@ Before creating a new release, the following MUST be in place.
 
 - Bump version number (minor: fixes and bugs, medium: small changes in API, added features, major: large breaking 
   changes or major new options and features)
-- Updated CHANGELOG.md
+- Update `CHANGELOG.md`.
 - ensure any new requirements are added to `dev/requirements.txt` without a version number (unless a specific 
   version is required).
-- freeze `requirements.txt` as instructed below
+- freeze `requirements.txt` as instructed below.
 
 ## How to freeze packages
 
@@ -49,6 +49,8 @@ python -m venv $HOME/venv/liveorc-dev
 source $HOME/venv/liveorc-dev/bin/activate
 pip install --upgrade pip
 pip install -r dev/requirements.txt
+# run the tests, do not deploy before these are satisfactory
+python manage.py test
 # freeze only packages directly imported into the project
 pip freeze -q -r dev/requirements.txt | sed '/freeze/,$ d' > requirements.txt
 deactivate
@@ -56,4 +58,8 @@ deactivate
 rm -fr $HOME/venv/liveorc-dev
 
 ```
-
+> [!NOTE]
+> As shown above, ensure that all tests run satisfactorily. This requires an installation on python<3.12, tests fail with
+> python=3.12 because the `assertEquals` changed name. It is recommended to also check if the tests of the installed 
+> version of pyopenrivercam are running without faults, by checking out the code of pyorc from 
+> https://github.com/localdevices/pyorc and running the tests with the installed liveorc environment.

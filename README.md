@@ -1,3 +1,9 @@
+<figure>
+    <img src="https://raw.githubusercontent.com/localdevices/pyorc/main/docs/_static/orc_logo_color.svg" 
+width=100 align="right">
+</figure>
+<br>
+
 ![Version](https://img.shields.io/github/v/release/localdevices/LiveORC)
 
 # LiveORC
@@ -24,6 +30,7 @@ Web-based, professional and scalable velocimetry analysis for operational river 
 * [Set up a field camera](#set-up-a-field-camera)
 * [REST API](#rest-api)
 * [Recipes](#recipes)
+* [Trademark](#trademark)
 
 > [!IMPORTANT]
 > LiveORC is still in development. Features such as interactive selection of ground control points, assembling a camera 
@@ -120,7 +127,7 @@ is our recommended use. Please take the following into account before starting L
   socket. To allow the non-root user to connect to the socket, run the following to allow access:
 
   ```shell
-  sudo chmod 660 /var/run/docker.sock
+  sudo chmod 666 /var/run/docker.sock
   ```
 
   This assumes the socket runs on `/var/run/docker.sock`. If the location is different, then alter the location.
@@ -745,3 +752,11 @@ mask:
       wdw: 1
       reduce_time: True
 ```
+
+# License
+LiveORC is licensed under the terms of the 
+[GNU Affero General Public License v3.0](https://github.com/localdevices/LiveORC/blob/main/LICENSE)
+
+# Trademark
+See our [OpenRiverCam Trademark guidelines](https://github.com/localdevices/pyorc/blob/main/TRADEMARK.md)
+

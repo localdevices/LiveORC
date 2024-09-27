@@ -17,7 +17,7 @@ django-storages
 drf-nested-routers
 drf-spectacular
 fontawesomefree
-nodeorc==0.1.7
+nodeorc==0.2.0
 pytest-django
 psycopg2-binary
 shortuuid

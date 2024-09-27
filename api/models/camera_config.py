@@ -96,7 +96,7 @@ class CameraConfig(BaseModel):
     start_date = models.DateTimeField("start validity date", auto_now_add=True)
     end_date = models.DateTimeField("end validity date", null=True)
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
-    version = models.CharField("pyORC version compatibility", max_length=15, blank=True, default=pyorc.__version__, editable=False)
+    version = models.CharField("pyORC version compatibility", max_length=15, blank=True, editable=False)
     server = models.ForeignKey(Server, on_delete=models.SET_NULL, null=True, blank=True)
     recipe = models.ForeignKey(Recipe, on_delete=models.SET_NULL, null=True, blank=True)
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True)
