@@ -15,4 +15,6 @@ jobs:
         docker compose -f docker-compose.yml up -d
         sleep 20  # wait until compose is up
         docker compose exec -T webapp /bin/bash -c "python manage.py test"
+        # Also test the pyorc installation. cartopy is an additional requirement, so install that first
+        docker compose exec -T webapp /bin/bash -c "git clone https://github.com/localdevices/pyorc.git;cd pyorc/tests;pip install cartopy;pytest ."
       
