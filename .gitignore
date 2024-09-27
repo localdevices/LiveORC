@@ -4,6 +4,11 @@
 nginx/nginx.conf
 nginx/nginx-ssl.conf
 
+# nginx related
+.cronenv
+re
+sys
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
