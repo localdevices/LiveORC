@@ -127,7 +127,7 @@ is our recommended use. Please take the following into account before starting L
   socket. To allow the non-root user to connect to the socket, run the following to allow access:
 
   ```shell
-  sudo chmod 660 /var/run/docker.sock
+  sudo chmod 666 /var/run/docker.sock
   ```
 
   This assumes the socket runs on `/var/run/docker.sock`. If the location is different, then alter the location.
