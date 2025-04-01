@@ -1,3 +1,14 @@
+## [0.2.x] - xxxx-xx-xx
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- Recipe serialization now includes "id"
+- fixed test assertions by using `assertEqual` instead of deprecated `assertEquals`
+### Security
+
+
 ## [0.2.0] - 2024-09-27
 ### Added
 - Style and logos
