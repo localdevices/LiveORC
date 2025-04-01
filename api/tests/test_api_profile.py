@@ -40,12 +40,12 @@ class ProfileViewTests(InitTestCase):
                 "institute": 1}
         )
         # check the request
-        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         # check if user3 is not able to see the model
         client.logout()
         client.login(username="user3@institute2.com", password="test1234")
         r = client.get('/api/site/1/profile/1', follow=True)
-        self.assertEquals(r.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
 

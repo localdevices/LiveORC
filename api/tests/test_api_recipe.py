@@ -42,6 +42,6 @@ class RecipeViewTests(InitTestCase):
             }
         )
         # check the request
-        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
 

@@ -45,7 +45,7 @@ class TaskViewTests(InitTestCase):
             f'/api/site/1/video/{video_id}/task/'
         )
         # as there is no water level yet, this should give a 400 error
-        self.assertEquals(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         timestamp = video_sample["timestamp"]
         # some fake water level
         h = 1182.3
@@ -58,21 +58,21 @@ class TaskViewTests(InitTestCase):
                 "h": h
             }
         )
-        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         # Upon creation of a time series close in time to the video, the two should be automatically linked.
         # check if the video now has a time series associated with it. At this stage, the status should still be NEW
         # because no task is initiated yet.
         video = Video.objects.get(id=1)
-        self.assertEquals(video.time_series is not None, True)
-        self.assertEquals(video.status, VideoStatus.QUEUE)
+        self.assertEqual(video.time_series is not None, True)
+        self.assertEqual(video.status, VideoStatus.QUEUE)
         # One task should be made, check if there is indeed a total of one tasks in the full queryset
-        self.assertEquals(len(Task.objects.all()), 1)
+        self.assertEqual(len(Task.objects.all()), 1)
         # check if task creation is not possible as other user
         client.logout()
         client.login(username='user2@institute1.com', password='test1234')
         r = client.post(
             f'/api/site/1/video/{video_id}/task/'
         )
-        self.assertEquals(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
 
