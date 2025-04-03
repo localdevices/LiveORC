@@ -6,6 +6,8 @@
 ### Fixed
 - Recipe serialization now includes "id"
 - fixed test assertions by using `assertEqual` instead of deprecated `assertEquals`
+- fixed wrongly preferred HTML serializer for API POST/GET request to time series objects. This now
+  is JSON by default.
 ### Security
 
 
