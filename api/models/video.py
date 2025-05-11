@@ -221,6 +221,7 @@ class Video(models.Model):
                 raise Exception('Could not create keyframe - is the file type valid?')
             # now check for a water level series
             if self.time_series is not None:
+                super(Video, self).save(*(), **{})
                 return
             # look for time series instances that are for the same site and not yet associated with a video
             ts_at_site = TimeSeries.objects.filter(
