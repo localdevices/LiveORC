@@ -31,7 +31,7 @@ class TimeSeriesViewTests(InitTestCase):
                 "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
             }
         )
-        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         # check if other user can read but not write
         client.logout()
         client.login(username='user2@institute1.com', password='test1234')
@@ -39,7 +39,7 @@ class TimeSeriesViewTests(InitTestCase):
             '/api/site/1/timeseries/1',
             follow=True
         )
-        self.assertEquals(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
 
         r = client.post(
             '/api/site/1/timeseries/',
@@ -48,7 +48,7 @@ class TimeSeriesViewTests(InitTestCase):
                 "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
             }
         )
-        self.assertEquals(r.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
         client.logout()
@@ -57,7 +57,7 @@ class TimeSeriesViewTests(InitTestCase):
             '/api/site/1/timeseries/1',
             follow=True
         )
-        self.assertEquals(r.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
         r = client.post(
             '/api/site/1/timeseries/',
@@ -66,7 +66,7 @@ class TimeSeriesViewTests(InitTestCase):
                 "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
             }
         )
-        self.assertEquals(r.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_add_longer_timeseries_and_query(self):
         client = APIClient()
@@ -82,17 +82,17 @@ class TimeSeriesViewTests(InitTestCase):
                     "timestamp": ts.strftime("%Y-%m-%dT%H:%M:%SZ")
                 }
             )
-        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         uri = reverse("api:site-timeseries-list", args=(["1"]))
         # query in PIJSON format
         r = client.get(
             uri + "?startDateTime=2000-01-01T04:00:00:00Z" + "&endDateTime=2000-01-01T07:00:00:00Z" + "&format=pijson"
         )
-        self.assertEquals(len(r.json()), 3)  # test for number of fields in pijson (always 3)
-        self.assertEquals(len(r.json()["timeSeries"]), 9)  # test for number of variables (currently 9)
-        self.assertEquals(len(r.json()["timeSeries"][0]["events"]), 4)  # test for number of records
+        self.assertEqual(len(r.json()), 3)  # test for number of fields in pijson (always 3)
+        self.assertEqual(len(r.json()["timeSeries"]), 9)  # test for number of variables (currently 9)
+        self.assertEqual(len(r.json()["timeSeries"][0]["events"]), 4)  # test for number of records
         # query in csv format
         r = client.get(
             uri + "?startDateTime=2000-01-01T04:00:00:00Z" + "&endDateTime=2000-01-01T07:00:00:00Z" + "&format=csv"
         )
-        self.assertEquals(len(r.content), 277)
+        self.assertEqual(len(r.content), 277)

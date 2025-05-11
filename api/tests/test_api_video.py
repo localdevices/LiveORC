@@ -101,30 +101,30 @@ class VideoViewTests(InitTestCase):
             "/api/video/",
             data=video_sample
         )
-        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         r = client.get("/api/site/1/video/1/")
-        self.assertEquals(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
         # make sure a second user with membership can see but not alter the video
         client.logout()
         client.login(username='user2@institute1.com', password='test1234')
         r = client.get("/api/site/1/video/1/")
-        self.assertEquals(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
         r = client.patch(
             '/api/site/1/video/1/',
             data={"timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")}
             # follow=True
         )
-        self.assertEquals(r.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
         client.logout()
         client.login(username='user3@institute2.com', password='test1234')
         r = client.get("/api/site/1/video/1/")
-        self.assertEquals(r.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
         r = client.patch(
             '/api/site/1/video/1/',
             data={"timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")}
             # follow=True
         )
-        self.assertEquals(r.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
 
@@ -141,9 +141,9 @@ class VideoViewTests(InitTestCase):
             "/api/video/",
             data=image_sample
         )
-        self.assertEquals(r.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         r = client.get("/api/site/1/video/1/")
-        self.assertEquals(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
 
 
 

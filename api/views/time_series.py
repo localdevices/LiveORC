@@ -21,7 +21,7 @@ from rest_framework_csv.renderers import CSVRenderer
     ),
     # retrieve=None,  # Disables 'format' parameter for retrieve
 )
-@renderer_classes([BrowsableAPIRenderer, JSONRenderer, CSVRenderer, PIJSONRenderer, WebJSONRenderer])
+@renderer_classes([JSONRenderer, BrowsableAPIRenderer, CSVRenderer, PIJSONRenderer, WebJSONRenderer])
 class TimeSeriesViewSet(BaseModelViewSet):
     """
     API endpoints that allows time series to be viewed or edited.
