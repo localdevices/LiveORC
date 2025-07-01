@@ -77,6 +77,8 @@ class TimeSeriesAdmin(ExportActionModelAdmin, BaseAdmin):
         "str_q_raw",
         "str_v_av",
         "str_v_bulk",
+        "str_wetted_surface",
+        "str_wetted_perimeter",
         "str_fraction_velocimetry",
         "link_video"
     )
@@ -96,8 +98,8 @@ class TimeSeriesAdmin(ExportActionModelAdmin, BaseAdmin):
                         "str_q_raw",
                         "str_v_av",
                         "str_v_bulk",
-                        "wetted_surface",
-                        "wetted_perimeter",
+                        "str_wetted_surface",
+                        "str_wetted_perimeter",
                         "str_fraction_velocimetry"
                     ]
             }
@@ -149,11 +151,11 @@ class TimeSeriesAdmin(ExportActionModelAdmin, BaseAdmin):
                 "str_q_75",
                 "str_q_95",
                 "q_raw",
+                "str_v_av",
+                "str_v_bulk",
                 "str_wetted_surface",
                 "str_wetted_perimeter",
-                "str_fraction_velocimetry",
-                "str_v_av",
-                "str_v_bulk"
+                "str_fraction_velocimetry"
             )
         return self.readonly_fields
 
