@@ -7,8 +7,8 @@ class TimeSeriesResource(resources.ModelResource):
 
     class Meta:
         model = TimeSeries
-        fields = ('id', 'site__name','timestamp', 'h', 'q_05', 'q_25', 'q_50', 'q_75', 'q_95', 'fraction_velocimetry')
-        export_order = ('id', 'site__name', 'timestamp', 'h', 'q_05', 'q_25', 'q_50', 'q_75', 'q_95', 'fraction_velocimetry')
+        fields = ('id', 'site__name','timestamp', 'h', 'q_05', 'q_25', 'q_50', 'q_75', 'q_95', 'q_raw', 'v_av', 'v_bulk', 'fraction_velocimetry')
+        export_order = ('id', 'site__name', 'timestamp', 'h', 'q_05', 'q_25', 'q_50', 'q_75', 'q_95',  'q_raw', 'v_av', 'v_bulk', 'fraction_velocimetry')
 
     @classmethod
     def get_display_name(cls):
