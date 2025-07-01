@@ -60,6 +60,9 @@ class PIJSONRenderer(JSONRenderer):
             "q_50": "q.50",
             "q_75": "q.75",
             "q_95": "q.95",
+            "q_raw": "q.raw",
+            "v_av": "v.av",
+            "v_bulk": "v.bulk",
             "wetted_surface": "A.wet",
             "wetted_perimeter": "P.wet",
             "fraction_velocimetry": "v.frac"
@@ -71,6 +74,9 @@ class PIJSONRenderer(JSONRenderer):
             "q_50": "m3/s",
             "q_75": "m3/s",
             "q_95": "m3/s",
+            "q_raw": "m3/s",
+            "v_av": "m/s",
+            "v_bulk": "m/s",
             "wetted_surface": "m2",
             "wetted_perimeter": "m",
             "fraction_velocimetry": "%"
