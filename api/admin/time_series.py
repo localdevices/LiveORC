@@ -65,7 +65,7 @@ class TimeSeriesInline(admin.TabularInline):
 class TimeSeriesAdmin(ExportActionModelAdmin, BaseAdmin):
     resource_classes = [TimeSeriesResource]
     export_form_class = CustomExportForm
-    list_display = ["get_site_name", "timestamp", "str_h", "str_fraction_velocimetry", "str_q_50", 'thumbnail_preview']
+    list_display = ["get_site_name", "timestamp", "str_h", "str_fraction_velocimetry", "str_q_50", "str_q_raw", "str_v_bulk", "str_v_av", "thumbnail_preview"]
     list_filter = ["site__name"]
     readonly_fields = (
         "image_preview",
@@ -74,6 +74,11 @@ class TimeSeriesAdmin(ExportActionModelAdmin, BaseAdmin):
         "str_q_50",
         "str_q_75",
         "str_q_95",
+        "str_q_raw",
+        "str_v_av",
+        "str_v_bulk",
+        "str_wetted_surface",
+        "str_wetted_perimeter",
         "str_fraction_velocimetry",
         "link_video"
     )
@@ -90,8 +95,11 @@ class TimeSeriesAdmin(ExportActionModelAdmin, BaseAdmin):
                         "str_q_50",
                         "str_q_75",
                         "str_q_95",
-                        "wetted_surface",
-                        "wetted_perimeter",
+                        "str_q_raw",
+                        "str_v_av",
+                        "str_v_bulk",
+                        "str_wetted_surface",
+                        "str_wetted_perimeter",
                         "str_fraction_velocimetry"
                     ]
             }
@@ -142,8 +150,11 @@ class TimeSeriesAdmin(ExportActionModelAdmin, BaseAdmin):
                 "str_q_50",
                 "str_q_75",
                 "str_q_95",
-                "wetted_surface",
-                "wetted_perimeter",
+                "q_raw",
+                "str_v_av",
+                "str_v_bulk",
+                "str_wetted_surface",
+                "str_wetted_perimeter",
                 "str_fraction_velocimetry"
             )
         return self.readonly_fields
@@ -201,6 +212,37 @@ class TimeSeriesAdmin(ExportActionModelAdmin, BaseAdmin):
             return round(obj.q_95, 2)
     str_q_95.short_description = 'Discharge 95% [m3/s]'
     str_q_95.allow_tags = True
+
+    def str_q_raw(self, obj):
+        if obj.q_raw:
+            return round(obj.q_raw, 2)
+    str_q_raw.short_description = 'Optical discharge [m3/s]'
+    str_q_raw.allow_tags = True
+
+    def str_v_av(self, obj):
+        if obj.v_av:
+            return round(obj.v_av, 2)
+    str_v_av.short_description = 'Av. surface velocity [m/s]'
+    str_v_av.allow_tags = True
+
+
+    def str_wetted_surface(self, obj):
+        if obj.wetted_surface:
+            return round(obj.wetted_surface, 2)
+    str_wetted_surface.short_description = 'Wetted surface [m2]'
+    str_wetted_surface.allow_tags = True
+
+    def str_wetted_perimeter(self, obj):
+        if obj.wetted_perimeter:
+            return round(obj.wetted_perimeter, 2)
+    str_wetted_perimeter.short_description = 'Wetted perimeter [m]'
+    str_wetted_perimeter.allow_tags = True
+
+    def str_v_bulk(self, obj):
+        if obj.v_bulk:
+            return round(obj.v_bulk, 2)
+    str_v_bulk.short_description = 'Bulk velocity [m/s]'
+    str_v_bulk.allow_tags = True
 
     def str_fraction_velocimetry(self, obj):
         if obj.fraction_velocimetry:

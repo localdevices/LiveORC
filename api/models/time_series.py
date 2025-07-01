@@ -37,9 +37,12 @@ class TimeSeries(BaseModel):
     q_50 = models.FloatField("Discharge median", help_text="Median river flow", null=True, blank=True)
     q_75 = models.FloatField("Discharge 75%", help_text="River flow with probability of non-exceedance of 75% [m3/s]", null=True, blank=True)
     q_95 = models.FloatField("Discharge 95%", help_text="River flow with probability of non-exceedance of 95% [m3/s]", null=True, blank=True)
+    q_raw = models.FloatField("Raw discharge", help_text="River flow measured optically", null=True, blank=True)
     wetted_surface = models.FloatField(help_text="Wetted surface area with given water level [m2]", null=True, blank=True)
     wetted_perimeter = models.FloatField(help_text="Wetted perimeter with given water level [m]", null=True, blank=True)
     fraction_velocimetry = models.FloatField(help_text="Fraction of discharge resolved using velocimetry [-]", null=True, blank=True)
+    v_bulk = models.FloatField(help_text="Bulk velocity [m/s]", null=True, blank=True)
+    v_av = models.FloatField(help_text="Average surface velocity [m/s]", null=True, blank=True)
 
     # TODO: create link with videos, filtered on site, to add water level to those videos.
     def save(self, *args, **kwargs):
@@ -65,9 +68,13 @@ class TimeSeries(BaseModel):
         verbose_name_plural = "time series"
 
     def __str__(self):
-        return "{:s} h [m]: {:s}, Q [m3/s]: {:s}, f [-]: {:s}".format(
+        return "{:s} h [m]: {:s}, Q [m3/s]: {:s}, Q_raw [m3/s]: {:s}, v_av [m/s]: {:s}, v_bulk [m/s]: {:s} f [-]: {:s}".format(
             self.timestamp.strftime("%Y-%m-%dT%H:%M:%S"),
             get_str(self.h, 3),
             get_str(self.q_50, 2),
+            get_str(self.q_raw, 2),
+            get_str(self.v_av, 2),
+            get_str(self.v_bulk, 2),
             get_str(self.fraction_velocimetry, 1)
+
         )
