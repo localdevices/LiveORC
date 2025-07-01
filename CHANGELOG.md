@@ -1,6 +1,9 @@
-## [0.2.x] - xxxx-xx-xx
+## [0.2.1] - 2025-07-01
 ### Added
 ### Changed
+- New fields `q_raw`, `v_av`, `v_bulk` in `api.models.time_series.py` for storing raw
+  optical discharge, average surface velocity and bulk velocity.
+- Added new time series fields to admin and API views.
 ### Deprecated
 ### Removed
 ### Fixed
@@ -8,6 +11,7 @@
 - fixed test assertions by using `assertEqual` instead of deprecated `assertEquals`
 - fixed wrongly preferred HTML serializer for API POST/GET request to time series objects. This now
   is JSON by default.
+- storage port mapping for internal storage set to correct port.
 ### Security
 
 
