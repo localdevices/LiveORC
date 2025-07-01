@@ -8,13 +8,14 @@ services:
   storage:
     image: minio/minio
     ports:
-      - ${LORC_STORAGE_PORT}:9000
+      - ${LORC_STORAGE_PORT}:${LORC_STORAGE_PORT}
       - 9001:9001
     environment:
       MINIO_ROOT_USER: "${LORC_STORAGE_ACCESS}"
       MINIO_ROOT_PASSWORD: "${LORC_STORAGE_SECRET}"
+      MINIO_API_PORT: ${LORC_STORAGE_PORT}
       MINIO_CONSOLE_PORT: 9001
 
     volumes:
       - ${LORC_STORAGE_DIR}:/data
-    command: server /data --console-address ":9001"
+    command: server /data --console-address ":9001" --address ":${LORC_STORAGE_PORT}"

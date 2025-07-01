@@ -120,7 +120,7 @@ case $key in
     shift # past value
     ;;
 	--storage-port)
-    LORC_STORAGE_PORT=$(realpath "$2")
+    LORC_STORAGE_PORT=$2
     export LORC_STORAGE_PORT
     shift # past argument
     shift # past value
