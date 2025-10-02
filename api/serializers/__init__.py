@@ -4,7 +4,7 @@ from .camera_config import CameraConfigSerializer, CameraConfigCreateSerializer
 from .profile import ProfileSerializer, ProfileCreateSerializer
 from .recipe import RecipeSerializer
 from .video import VideoSerializer
-from .time_series import TimeSeriesSerializer, TimeSeriesCreateSerializer
+from .time_series import TimeSeriesSerializer, TimeSeriesCreateSerializer, TimeSeriesUpdateSerializer
 from .server import ServerSerializer
 from .task import TaskSerializer, TaskCreateSerializer
 from .task_form import TaskFormSerializer

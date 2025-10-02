@@ -1,3 +1,13 @@
+## [0.2.2] - 2025-10-02
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- PATCH /api/site/<site_pk>/timeseries/<pk> was not working, now properly functions.
+### Security
+
+
 ## [0.2.1] - 2025-07-01
 ### Added
 ### Changed

@@ -40,6 +40,7 @@ class TimeSeriesSerializer(QueryFieldsMixin, serializers.ModelSerializer):
     def validate(self, data):
         user = User.objects.get(pk=self.initial_data["creator"])
         institute_validator(institute=data.get("site").institute, user=user)
+        super().validate(data)
         return data
 
 class TimeSeriesCreateSerializer(TimeSeriesSerializer):
@@ -51,3 +52,11 @@ class TimeSeriesCreateSerializer(TimeSeriesSerializer):
         model = TimeSeries
         exclude = ("site", )
 
+class TimeSeriesUpdateSerializer(TimeSeriesCreateSerializer):
+    class Meta:
+        model = TimeSeries
+        exclude = ("site", "creator")
+
+    def validate(self, data):
+        """Pass on the attributes as is, without user / creator / site check."""
+        return data
