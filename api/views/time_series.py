@@ -5,7 +5,7 @@ from rest_framework import status, permissions
 from rest_framework.decorators import renderer_classes
 from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
-from api.serializers import TimeSeriesSerializer, TimeSeriesCreateSerializer
+from api.serializers import TimeSeriesSerializer, TimeSeriesCreateSerializer, TimeSeriesUpdateSerializer
 from api.models import TimeSeries, Task, VideoStatus
 from api.task_utils import get_task
 from api.views import BaseModelViewSet
@@ -35,6 +35,8 @@ class TimeSeriesViewSet(BaseModelViewSet):
     def get_serializer_class(self):
         if self.action == 'create':
             return TimeSeriesCreateSerializer
+        elif self.action in ['update', 'partial_update']:
+            return TimeSeriesUpdateSerializer
         return TimeSeriesSerializer
 
     def create(self, request, site_pk=None, *args, **kwargs):
@@ -71,6 +73,10 @@ class TimeSeriesViewSet(BaseModelViewSet):
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
 
     def get_queryset(self):
         # time series can also be retrieved nested per site, by filtering on the site of the cameraconfig property.

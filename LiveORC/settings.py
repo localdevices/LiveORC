@@ -16,7 +16,7 @@ import sys
 import boto3
 
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-VERSION = "0.2.1"
+VERSION = "0.2.2"
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # try to get BASE_DIR from env variable
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -158,7 +158,7 @@ else:
 SPECTACULAR_SETTINGS = {
     'TITLE': 'LiveORC API',
     'DESCRIPTION': 'Live OpenRiverCam REST API and administrator dashboard',
-    'VERSION': '0.1.0',
+    'VERSION': VERSION,
     'SERVE_INCLUDE_SCHEMA': False,
     # OTHER SETTINGS
 }

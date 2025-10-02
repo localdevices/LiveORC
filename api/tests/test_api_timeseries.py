@@ -41,6 +41,13 @@ class TimeSeriesViewTests(InitTestCase):
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
 
+        # try to patch a time series object
+        r = client.patch(
+            '/api/site/1/timeseries/1',
+            data={"h": 1.0},
+            follow=True
+        )
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
         r = client.post(
             '/api/site/1/timeseries/',
             data={
