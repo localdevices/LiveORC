@@ -3,7 +3,7 @@ from rest_framework import status, renderers
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from api.serializers import CameraConfigSerializer, CameraConfigCreateSerializer, TaskFormSerializer
+from api.serializers import CameraConfigSerializer, CameraConfigCreateSerializer, CameraConfigUpdateSerializer, TaskFormSerializer
 from api.models import CameraConfig, Device, TaskForm
 from api.views import BaseModelViewSet
 
@@ -20,10 +20,13 @@ class CameraConfigViewSet(BaseModelViewSet):
     """
     queryset = CameraConfig.objects.all().order_by('name')
     serializer_class = CameraConfigSerializer
+    http_method_names = ["get", "post", "delete", "patch"]
 
     def get_serializer_class(self):
         if self.action == 'create':
             return CameraConfigCreateSerializer
+        elif self.action in ['update', 'partial_update']:
+            return CameraConfigUpdateSerializer
         return CameraConfigSerializer
 
     def create(self, request, site_pk=None, *args, **kwargs):
@@ -43,6 +46,8 @@ class CameraConfigViewSet(BaseModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
 
     @extend_schema(
         description="Create a task form for a specified device of the camera configuration",

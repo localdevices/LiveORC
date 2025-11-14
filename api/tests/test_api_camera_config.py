@@ -187,10 +187,24 @@ class CameraConfigViewTests(InitTestCase):
                 "camera_config": json.dumps(cam_config),
                 "profile": 1,
                 "recipe": 1,
-                "nodeorc_version": "0.1.0"
             }
         )
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        # also get the id of the camera config
+        cam_config_id = r.json()["id"]
+
+
+        # also check if we can PATCH the camera config
+        new_cam_config_data = {
+            "name": "geul_cam_patched"
+        }
+        r = client.patch(
+            f'/api/site/1/cameraconfig/{cam_config_id}/',
+            data=new_cam_config_data,
+            follow=True
+        )
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+
         # make a device with which we can test the task_form creation
         data = get_device_data()
         r = client.post(
