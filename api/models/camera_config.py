@@ -1,4 +1,7 @@
 from datetime import timedelta
+import base64
+import io
+import matplotlib.pyplot as plt
 import shapely.wkt
 from django.contrib.auth import get_user_model
 from django.contrib.gis.db import models
@@ -53,6 +56,13 @@ map_template = """
     }});
 </script>
 
+"""
+
+# Simple HTML template for non‑geographic x/y plot
+_bbox_plot_template = """
+<div class="bbox-plot-wrapper">
+    <img src="data:image/png;base64,{}" alt="Bounding box and profile plot" />
+</div>
 """
 
 lens_position_schema = {
@@ -160,20 +170,59 @@ class CameraConfig(BaseModel):
 
     width.fget.short_description = "Width of frames [pix]"
 
+    def _bbox_plot_fallback(self):
+        """
+        Fallback: render a simple x/y plot with cross section and bbox in matplotlib,
+        This does not use any geographic CRS; it just plots coordinates.
+        """
+        fig = plt.figure(figsize=(10, 7))
+        ax = fig.add_subplot(111, projection="3d")
+        # load cam config and cross section from data fields
+        camera_config = pyorc.load_camera_config(self.data)
+        cs = pyorc.CrossSection(camera_config=camera_config, cs=self.profile.data)
+        camera_config.plot(ax=ax, mode="3d")
+        cs.plot(ax=ax, mode="3d")
+        # ax.set_xlabel("x")
+        # ax.set_ylabel("y")
+        ax.set_aspect("equal", adjustable="datalim")
+        ax.legend(loc="best")
+
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", bbox_inches="tight")
+        plt.close(fig)
+        img_b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+        return _bbox_plot_template.format(img_b64)
+
+
     @property
     def bbox_view(self):
-        if self.profile:
+        if self.bbox:
+            try:
+                bbox_wkt = self.bbox.wkt
+            except Exception:
+                bbox_wkt = None
+        if self.profile and getattr(self.profile, "multipoint", None):
+            try:
+                profile_wkt = self.profile.multipoint.wkt
+            except Exception:
+                profile_wkt = None
+        if bbox_wkt and profile_wkt:
             return mark_safe(
                 map_template.format(self.bbox.wkt, self.profile.multipoint.wkt, self.x, self.y)
             )
-        return mark_safe(
-            map_template.format(
-                self.bbox.wkt,
-                'MULTIPOINT EMPTY',
-                self.x,
-                self.y
+        elif bbox_wkt:
+            # only plot bounding box
+            return mark_safe(
+                map_template.format(
+                    self.bbox.wkt,
+                    'MULTIPOINT EMPTY',
+                    self.x,
+                    self.y
+                )
             )
-        )
+        else:
+            #fallback to simple plot
+            return mark_safe(self._bbox_plot_fallback())
 
 
     @property
