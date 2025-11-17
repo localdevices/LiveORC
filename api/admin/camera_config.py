@@ -229,9 +229,13 @@ class CameraConfigAdmin(BaseAdmin):
         form.instance.camera_config = json.load(request._files["json_file"])
         super().save_model(request, obj, form, change)
 
+    @admin.display(description='Camera calibration geographical view')
     def bounding_box_view(self, obj):
         return obj.bbox_view
+    # bounding_box_view.short_description = 'Thumbnail'
+    # thumbnail_preview.allow_tags = True
 
+    @admin.display(description='Camera calibration 3D view')
     def bounding_box_3d_view(self, obj):
         return obj.bbox_plot_3d
 
