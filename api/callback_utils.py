@@ -93,6 +93,7 @@ def get_form_callback_discharge_post(instance):
     return models.Callback(
         func_name="discharge",
         request_type="POST",
+        kwargs={},
         endpoint=reverse(
             "api:site-timeseries-list",
             args=([

@@ -1,3 +1,15 @@
+## [0.2.3] - 2025-11-17
+### Added
+- Camera config admin view now also displays a 3D view of the camera configuration.
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- Camera config admin view checks if CRS is provided. If not, the map view is not displayed.
+- PATCH /api/site/<site_pk>/cameraconfig/<pk> was not working, now properly functions.
+### Security
+
+
 ## [0.2.2] - 2025-10-02
 ### Added
 ### Changed

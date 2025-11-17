@@ -18,6 +18,8 @@ COPY django-admin-interface/media /liveorc/media
 RUN apt update && apt install ffmpeg libsm6 libxext6 libgl1 python3-venv libgdal-dev libsqlite3-mod-spatialite nginx certbot gettext dos2unix cron -y && \
     # setup application with database
     pip install --upgrade pip && pip install --trusted-host pypi.python.org --requirement requirements.txt && pip install gunicorn && \
+    # override pyopenrivercam version
+    pip install --upgrade pyopenrivercam && \
     # make scripts executable and run as unix
     dos2unix /liveorc/start.sh && dos2unix /liveorc/nginx/letsencrypt-autogen.sh && dos2unix /liveorc/nginx/crontab && \
     chmod +x /liveorc/start.sh && chmod +x /liveorc/nginx/letsencrypt-autogen.sh && chmod +x /liveorc/nginx/crontab && \

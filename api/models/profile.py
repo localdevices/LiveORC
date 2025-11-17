@@ -67,7 +67,8 @@ class Profile(BaseModel):
     @property
     def crs(self):
         if self.data is not None:
-            return CRS.from_user_input(self.data["crs"]["properties"]["name"])
+            if "crs" in self.data:
+                return CRS.from_user_input(self.data["crs"]["properties"]["name"])
 
     @property
     def multipoint(self):
@@ -81,7 +82,7 @@ class Profile(BaseModel):
             multipoint = shapely.ops.transform(transformer, multipoint)
             return GEOSGeometry(multipoint.wkt, srid=4326)
 
-    multipoint.fget.short_description = "Cross section points (wkt) for profile measurements"
+    multipoint.fget.short_description = "Cross section points (wkt only) for profile measurements"
 
     @property
     def profile_view(self):

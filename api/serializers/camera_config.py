@@ -21,5 +21,14 @@ class CameraConfigSerializer(serializers.ModelSerializer):
 class CameraConfigCreateSerializer(CameraConfigSerializer):
     class Meta:
         model = CameraConfig
-        exclude = ("site", )
+        exclude = ("site",)
 
+
+class CameraConfigUpdateSerializer(CameraConfigSerializer):
+    class Meta:
+        model = CameraConfig
+        exclude = ("site", "creator")
+
+    def validate(self, data):
+        """Pass on the attributes as is, without user / creator / site check."""
+        return data
