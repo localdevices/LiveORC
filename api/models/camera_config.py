@@ -1,8 +1,12 @@
 from datetime import timedelta
 import base64
+import geopandas as gpd
 import io
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("Agg")  # make sure a non-interactive backend is used only
 import shapely.wkt
+
 from django.contrib.auth import get_user_model
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
@@ -12,10 +16,12 @@ from django.utils.html import mark_safe
 from django.utils.translation import gettext_lazy
 from pyproj import CRS, Transformer
 from shapely import ops
+from shapely.geometry import Point
 
 from api.models import BaseModel, Site, Server, Recipe, Profile
 import pyorc
 
+from api.tests.test_api_video import camera_config
 
 map_template = """
 <div id="id_geom_div_map" class="dj_map_wrapper">
@@ -59,10 +65,11 @@ map_template = """
 """
 
 # Simple HTML template for non‑geographic x/y plot
-_bbox_plot_template = """
+bbox_plot_3d_template = """
 <div class="bbox-plot-wrapper">
     <img src="data:image/png;base64,{}" alt="Bounding box and profile plot" />
 </div>
+
 """
 
 lens_position_schema = {
@@ -135,16 +142,17 @@ class CameraConfig(BaseModel):
         if self.camera_config is not None:
             if "crs" in self.camera_config:
                 crs = self.camera_config["crs"]
-                transformer = Transformer.from_crs(
-                    CRS.from_user_input(crs),
-                    CRS.from_epsg(4326),
-                    always_xy=True).transform
+                if crs:
+                    transformer = Transformer.from_crs(
+                        CRS.from_user_input(crs),
+                        CRS.from_epsg(4326),
+                        always_xy=True).transform
 
-                polygon = shapely.wkt.loads(self.camera_config["bbox"])
-                polygon = shapely.ops.transform(transformer, polygon)
-                return GEOSGeometry(polygon.wkt, srid=4326)
+                    polygon = shapely.wkt.loads(self.camera_config["bbox"])
+                    polygon = shapely.ops.transform(transformer, polygon)
+                    return GEOSGeometry(polygon.wkt, srid=4326)
 
-    bbox.fget.short_description = "Polygon bounding box (wkt) for area of interest"
+    bbox.fget.short_description = "Polygon bounding box (wkt only) for area of interest"
 
     @property
     def x(self):
@@ -170,28 +178,36 @@ class CameraConfig(BaseModel):
 
     width.fget.short_description = "Width of frames [pix]"
 
-    def _bbox_plot_fallback(self):
+    @property
+    def bbox_plot_3d(self):
         """
-        Fallback: render a simple x/y plot with cross section and bbox in matplotlib,
+        render a 3d plot with cross section and bbox in matplotlib,
         This does not use any geographic CRS; it just plots coordinates.
         """
-        fig = plt.figure(figsize=(10, 7))
+        fig = plt.figure(figsize=(7, 5))
         ax = fig.add_subplot(111, projection="3d")
         # load cam config and cross section from data fields
-        camera_config = pyorc.load_camera_config(self.data)
-        cs = pyorc.CrossSection(camera_config=camera_config, cs=self.profile.data)
-        camera_config.plot(ax=ax, mode="3d")
-        cs.plot(ax=ax, mode="3d")
+        camera_config = pyorc.CameraConfig(**self.camera_config)
+        cs_data, crs = pyorc.cli.cli_utils.read_shape(geojson=self.profile.data)
+        # coerce into a geopandas GeoDataFrame
+        if crs is not None:
+            geometry = [Point(_x, _y, _z) for _x, _y, _z in cs_data]
+            cs_data = gpd.GeoDataFrame(geometry=geometry, crs=crs)
+        cs = pyorc.CrossSection(camera_config=camera_config, cross_section=cs_data)
+        cs.camera_config.plot(ax=ax, mode="3d")
+        cs.plot(ax=ax, h=cs.camera_config.gcps["h_ref"])
         # ax.set_xlabel("x")
         # ax.set_ylabel("y")
         ax.set_aspect("equal", adjustable="datalim")
-        ax.legend(loc="best")
+        ax.legend(loc="best", fontsize=7)
 
         buf = io.BytesIO()
-        fig.savefig(buf, format="png", bbox_inches="tight")
+        fig.savefig(buf, format="jpg", dpi=100, bbox_inches="tight")
         plt.close(fig)
         img_b64 = base64.b64encode(buf.getvalue()).decode("ascii")
-        return _bbox_plot_template.format(img_b64)
+        return mark_safe(bbox_plot_3d_template.format(img_b64))
+
+    bbox_plot_3d.fget.short_description = "Camera calibration 3D view"
 
 
     @property
@@ -201,11 +217,15 @@ class CameraConfig(BaseModel):
                 bbox_wkt = self.bbox.wkt
             except Exception:
                 bbox_wkt = None
+        else:
+            bbox_wkt = None
         if self.profile and getattr(self.profile, "multipoint", None):
             try:
                 profile_wkt = self.profile.multipoint.wkt
             except Exception:
                 profile_wkt = None
+        else:
+            profile_wkt = None
         if bbox_wkt and profile_wkt:
             return mark_safe(
                 map_template.format(self.bbox.wkt, self.profile.multipoint.wkt, self.x, self.y)
@@ -222,8 +242,9 @@ class CameraConfig(BaseModel):
             )
         else:
             #fallback to simple plot
-            return mark_safe(self._bbox_plot_fallback())
+            return None
 
+    bbox_view.fget.short_description = "Camera calibration geographical view"
 
     @property
     def resolution(self):

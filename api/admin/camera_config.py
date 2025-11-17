@@ -110,7 +110,8 @@ class CameraConfigAdmin(BaseAdmin):
                 "width",
                 "resolution",
                 "window_size",
-                "bounding_box_view"
+                "bounding_box_view",
+                "bounding_box_3d_view"
             ]}
          )
     ]
@@ -147,7 +148,7 @@ class CameraConfigAdmin(BaseAdmin):
     list_filter = [SiteUserFilter]
     form = CameraConfigForm
     # inlines = [VideoInline]
-    readonly_fields = ["bounding_box_view", "height", "width", "resolution", "window_size", "bbox"]
+    readonly_fields = ["bounding_box_view", "bounding_box_3d_view", "height", "width", "resolution", "window_size", "bbox"]
     formfield_overrides = {}
 
     @admin.display(ordering='site__name', description="Site")
@@ -230,4 +231,7 @@ class CameraConfigAdmin(BaseAdmin):
 
     def bounding_box_view(self, obj):
         return obj.bbox_view
+
+    def bounding_box_3d_view(self, obj):
+        return obj.bbox_plot_3d
 
