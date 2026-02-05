@@ -1,3 +1,13 @@
+## [0.2.X] - 
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- Video POST without any files was not possible. This is now fixed. Only metadata can be posted now.
+### Security
+
+
 ## [0.2.3] - 2025-11-17
 ### Added
 - Camera config admin view now also displays a 3D view of the camera configuration.

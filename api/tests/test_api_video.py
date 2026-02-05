@@ -39,6 +39,13 @@ def prep_video_sample(video_sample_url):
     }
     return msg
 
+def prep_no_files_sample():
+    msg = {
+        "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "camera_config": 1,
+    }
+    return msg
+
 def prep_image_sample(image_sample_url):
     filename = os.path.split(image_sample_url)[-1]
     print(f"Downloading {image_sample_url}")
@@ -65,7 +72,7 @@ def camconfig(camconfig_url):
 camera_config = camconfig(camconfig_url)
 video_sample = prep_video_sample(video_sample_url)
 image_sample = prep_image_sample(image_sample_url)
-
+no_files_sample = prep_no_files_sample()
 
 camera_config_form = {
     "name": "ngwerere_cam",
@@ -102,6 +109,11 @@ class VideoViewTests(InitTestCase):
             data=video_sample
         )
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        # check if file is there, but image not
+        self.assertIsNotNone(r.data["file"])
+        self.assertIsNone(r.data["image"])
+        self.assertIsNotNone(r.data["thumbnail"])
+
         r = client.get("/api/site/1/video/1/")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         # make sure a second user with membership can see but not alter the video
@@ -127,7 +139,6 @@ class VideoViewTests(InitTestCase):
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
-
     def test_add_image(self):
         client = APIClient()
         client.login(username='user@institute1.com', password='test1234')
@@ -144,6 +155,34 @@ class VideoViewTests(InitTestCase):
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         r = client.get("/api/site/1/video/1/")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
+        # check if image is there, but file not
+        self.assertIsNotNone(r.data["image"])
+        self.assertIsNone(r.data["file"])
+        self.assertIsNotNone(r.data["thumbnail"])
+
+
+    def test_add_no_files(self):
+        client = APIClient()
+        client.login(username='user@institute1.com', password='test1234')
+        # create a camera config on site
+        r = client.post(
+            '/api/site/1/cameraconfig/',
+            camera_config_form
+        )
+        # post a video with only the result image instead of full video
+        r = client.post(
+            "/api/video/",
+            data=no_files_sample
+        )
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        r = client.get("/api/site/1/video/1/")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        # check if no files are present
+        self.assertIsNone(r.data["file"])
+        self.assertIsNone(r.data["image"])
+        self.assertIsNone(r.data["thumbnail"])
+
+
 
 
 

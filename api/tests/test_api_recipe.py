@@ -31,7 +31,9 @@ class RecipeViewTests(InitTestCase):
 
     def test_add_recipe(self):
         client = APIClient()
-        client.login(username='user@institute1.com', password='test1234')
+        user = "superuser@test.com"
+        password = "test1234"
+        client.login(username=user, password=password)
         # create a camera config on site
         r = client.post(
             '/api/recipe/',
@@ -43,5 +45,19 @@ class RecipeViewTests(InitTestCase):
         )
         # check the request
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        # client.login(username='user@institute1.com', password='test1234')
+
+        # check if recipe can be patched
+        r = client.patch(
+            '/api/recipe/1',
+            data={
+                "name": "general_recipe_patched",
+            },
+            follow=True
+        )
+        # check the request
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+
+
 
 

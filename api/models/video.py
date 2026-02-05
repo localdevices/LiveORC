@@ -246,9 +246,12 @@ class Video(models.Model):
             # extract one frame and save that as a keyframe
             add_frame_to_model(self.file, self.keyframe)
             add_frame_to_model(self.file, self.thumbnail, suffix="_thumb", thumb=True)
-        else:
+        elif self.image:
             # only add a thumbnail in this case
             add_frame_to_model(self.image, self.thumbnail, suffix="_thumb", thumb=True)
+        else:
+            # do nothing, no video file or image are provided
+            pass
         return True
 
     def make_thumbnail(self):
