@@ -49,7 +49,7 @@ class TaskAdmin(BaseAdmin):
     def filter_institute(self, request, qs):
         memberships = request.user.get_memberships()
         institutes = [m.institute for m in memberships]
-        return qs.filter(video__camera_config__site__institute__in=institutes)
+        return qs.filter(video__video_config__camera_config__site__institute__in=institutes)
 
     def get_video_timestamp(self, obj):
         return obj.video.timestamp

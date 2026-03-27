@@ -4,7 +4,7 @@ from api.admin import InstituteFilter
 
 from users.models import Institute
 
-FOREIGN_KEYS = ["institute", "site", "profile", "camera_config"]
+FOREIGN_KEYS = ["institute", "site", "cross_section", "cross_section_wl", "camera_config", "video_config"]
 
 
 class BaseForm(forms.ModelForm):

@@ -2,14 +2,19 @@ import mimetypes
 
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 from rest_framework import status, permissions, renderers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from api.serializers import VideoSerializer
 from api.models import Video, Task, VideoStatus
-from api.task_utils import get_task
+# from api.task_utils import get_task
 from api.views import BaseModelViewSet
 
+_SITE_PK_PARAM = OpenApiParameter(
+    name='site_pk', type=OpenApiTypes.INT, location=OpenApiParameter.PATH
+)
 
 class VideoViewSet(BaseModelViewSet):
     """
@@ -21,8 +26,8 @@ class VideoViewSet(BaseModelViewSet):
     http_method_names = ["post"]
 
     def get_queryset(self):
-        # video can also be retrieved nested per site, by filtering on the site of the cameraconfig property.
-        return Video.objects.filter(camera_config__site__id=self.kwargs['site_pk'])
+        # video can also be retrieved nested per site, by filtering on the site of the camera config via video config.
+        return Video.objects.filter(video_config__site__id=self.kwargs['site_pk'])
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def playback(self, request, *args, **kwargs):
@@ -74,14 +79,15 @@ class VideoViewSet(BaseModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
+    # TODO: Bring back once ORCOS task creation is supported
+    # @action(detail=True, methods=['post'], renderer_classes=[renderers.StaticHTMLRenderer])
+    # def create_task(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     task = get_task(instance, request, *args, **kwargs)
+    #     return redirect('api:video-list')
 
-    @action(detail=True, methods=['post'], renderer_classes=[renderers.StaticHTMLRenderer])
-    def create_task(self, request, *args, **kwargs):
-        instance = self.get_object()
-        task = get_task(instance, request, *args, **kwargs)
-        return redirect('api:video-list')
 
-
+@extend_schema(parameters=[_SITE_PK_PARAM])
 class VideoSiteViewSet(VideoViewSet):
     """
     API endpoints that allows videos to be edited

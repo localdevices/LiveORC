@@ -86,8 +86,10 @@ class TimeSeriesViewTests(InitTestCase):
                 '/api/site/1/timeseries/',
                 data={
                     "h": float(n),
-                    "timestamp": ts.strftime("%Y-%m-%dT%H:%M:%SZ")
-                }
+                    "timestamp": ts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "misc": {"test": 3.14, "test2": "hello"}
+                },
+                format="json"
             )
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         uri = reverse("api:site-timeseries-list", args=(["1"]))
@@ -102,4 +104,4 @@ class TimeSeriesViewTests(InitTestCase):
         r = client.get(
             uri + "?startDateTime=2000-01-01T04:00:00:00Z" + "&endDateTime=2000-01-01T07:00:00:00Z" + "&format=csv"
         )
-        self.assertEqual(len(r.content), 307)
+        self.assertEqual(len(r.content), 372)

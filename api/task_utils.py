@@ -1,10 +1,11 @@
 import os
+import copy
 
 from django.conf import settings
 from django.urls import reverse
 # helper functions to develop tasks from models
 from nodeorc import models
-from api.models import Video, CameraConfig
+from api.models import Video, VideoConfig
 from api import callback_utils
 
 
@@ -151,11 +152,6 @@ def get_task(
     }
     subtasks = get_subtasks(instance, output_files=output_files)
     callbacks = []
-    # callbacks = get_callbacks(
-    #     instance.camera_config,
-    #     query_callbacks
-    # )
-
     task = models.Task(
         subtasks=subtasks,
         input_files=input_files,
@@ -204,10 +200,10 @@ def get_storage(instance):
 
 
 def get_subtasks_form(instance):
-    camera_config = instance
+    video_config = instance
     video = None
     subtask = get_subtask_all(
-        camera_config=camera_config,
+        video_config=video_config,
         video=video
     )
     return [subtask]
@@ -232,23 +228,25 @@ def get_subtasks(instance, output_files=OUTPUT_FILES_ALL):
         raise Exception(error_msg)
     if not instance.time_series.h:
         raise Exception(error_msg)
-    camera_config = instance.camera_config
+    video_config = instance.video_config
+    if not video_config:
+        raise Exception("Cannot create task, no video_config available")
     video = instance
-    if not camera_config.recipe:
+    if not video_config.recipe:
         raise Exception("Cannot create task, no recipe available")
     # we assume first that only 2d is processed
     task_type = "2d_only"
     # check if we can do a full processing with 1d included. This requires camera profile and a transect section in the
     # recipe
-    if camera_config.profile and "transect" in camera_config.recipe.data:
+    if video_config.cross_section and "transect" in video_config.recipe.data:
         task_type = "all"
 
     # now dependent on the available data, prepare a task
     if task_type == "all":
-        subtask = get_subtask_all(camera_config=camera_config, video=video, output_files=output_files)
+        subtask = get_subtask_all(video_config=video_config, video=video, output_files=output_files)
     else:
         raise NotImplementedError(
-            "2D only tasks are not yet supported. Add a profile to the Camera Config to allow for processing this task."
+            "2D only tasks are not yet supported. Add a cross section to the VideoConfig to allow processing this task."
         )
     # we provide a list back so that we can later extend this to hold several subtasks, e.g. one per cross section
     # if we have more than one.
@@ -261,16 +259,16 @@ def get_callbacks(instance, query_callbacks):
 
 
 def get_subtask_all(
-        camera_config,
-        video,
-        output_files=OUTPUT_FILES_ALL
+    video_config,
+    video,
+    output_files=OUTPUT_FILES_ALL
 ):
     """
     Makes a full subtask using the entire recipe, including getting profiles ready for processing where needed
 
     Parameters
     ----------
-    camera_config
+    video_config
     video
 
     Returns
@@ -279,9 +277,9 @@ def get_subtask_all(
     """
 
     name = "velocity_flow_subprocess"
-    cameraconfig = camera_config.camera_config
-    recipe = camera_config.recipe.data
-    profile = camera_config.profile.data
+    cameraconfig = video_config.camera_config.data
+    recipe = video_config.recipe.data
+    cross_section = video_config.cross_section.features
     if video:
         h_a = video.time_series.h
         videofile = str(video.file)
@@ -301,7 +299,7 @@ def get_subtask_all(
             }
         }
     # remove the geojson and shapefile parts
-    recipe = recipe_update_profile(recipe, profile)
+    recipe = recipe_update_cross_section(recipe, cross_section)
 
     # TODO: input_files should refer to name of file only (now full subpath to MEDIA_ROOT). Location is arranged by the Storage
     # define the subtask
@@ -324,7 +322,7 @@ def get_subtask_all(
     return subtask
 
 
-def recipe_update_profile(recipe, profile):
+def recipe_update_cross_section(recipe, cross_section):
     """
     Replaces any profile related information in the recipe with the provided profile instance.
     The routine checks this in the "transect"  section, where profile data is defined, and in the "plot"
@@ -334,8 +332,8 @@ def recipe_update_profile(recipe, profile):
     ----------
     recipe : dict
         containing a pyorc recipe as json
-    profile : dict
-        geojson with profile data
+    cross_section : dict
+        geojson with cross-section data
 
     Returns
     -------
@@ -343,6 +341,7 @@ def recipe_update_profile(recipe, profile):
         updated recipe
 
     """
+    recipe = copy.deepcopy(recipe)
     transect_template = recipe["transect"]
     transect = {}
     trans_no = 0
@@ -356,8 +355,8 @@ def recipe_update_profile(recipe, profile):
                 del v["geojson"]
             if "shapefile" in v:
                 del v["shapefile"]
-            # replace the geojson for the profile values
-            v["geojson"] = profile
+            # replace the geojson for the cross-section values
+            v["geojson"] = cross_section
             # replace the transect data
             transect[f"transect_{trans_no}"] = v
             # we only support one transect for now, so here we break. We may alter this when multiple transects
@@ -405,7 +404,7 @@ def get_callback_discharge_patch(instance):
         endpoint=reverse(
             "api:site-timeseries-detail",
             args=([
-                str(instance.camera_config.site.id),
+                str(instance.video_config.site.id),
                 str(instance.time_series.id)
             ])
         )
@@ -417,12 +416,12 @@ def get_callback_video_patch(instance):
         func_name="video",
         request_type="PATCH",
         kwargs={
-            "camera_config": instance.camera_config.id
+            "video_config": instance.video_config.id
         },
         endpoint=reverse(
             "api:site-video-detail",
             args=([
-                str(instance.camera_config.site.id),
+                str(instance.video_config.site.id),
                 str(instance.id)
             ])
         )

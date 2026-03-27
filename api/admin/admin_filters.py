@@ -25,14 +25,14 @@ class InstituteOwnerFilter(admin.SimpleListFilter):
         if request.user.is_superuser:
             institutes = Institute.objects.all()
         else:
-            institutes = Institute.filter(owner=request.user)
+            institutes = Institute.objects.filter(owner=request.user)
 
         return institutes.values_list("id", "name")
 
 
 class VideoSiteUserFilter(admin.SimpleListFilter):
     title = "Filter sites"
-    parameter_name = "camera_config__site__user"
+    parameter_name = "video_config__camera_config__site__user"
 
     def lookups(self, request, model_admin):
         # filter the filter key for the current user. TODO: change in institute once issue 34 is resolved
@@ -46,7 +46,7 @@ class VideoSiteUserFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         value = self.value()
         if value:
-            return queryset.filter(camera_config__site__id=value)
+            return queryset.filter(video_config__camera_config__site__id=value)
 
 
 class InstituteFilter(admin.SimpleListFilter):
@@ -72,14 +72,14 @@ class VideoInstituteFilter(InstituteFilter):
     def queryset(self, request, queryset):
         value = self.value()
         if value:
-            return queryset.filter(camera_config__site__institute__id=value)
+            return queryset.filter(video_config__camera_config__site__institute__id=value)
 
 
 class TaskInstituteFilter(InstituteFilter):
     def queryset(self, request, queryset):
         value = self.value()
         if value:
-            return queryset.filter(video__camera_config__site__institute__id=value)
+            return queryset.filter(video__video_config__camera_config__site__institute__id=value)
 
 
 

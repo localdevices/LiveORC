@@ -9,7 +9,7 @@ from .test_api_recipe import recipe
 from .test_api_profile import profile
 from .test_api_video import camera_config_form, prep_video_sample, video_sample_url
 
-from api.models import Site, Recipe, Profile, Video, VideoStatus, Task
+from api.models import Site, Recipe, CrossSection, Video, VideoStatus, Task
 from users.models import User, Institute
 
 video_sample = prep_video_sample(video_sample_url)
@@ -21,7 +21,7 @@ class TaskViewTests(InitTestCase):
         institute = Institute.objects.get(pk=1)
         site = Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151), institute=institute, creator=user)
         Recipe.objects.create(name="ngwerere_recipe", data=recipe, institute=institute, creator=user)
-        Profile.objects.create(name="some_profile", data=profile, site=site, creator=user)
+        CrossSection.objects.create(name="some_cross_section", features=profile, site=site, creator=user)
         # pass
     def tearDown(self):
         pass
@@ -34,6 +34,17 @@ class TaskViewTests(InitTestCase):
             '/api/site/1/cameraconfig/',
             camera_config_form
         )
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        r = client.post(
+            '/api/site/1/videoconfig/',
+            {
+                "name": "ngwerere_video_config",
+                "camera_config": 1,
+                "recipe": 1,
+                "cross_section": 1,
+            }
+        )
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         # post a video
         r = client.post(
             "/api/video/",
@@ -73,6 +84,10 @@ class TaskViewTests(InitTestCase):
         r = client.post(
             f'/api/site/1/video/{video_id}/task/'
         )
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        # TODO modify to 400 when task creation with ORCOS is implemented, now 404 because endpoint is commented out
+
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)  
+
+        # self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
 

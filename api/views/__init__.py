@@ -2,11 +2,13 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from .base import BaseModelViewSet
+from .version import VersionView
 from .site import SiteViewSet
 from .camera_config import CameraConfigViewSet
-from .profile import ProfileViewSet
+from .cross_section import CrossSectionViewSet
+from .video_config import VideoConfigViewSet
 from .recipe import RecipeViewSet
-from .task import TaskViewSet
+# from .task import TaskViewSet
 from .time_series import TimeSeriesViewSet
 from .video import VideoViewSet, VideoSiteViewSet
 from .device import DeviceViewSet

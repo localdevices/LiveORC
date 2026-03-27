@@ -78,7 +78,7 @@
 
 </div>
 </form>
-<form enctype="multipart/form-data" id="send_form" action="../send_form" method="post">
+{% comment %} <form enctype="multipart/form-data" id="send_form" action="../send_form" method="post">
     {% csrf_token %}
   <fieldset class="module aligned ">
     <h2>Send to device</h2>
@@ -146,7 +146,7 @@
         <input type="submit" name="_send_to_device" value="send" style="background:green;" class="default"></input>
     </div>
 </fieldset>
-</form>
+</form> {% endcomment %}
 </div>
 {% endblock %}
 <!--<div class="submit-row">-->

@@ -3,11 +3,12 @@ from django.contrib.auth.models import Group
 from api.models import (
     Site,
     CameraConfig,
+    VideoConfig,
     Video,
     Task,
     TaskForm,
     Server,
-    Profile,
+    CrossSection,
     Recipe,
     TimeSeries,
     Device
@@ -25,7 +26,8 @@ from .admin_filters import (
 from .base import BaseAdmin, BaseInstituteAdmin, BaseForm
 from .time_series import TimeSeriesAdmin
 from .camera_config import CameraConfigAdmin
-from .profile import ProfileAdmin
+from .cross_section import CrossSectionAdmin
+from .video_config import VideoConfigAdmin
 from .recipe import RecipeAdmin
 from .video import VideoInline, VideoAdmin
 from .site import SiteAdmin
@@ -42,7 +44,8 @@ from .server import ServerAdmin
 
 admin.site.register(Site, SiteAdmin)
 admin.site.register(CameraConfig, CameraConfigAdmin)
-admin.site.register(Profile, ProfileAdmin)
+admin.site.register(VideoConfig, VideoConfigAdmin)
+admin.site.register(CrossSection, CrossSectionAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 # admin.site.register(Project, ProjectAdmin)  # leave out for now, may become relevant for future geospatial applications
 admin.site.register(Video, VideoAdmin)

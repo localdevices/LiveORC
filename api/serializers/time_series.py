@@ -31,6 +31,7 @@ class TimeSeriesSerializer(QueryFieldsMixin, serializers.ModelSerializer):
             "wetted_surface",
             "wetted_perimeter",
             "fraction_velocimetry",
+            "misc",
             "creator",
             "site",
             "video"

@@ -2,18 +2,18 @@ from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 
-from api.models import Profile
+from api.models import CrossSection
 from api.admin import BaseAdmin, SiteUserFilter, BaseForm
 
 import json
 import pyorc
 
 
-class ProfileForm(BaseForm):
+class CrossSectionForm(BaseForm):
     geojson_file = forms.FileField()
 
     class Meta:
-        model = Profile
+        model = CrossSection
         fields = "__all__"
 
     def clean(self):
@@ -26,10 +26,10 @@ class ProfileForm(BaseForm):
                 # verify that geojson contains the right data
                 data, crs = pyorc.cli.cli_utils.read_shape(geojson=geo)
             except BaseException as e:
-                raise ValidationError(f"Problem with profile file: {e}")
+                raise ValidationError(f"Problem with cross section file: {e}")
 
 
-class ProfileAdmin(BaseAdmin):
+class CrossSectionAdmin(BaseAdmin):
     class Media:
         js = (
             'https://cdn.jsdelivr.net/npm/ol@v7.2.2/dist/ol.js',
@@ -43,9 +43,9 @@ class ProfileAdmin(BaseAdmin):
         }
     fieldsets = [
         ("User input", {"fields": ["name", "site", "timestamp", "geojson_file"]}),
-        ("Resulting non-editable profile information", {
+        ("Resulting non-editable cross section information", {
             "fields": [
-                "profile_view",
+                "cross_section_view",
                 "crs",
                 "multipoint",
             ]}
@@ -54,8 +54,8 @@ class ProfileAdmin(BaseAdmin):
     list_display = ["name", "timestamp", "get_site_name"]
     search_fields = ["site"]
     list_filter = [SiteUserFilter]
-    form = ProfileForm
-    readonly_fields = ["profile_view", "crs", "multipoint"]
+    form = CrossSectionForm
+    readonly_fields = ["cross_section_view", "crs", "multipoint"]
     formfield_overrides = {}
     @admin.display(ordering='site__name', description="Site")
     def get_site_name(self, obj):
@@ -68,9 +68,9 @@ class ProfileAdmin(BaseAdmin):
 
     def save_model(self, request, obj, form, change):
         request._files["geojson_file"].seek(0)
-        form.instance.data = json.load(request._files["geojson_file"])
+        form.instance.features = json.load(request._files["geojson_file"])
         super().save_model(request, obj, form, change)
 
-    def profile_view(self, obj):
-        return obj.profile_view
+    def cross_section_view(self, obj):
+        return obj.cross_section_view
 

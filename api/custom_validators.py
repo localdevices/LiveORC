@@ -4,6 +4,9 @@ from users.models import User
 
 
 def institute_validator(institute, user):
+    # pass if user is superuser
+    if user.is_superuser:
+        return
     # if institute is not None
     if institute:
         owned_institutes = [m.institute for m in user.get_owned_institute_memberships()]
@@ -16,6 +19,8 @@ class InstituteOwned:
     requires_context = True
 
     def __call__(self, value, serializer_field):
+        if serializer_field.context["request"].user.is_superuser:
+            return
         if "institute" in value:
             owned_institutes = [m.institute for m in serializer_field.context["request"].user.get_owned_institute_memberships()]
             if not (value["institute"] in owned_institutes):
@@ -26,6 +31,8 @@ class SiteOwned:
     requires_context = True
 
     def __call__(self, value, serializer_field):
+        if serializer_field.context["request"].user.is_superuser:
+            return
         if "site" in value:
             user = User.objects.get(pk=serializer_field.initial_data["creator"])
             owned_institutes = [m.institute for m in user.get_owned_institute_memberships()]

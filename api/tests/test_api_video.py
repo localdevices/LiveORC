@@ -4,7 +4,7 @@ from django.contrib.gis.geos import Point
 from django.core.files.uploadedfile import SimpleUploadedFile
 from .test_setup_db import InitTestCase
 # Create your tests here.
-from api.models import Site, Recipe, Profile
+from api.models import Site, Recipe, CrossSection
 from users.models import User, Institute
 from datetime import datetime
 import json
@@ -34,7 +34,7 @@ def prep_video_sample(video_sample_url):
     # }
     msg = {
         "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "camera_config": 1,
+        "video_config": 1,
         "file": video_file
     }
     return msg
@@ -42,7 +42,7 @@ def prep_video_sample(video_sample_url):
 def prep_no_files_sample():
     msg = {
         "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "camera_config": 1,
+        "video_config": 1,
     }
     return msg
 
@@ -57,7 +57,7 @@ def prep_image_sample(image_sample_url):
     # }
     msg = {
         "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "camera_config": 1,
+        "video_config": 1,
         "image": image_file
     }
     return msg
@@ -79,8 +79,13 @@ camera_config_form = {
     "site": 1,
     "end_date": "2099-01-01",
     "camera_config": json.dumps(camera_config),
+}
+
+video_config_form = {
+    "name": "ngwerere_video_config",
+    "camera_config": 1,
     "recipe": 1,
-    "profile": 1
+    "cross_section": 1,
 }
 
 
@@ -90,7 +95,7 @@ class VideoViewTests(InitTestCase):
         institute = Institute.objects.get(pk=1)
         site = Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151), creator=user, institute=institute)
         Recipe.objects.create(name="ngwerere_recipe", data=recipe, creator=user, institute=institute)
-        Profile.objects.create(name="some_profile", data=profile, site=site, creator=user)
+        CrossSection.objects.create(name="some_cross_section", features=profile, site=site, creator=user)
 
     def tearDown(self):
         pass
@@ -103,6 +108,9 @@ class VideoViewTests(InitTestCase):
             '/api/site/1/cameraconfig/',
             camera_config_form
         )
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        r = client.post('/api/site/1/videoconfig/', video_config_form)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         # post a video
         r = client.post(
             "/api/video/",
@@ -147,6 +155,9 @@ class VideoViewTests(InitTestCase):
             '/api/site/1/cameraconfig/',
             camera_config_form
         )
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        r = client.post('/api/site/1/videoconfig/', video_config_form)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         # post a video with only the result image instead of full video
         r = client.post(
             "/api/video/",
@@ -169,6 +180,9 @@ class VideoViewTests(InitTestCase):
             '/api/site/1/cameraconfig/',
             camera_config_form
         )
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        r = client.post('/api/site/1/videoconfig/', video_config_form)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         # post a video with only the result image instead of full video
         r = client.post(
             "/api/video/",

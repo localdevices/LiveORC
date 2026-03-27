@@ -43,6 +43,7 @@ class TimeSeries(BaseModel):
     fraction_velocimetry = models.FloatField(help_text="Fraction of discharge resolved using velocimetry [-]", null=True, blank=True)
     v_bulk = models.FloatField(help_text="Bulk velocity [m/s]", null=True, blank=True)
     v_av = models.FloatField(help_text="Average surface velocity [m/s]", null=True, blank=True)
+    misc = models.JSONField(help_text="Miscellaneous data from time series processes", null=True, blank=True)
 
     # TODO: create link with videos, filtered on site, to add water level to those videos.
     def save(self, *args, **kwargs):
@@ -51,14 +52,14 @@ class TimeSeries(BaseModel):
         Video = apps.get_model('api.Video')
         from ..models import VideoStatus
         videos_at_site = Video.objects.filter(
-            camera_config__site__id=self.site.id
+            video_config__site__id=self.site.id
         ).filter(status=VideoStatus.NEW)
         if len(videos_at_site) != 0:
             # apparently there is a candidate time series record
             video_closest = get_closest_to_dt(videos_at_site, self.timestamp)
             # check if time diff is acceptable
             dt = np.abs(self.timestamp - video_closest.timestamp)
-            if dt < video_closest.camera_config.allowed_dt:
+            if video_closest.video_config and video_closest.video_config.camera_config and dt < video_closest.video_config.camera_config.allowed_dt:
                 video_closest.time_series = self
                 # video_closest.status = VideoStatus.QUEUE
                 video_closest.save()

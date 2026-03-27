@@ -3,7 +3,7 @@ from django import forms
 
 from api.models import Device
 from api.models import DeviceStatus, DeviceFormStatus
-import nodeorc
+# import nodeorc
 
 class DeviceForm(forms.ModelForm):
 
@@ -73,7 +73,8 @@ class DeviceAdmin(admin.GISModelAdmin):
         """
         Check if currently active form of device is functional
         """
-
-        return obj.nodeorc_version == nodeorc.__version__
+        # TODO: check sync between orcos and liveorc version requirements
+        # return obj.nodeorc_version == nodeorc.__version__
+        return True
     version_synced.boolean = True
     version_synced.allow_tags = True

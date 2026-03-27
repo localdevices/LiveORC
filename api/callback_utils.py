@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from nodeorc import models
+# from nodeorc import models
 
 
 def get_tokens_for_user(user):
@@ -70,7 +70,7 @@ def get_task_callback_discharge_patch(instance):
         endpoint=reverse(
             "api:site-timeseries-detail",
             args=([
-                str(instance.camera_config.site.id),
+                str(instance.effective_camera_config.site.id),
                 str(instance.time_series.id)
             ])
         ),
@@ -110,7 +110,7 @@ def get_form_callback_video_post(instance):
         func_name="video",
         request_type="POST",
         kwargs={
-            "camera_config": instance.id
+            "video_config": instance.id
         },
         endpoint=reverse(
             "api:video-list",
@@ -125,7 +125,7 @@ def get_form_callback_video_no_file_post(instance):
         func_name="video_no_file",
         request_type="POST",
         kwargs={
-            "camera_config": instance.id
+            "video_config": instance.id
         },
         endpoint=reverse(
             "api:video-list",
@@ -140,12 +140,12 @@ def get_task_callback_video_patch(instance):
         func_name="video",
         request_type="PATCH",
         kwargs={
-            "camera_config": instance.camera_config.id
+            "video_config": instance.video_config.id
         },
         endpoint=reverse(
             "api:site-video-detail",
             args=([
-                str(instance.camera_config.site.id),
+                str(instance.effective_camera_config.site.id),
                 str(instance.id)
             ])
         ),
