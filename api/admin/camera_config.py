@@ -51,6 +51,7 @@ class CameraConfigAdmin(BaseAdmin):
                     "resolution",
                     "window_size",
                     "bounding_box_view",
+                    "bounding_box_3d_view"
                 ]
             },
         ),
@@ -60,7 +61,7 @@ class CameraConfigAdmin(BaseAdmin):
     search_fields = ["name"]
     list_filter = [SiteUserFilter]
     form = CameraConfigForm
-    readonly_fields = ["bounding_box_view", "height", "width", "resolution", "window_size", "bbox"]
+    readonly_fields = ["bounding_box_view", "bounding_box_3d_view", "height", "width", "resolution", "window_size", "bbox"]
 
     @admin.display(ordering="site__name", description="Site")
     def get_site_name(self, obj):
@@ -79,3 +80,7 @@ class CameraConfigAdmin(BaseAdmin):
     @admin.display(description="Camera calibration geographical view")
     def bounding_box_view(self, obj):
         return obj.bbox_view
+
+    @admin.display(description="Camera calibration 3D view")
+    def bounding_box_3d_view(self, obj):
+        return obj.bbox_plot_3d

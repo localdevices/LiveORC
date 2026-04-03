@@ -1,4 +1,3 @@
-import pyorc
 import shapely
 import shapely.ops
 import shapely.geometry
@@ -8,8 +7,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.html import mark_safe
 
+from pyorc.cli.cli_utils import read_shape
 from pyproj import CRS, Transformer
-
 from api.models import BaseModel, Site
 
 map_template = """
@@ -59,7 +58,7 @@ class CrossSection(BaseModel):
     # TODO: change into a GeoJSON field (using GeoDjango)
     @property
     def coords(self):
-        data, crs = pyorc.cli.cli_utils.read_shape(geojson=self.features)
+        data, crs = read_shape(geojson=self.features)
         return data
 
     @property

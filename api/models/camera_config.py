@@ -1,7 +1,13 @@
-from datetime import timedelta
-
+import base64
+import io
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("Agg")
+import pyorc
 import shapely.ops
 import shapely.wkt
+
+from datetime import timedelta
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -42,6 +48,28 @@ map_template = """
 </script>
 """
 
+# Simple HTML template for non‑geographic x/y plot
+bbox_plot_3d_template = """
+<div class="bbox-plot-wrapper">
+    <img src="data:image/png;base64,{}" alt="3D camera config plot" />
+</div>
+
+"""
+
+lens_position_schema = {
+    'schema': 'http://json-schema.org/draft-07/schema#',
+    'type': 'object',
+    'properties': {
+        'x': {
+            'type': 'float'
+        },
+        'y': {
+            'type': 'float'
+        }
+    },
+    'required': ['x', 'y', 'z']
+}
+
 
 class CameraConfig(BaseModel):
     """Camera pose/calibration data used by VideoConfig."""
@@ -80,7 +108,7 @@ class CameraConfig(BaseModel):
 
     @property
     def bbox(self):
-        if self.data and "crs" in self.data and self.data.get("bbox"):
+        if self.data and "crs" in self.data and self.data["crs"] is not None and self.data.get("bbox"):
             transformer = Transformer.from_crs(
                 CRS.from_user_input(self.data["crs"]),
                 CRS.from_epsg(4326),
@@ -113,6 +141,29 @@ class CameraConfig(BaseModel):
             return self.data.get("width")
 
     width.fget.short_description = "Width of frames [pix]"
+
+    @property
+    def bbox_plot_3d(self):
+        """
+        render a 3d plot with bbox and gcps in matplotlib,
+        This does not use any geographic CRS; it just plots coordinates.
+        """
+        fig = plt.figure(figsize=(7, 5))
+        ax = fig.add_subplot(111, projection="3d")
+        # load cam config and cross section from data fields
+        camera_config = pyorc.CameraConfig(**self.data)
+        camera_config.plot(ax=ax, mode="3d")
+        ax.set_aspect("equal", adjustable="datalim")
+        ax.legend(loc="best", fontsize=7)
+
+        buf = io.BytesIO()
+        fig.savefig(buf, format="jpg", dpi=100, bbox_inches="tight")
+        plt.close(fig)
+        img_b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+        return mark_safe(bbox_plot_3d_template.format(img_b64))
+
+    bbox_plot_3d.fget.short_description = "Camera calibration 3D view"
+
 
     @property
     def bbox_view(self):

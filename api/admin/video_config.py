@@ -42,6 +42,17 @@ class VideoConfigForm(BaseForm):
 
 
 class VideoConfigAdmin(BaseAdmin):
+    class Media:
+        js = (
+            "https://cdn.jsdelivr.net/npm/ol@v7.2.2/dist/ol.js",
+            "gis/js/OLMapWidget.js",
+        )
+        css = {
+            "all": (
+                "https://cdn.jsdelivr.net/npm/ol@v7.2.2/ol.css",
+                "gis/css/ol3.css",
+            )
+        }
     fieldsets = [
         (
             "User input",
@@ -56,13 +67,23 @@ class VideoConfigAdmin(BaseAdmin):
                     # "tvec",
                 ]
             },
-        )
+        ),
+            (
+                "Resulting non-editable video configuration",
+                {
+                    "fields": [
+                        "vc_3d_view",
+                        "vc_view",
+                    ]
+                },
+            ),
     ]
 
     list_display = ["name", "get_site_name"]
     search_fields = ["name"]
     list_filter = [SiteUserFilter]
     form = VideoConfigForm
+    readonly_fields = ["vc_view", "vc_3d_view"]
 
     @admin.display(ordering="site__name", description="Site")
     def get_site_name(self, obj):
@@ -86,6 +107,14 @@ class VideoConfigAdmin(BaseAdmin):
     def filter_institute(self, request, qs):
         institutes = request.user.get_membership_institutes()
         return qs.filter(site__institute__in=institutes)
+
+    @admin.display(description="Video configuration 3D view")
+    def vc_3d_view(self, obj):
+        return obj.vc_plot_3d
+
+    @admin.display(description="Video configuration geographical view")
+    def vc_view(self, obj):
+        return obj.vc_view
 
     # TODO replace with ORC-OS interface once implemented
     # def send_form_view(self, request, pk):
