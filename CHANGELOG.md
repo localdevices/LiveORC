@@ -1,8 +1,16 @@
-## [0.2.X] - 
+## [0.3.0] - 
 ### Added
 ### Changed
+- API configuration has changed to match the data models of ORC-OS. This prepares LiveORC and ORC-OS to work
+  together operationally. This also prepares cloud processing using ORC-OS API as backend.
+- New naming convention `crosssection` and "Cross section" (in admin interface) for end points and database models
+  for cross sections, used to estimate discharge and water levels.
 ### Deprecated
+- NodeORC has been entirely removed. Cloud processing will be replaced in a future release by the ORC-OS API.
+  Currently temporarily, cloud processing is not possible. Only edge processing with ORC-OS is supported.
 ### Removed
+- All references to `profile`. Has been deprecated in favour of `crosssection` which resembles better the naming
+  convention throughout the ORC ecosystem.
 ### Fixed
 - Video POST without any files was not possible. This is now fixed. Only metadata can be posted now.
 ### Security

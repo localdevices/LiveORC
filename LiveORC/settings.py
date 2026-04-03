@@ -32,7 +32,7 @@ import boto3
 FORMS_URLFIELD_ASSUME_HTTPS = True
 
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-VERSION = "0.2.3"
+VERSION = "0.3.0"
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # try to get BASE_DIR from env variable
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -65,7 +65,6 @@ INSTALLED_APPS = [
     "import_export",
     'LiveORC.admin.CustomAdminConfig',
     'django.contrib.auth',
-    # 'django.contrib.admin',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -164,7 +163,6 @@ if os.getenv("LORC_DB_HOST"):
         }
     }
 else:
-    # SpatiaLiteWrapper.prepare_database = _patched_prepare_database
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.spatialite',
