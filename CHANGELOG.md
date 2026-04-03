@@ -1,4 +1,4 @@
-## [0.3.0] - 
+## [0.3.0] - 2026-04-03
 ### Added
 ### Changed
 - API configuration has changed to match the data models of ORC-OS. This prepares LiveORC and ORC-OS to work
