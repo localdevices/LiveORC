@@ -6,14 +6,17 @@
 - New naming convention `crosssection` and "Cross section" (in admin interface) for end points and database models
   for cross sections, used to estimate discharge and water levels.
 ### Deprecated
-- NodeORC has been entirely removed. Cloud processing will be replaced in a future release by the ORC-OS API.
-  Currently temporarily, cloud processing is not possible. Only edge processing with ORC-OS is supported.
 ### Removed
 - All references to `profile`. Has been deprecated in favour of `crosssection` which resembles better the naming
   convention throughout the ORC ecosystem.
+- NodeORC has been entirely removed. Cloud processing will be replaced in a future release by the ORC-OS API.     
+  Temporary descriptions of this issue have been added to the README.md
+  Currently temporarily, cloud processing is not possible. Only edge processing with ORC-OS is supported.
 ### Fixed
 - Video POST without any files was not possible. This is now fixed. Only metadata can be posted now.
+- Docker compose modified to prepare for ORC-OS interfacing.
 ### Security
+- Migration from Django 5.x to 6.x currently on 6.0.3
 
 
 ## [0.2.3] - 2025-11-17
