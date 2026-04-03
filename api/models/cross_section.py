@@ -1,16 +1,14 @@
-import pyorc
 import shapely
+import shapely.ops
 import shapely.geometry
 
-from django.contrib.auth import get_user_model
 from django.contrib.gis.geos import GEOSGeometry
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.html import mark_safe
 
+from pyorc.cli.cli_utils import read_shape
 from pyproj import CRS, Transformer
-
 from api.models import BaseModel, Site
 
 map_template = """
@@ -47,12 +45,11 @@ map_template = """
 """
 
 
-class Profile(BaseModel):
-    """
-    Contains the river profile as a geojson
-    """
-    name = models.CharField(max_length=100, help_text="Recognizable unique name for your profile")
-    data = models.JSONField(help_text="GeoJSON fields containing Point (x,y,z) geometries that encompass a cross section")
+class CrossSection(BaseModel):
+    """Contains cross-section geometry as a GeoJSON structure."""
+
+    name = models.CharField(max_length=100, help_text="Recognizable unique name for your cross section")
+    features = models.JSONField(help_text="GeoJSON fields containing Point (x,y,z) geometries that encompass a cross section")
     timestamp = models.DateTimeField("survey date", default=timezone.now)
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
 
@@ -61,14 +58,14 @@ class Profile(BaseModel):
     # TODO: change into a GeoJSON field (using GeoDjango)
     @property
     def coords(self):
-        data, crs = pyorc.cli.cli_utils.read_shape(geojson=self.data)
+        data, crs = read_shape(geojson=self.features)
         return data
 
     @property
     def crs(self):
-        if self.data is not None:
-            if "crs" in self.data:
-                return CRS.from_user_input(self.data["crs"]["properties"]["name"])
+        if self.features is not None:
+            if "crs" in self.features:
+                return CRS.from_user_input(self.features["crs"]["properties"]["name"])
 
     @property
     def multipoint(self):
@@ -82,10 +79,10 @@ class Profile(BaseModel):
             multipoint = shapely.ops.transform(transformer, multipoint)
             return GEOSGeometry(multipoint.wkt, srid=4326)
 
-    multipoint.fget.short_description = "Cross section points (wkt only) for profile measurements"
+    multipoint.fget.short_description = "Cross section points (wkt only)"
 
     @property
-    def profile_view(self):
+    def cross_section_view(self):
         return mark_safe(
             map_template.format(
                 self.multipoint.wkt,
@@ -93,3 +90,13 @@ class Profile(BaseModel):
                 self.multipoint.centroid.y
             )
         )
+
+    @property
+    def profile_view(self):
+        # Backward-compatible alias used by existing admin templates.
+        return self.cross_section_view
+
+    class Meta:
+        db_table = "api_profile"
+        verbose_name = "cross section"
+        verbose_name_plural = "cross sections"

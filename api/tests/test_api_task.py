@@ -9,7 +9,7 @@ from .test_api_recipe import recipe
 from .test_api_profile import profile
 from .test_api_video import camera_config_form, prep_video_sample, video_sample_url
 
-from api.models import Site, Recipe, Profile, Video, VideoStatus, Task
+from api.models import Site, Recipe, CrossSection, Video, VideoStatus, Task
 from users.models import User, Institute
 
 video_sample = prep_video_sample(video_sample_url)
@@ -21,7 +21,7 @@ class TaskViewTests(InitTestCase):
         institute = Institute.objects.get(pk=1)
         site = Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151), institute=institute, creator=user)
         Recipe.objects.create(name="ngwerere_recipe", data=recipe, institute=institute, creator=user)
-        Profile.objects.create(name="some_profile", data=profile, site=site, creator=user)
+        CrossSection.objects.create(name="some_cross_section", features=profile, site=site, creator=user)
         # pass
     def tearDown(self):
         pass
@@ -34,18 +34,31 @@ class TaskViewTests(InitTestCase):
             '/api/site/1/cameraconfig/',
             camera_config_form
         )
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        r = client.post(
+            '/api/site/1/videoconfig/',
+            {
+                "name": "ngwerere_video_config",
+                "camera_config": 1,
+                "recipe": 1,
+                "cross_section": 1,
+            }
+        )
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         # post a video
         r = client.post(
             "/api/video/",
             data=video_sample
         )
         video_id = r.json()["id"]
-        # now also post a task, with
+        # TODO bring back task tests as soon as ORC-OS is connected
+        # # now also post a task, with
         r = client.post(
             f'/api/site/1/video/{video_id}/task/'
         )
-        # as there is no water level yet, this should give a 400 error
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        # as there is no water level yet, this should give a 400 error, TODO: now 404 because endpoint is commented out
+        # change to 400 when task creation with ORCOS is implemented
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
         timestamp = video_sample["timestamp"]
         # some fake water level
         h = 1182.3
@@ -64,15 +77,24 @@ class TaskViewTests(InitTestCase):
         # because no task is initiated yet.
         video = Video.objects.get(id=1)
         self.assertEqual(video.time_series is not None, True)
-        self.assertEqual(video.status, VideoStatus.QUEUE)
-        # One task should be made, check if there is indeed a total of one tasks in the full queryset
-        self.assertEqual(len(Task.objects.all()), 1)
+        # TODO, change to QUEUE when task creation with ORCOS is implemented, now still NEW because endpoint is inactive
+        # self.assertEqual(video.status, VideoStatus.QUEUE)
+        self.assertEqual(video.status, VideoStatus.NEW)
+        # TODO: test for one task, when task creation with ORCOS is implemented, now there is no task created 
+        # because endpoint is inactive
+        # # One task should be made, check if there is indeed a total of one tasks in the full queryset
+        # self.assertEqual(len(Task.objects.all()), 1)
+        self.assertEqual(len(Task.objects.all()), 0)
         # check if task creation is not possible as other user
         client.logout()
         client.login(username='user2@institute1.com', password='test1234')
         r = client.post(
             f'/api/site/1/video/{video_id}/task/'
         )
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        # TODO modify to 400 when task creation with ORCOS is implemented, now 404 because endpoint is commented out
+
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)  
+
+        # self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
 

@@ -5,14 +5,17 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView
 )
 from api.views import (
+    VersionView,
     SiteViewSet,
-    ProfileViewSet,
+    CrossSectionViewSet,
+    # ProfileViewSet,
     RecipeViewSet,
     CameraConfigViewSet,
+    VideoConfigViewSet,
     VideoViewSet,
     VideoSiteViewSet,
     TimeSeriesViewSet,
-    TaskViewSet,
+    # TaskViewSet,
     DeviceViewSet
 )
 
@@ -31,13 +34,15 @@ router.register(r'device', DeviceViewSet)
 site_router = routers.NestedSimpleRouter(router, r'site', lookup='site')
 site_router.register(r'video', VideoSiteViewSet, basename='site-video')
 site_router.register(r'timeseries', TimeSeriesViewSet, basename='site-timeseries')
-site_router.register(r'profile', ProfileViewSet, basename='site-profile')
+site_router.register(r'crosssection', CrossSectionViewSet, basename='site-crosssection')
 site_router.register(r'cameraconfig', CameraConfigViewSet, basename='site-cameraconfig')
+site_router.register(r'videoconfig', VideoConfigViewSet, basename='site-videoconfig')
 
 video_router = routers.NestedSimpleRouter(site_router, r'video', lookup='video')
-video_router.register(r'task', TaskViewSet, basename='video-task')
+# video_router.register(r'task', TaskViewSet, basename='video-task')
 
 urlpatterns = [
+    path('version/', VersionView.as_view(), name='version'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     # path('institute_switch/<int:institute_id>/', switch_institute),

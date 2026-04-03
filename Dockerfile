@@ -1,4 +1,4 @@
-FROM python:3.11.8-bookworm
+FROM python:3.14.3-trixie
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1

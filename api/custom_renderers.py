@@ -52,7 +52,7 @@ class PIJSONRenderer(JSONRenderer):
             "version": "1.23",
             "timeZone": "0.0"
         }
-        meta_vars = ["id", "timestamp", "creator", "site", "video"]
+        meta_vars = ["id", "timestamp", "creator", "site", "video", "misc"]
         var_mapping = {
             "h": "h",
             "q_05": "q.05",

@@ -18,7 +18,7 @@ profile_file = os.path.join(os.path.split(__file__)[0], "testdata", "ngwerere_pr
 profile = get_profile(profile_file)
 
 
-class ProfileViewTests(InitTestCase):
+class CrossSectionViewTests(InitTestCase):
     def setUp(self):
         user = User.objects.get(pk=2)
         institute = Institute.objects.get(pk=1)
@@ -28,15 +28,15 @@ class ProfileViewTests(InitTestCase):
     def tearDown(self):
         pass
 
-    def test_add_profile(self):
+    def test_add_cross_section(self):
         client = APIClient()
         client.login(username='user@institute1.com', password='test1234')
-        # create a camera config on site
+        # create a cross section on site
         r = client.post(
-            '/api/site/1/profile/',
+            '/api/site/1/crosssection/',
             {
-                "name": "some_profile",
-                "data": json.dumps(profile),
+                "name": "some_cross_section",
+                "features": json.dumps(profile),
                 "institute": 1}
         )
         # check the request
@@ -44,7 +44,7 @@ class ProfileViewTests(InitTestCase):
         # check if user3 is not able to see the model
         client.logout()
         client.login(username="user3@institute2.com", password="test1234")
-        r = client.get('/api/site/1/profile/1', follow=True)
+        r = client.get('/api/site/1/crosssection/1', follow=True)
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 

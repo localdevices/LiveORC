@@ -13,7 +13,11 @@ class CameraConfigSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate(self, data):
-        user = User.objects.get(pk=self.initial_data["creator"])
+        creator_pk = self.initial_data.get("creator") if hasattr(self, "initial_data") else None
+        if creator_pk:
+            user = User.objects.get(pk=creator_pk)
+        else:
+            user = self.context["request"].user
         institute_validator(institute=data.get("site").institute, user=user)
         return data
 

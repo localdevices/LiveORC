@@ -1,3 +1,5 @@
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 from rest_framework import permissions, status
 from rest_framework.response import Response
 
@@ -5,8 +7,10 @@ from api.serializers import TaskSerializer, TaskCreateSerializer
 from api.models import Task, Video
 from api.task_utils import get_task
 from api.views import BaseModelViewSet
+from api.views.video import _SITE_PK_PARAM
 
 
+@extend_schema(parameters=[_SITE_PK_PARAM])
 class TaskViewSet(BaseModelViewSet):
     """
     API endpoints that allows tasks to be viewed or edited.

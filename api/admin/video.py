@@ -6,10 +6,10 @@ from django_object_actions import DjangoObjectActions, action
 from django.shortcuts import redirect, reverse
 
 from api.models import Video, VideoStatus, Task
-from api.task_utils import get_task
+# from api.task_utils import get_task
 from api.admin import BaseAdmin, BaseForm
 from api.admin import VideoSiteUserFilter, datetimefilter
-from api.tasks import run_nodeorc
+# from api.tasks import run_nodeorc
 
 class VideoForm(BaseForm):
     class Meta:
@@ -34,27 +34,28 @@ class VideoInline(admin.TabularInline):
 
 
 class VideoAdmin(DjangoObjectActions, BaseAdmin):
-    @action(
-        label="Queue task",  # optional
-        description="Click to queue a task"  # optional
-    )
-    def toolfunc(self, request, obj):
-        # create a new task for this video
-        if obj.is_ready_for_task:
-            # launch creation of a new task
-            obj.create_task(request)
-            return redirect('/admin/api/video')
-        elif not obj.time_series:
-            messages.error(request, f"Video {obj.id} does not yet have a water level at associated time stamp. ")
-        elif not obj.camera_config.profile:
-            messages.error(request, f"Video {obj.id}'s camera configuration does not have a profile. Add a profile to the camera configuration. ")
-        elif not obj.camera_config.recipe:
-            messages.error(request,f"Video {obj.id}'s camera configuration does not have a recipe. Add a recipe to the camera configuration. ")
-        elif obj.status == VideoStatus.QUEUE or obj.status == VideoStatus.TASK:
-            messages.error(request, f"Video {obj.id} is already queued or being processed. ")
-        return HttpResponseRedirect(reverse("admin:api_video_change", args=(obj.pk,)))
+    # TODO: bring back once ORCOS task creation is supported
+    # @action(
+    #     label="Queue task",  # optional
+    #     description="Click to queue a task"  # optional
+    # )
+    # def toolfunc(self, request, obj):
+    #     # create a new task for this video
+    #     if obj.is_ready_for_task:
+    #         # launch creation of a new task
+    #         obj.create_task(request)
+    #         return redirect('/admin/api/video')
+    #     elif not obj.time_series:
+    #         messages.error(request, f"Video {obj.id} does not yet have a water level at associated time stamp. ")
+    #     elif not obj.video_config or not obj.video_config.cross_section:
+    #         messages.error(request, f"Video {obj.id}'s video configuration does not have a cross section.")
+    #     elif not obj.video_config.recipe:
+    #         messages.error(request, f"Video {obj.id}'s video configuration does not have a recipe.")
+    #     elif obj.status == VideoStatus.QUEUE or obj.status == VideoStatus.TASK:
+    #         messages.error(request, f"Video {obj.id} is already queued or being processed. ")
+    #     return HttpResponseRedirect(reverse("admin:api_video_change", args=(obj.pk,)))
 
-    change_actions = ('toolfunc', )
+    # change_actions = ('toolfunc', )
 
     ordering = ["-timestamp"]
     list_display = [
@@ -67,7 +68,7 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
         "created_at",
         "play_button",
     ]
-    non_editable_fields = ["file", "camera_config"]
+    non_editable_fields = ["file", "video_config"]
     readonly_fields = (
         'video_preview',
         'get_site_name',
@@ -97,7 +98,7 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
                 "get_site_name",
                 "file",
                 "status",
-                "camera_config",
+                "video_config",
                 "timestamp",
                 "image_preview",
                 "video_preview"
@@ -118,17 +119,19 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
         # prevent that the file or camera config can be changed afterwards.
         # That is very risky and can lead to inconsistent model records
         if obj:
-            return (*self.readonly_fields, "file", "camera_config")
+            return (*self.readonly_fields, "file", "video_config")
         return self.readonly_fields
 
     def filter_institute(self, request, qs):
         memberships = request.user.get_memberships()
         institutes = [m.institute for m in memberships]
-        return qs.filter(camera_config__site__institute__in=institutes)
+        return qs.filter(video_config__site__institute__in=institutes)
 
-    @admin.display(ordering='camera_config__site__name', description="Site name")
+    @admin.display(ordering='video_config__site__name', description="Site name")
     def get_site_name(self, obj):
-        return obj.camera_config.site.name
+        if obj.video_config:
+            return obj.video_config.site.name
+        return "-"
 
     @admin.display(ordering='time_series__timestamp', description='Time stamp of related time series')
     def get_timestamp(self, obj):

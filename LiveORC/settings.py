@@ -15,8 +15,24 @@ from pathlib import Path
 import sys
 import boto3
 
+
+# Workaround for incompatibility between SQLite 3.36+ and SpatiaLite 5,
+# as used on GitHub Actions. This change monkey patches
+# prepare_database() to avoid a call to InitSpatialMetaDataFull(). See:
+# https://code.djangoproject.com/ticket/32935
+# https://groups.google.com/g/spatialite-users/c/SnNZt4AGm_o
+
+# from django.contrib.gis.db.backends.spatialite.base import DatabaseWrapper as SpatiaLiteWrapper
+# def _patched_prepare_database(self):
+#     super(SpatiaLiteWrapper, self).prepare_database()
+#     with self.cursor() as cursor:
+#         cursor.execute("PRAGMA table_info(geometry_columns);")
+
+# TODO: should be possible to remove this without warnings once we migrate to Django >= 6.0
+FORMS_URLFIELD_ASSUME_HTTPS = True
+
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-VERSION = "0.2.3"
+VERSION = "0.3.0"
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # try to get BASE_DIR from env variable
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -234,7 +250,8 @@ if storage_url:
             "endpoint_url": f"{storage_url}:{storage_port}",
             "access_key": os.getenv("LORC_STORAGE_ACCESS"),
             "secret_key": os.getenv("LORC_STORAGE_SECRET"),
-            "bucket_name": "media"
+            "bucket_name": "media",
+            "file_overwrite": True
         },
     }
     # create media bucket if it does not yet exist

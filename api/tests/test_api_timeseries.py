@@ -86,20 +86,22 @@ class TimeSeriesViewTests(InitTestCase):
                 '/api/site/1/timeseries/',
                 data={
                     "h": float(n),
-                    "timestamp": ts.strftime("%Y-%m-%dT%H:%M:%SZ")
-                }
+                    "timestamp": ts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "misc": {"test": 3.14, "test2": "hello"}
+                },
+                format="json"
             )
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         uri = reverse("api:site-timeseries-list", args=(["1"]))
         # query in PIJSON format
         r = client.get(
-            uri + "?startDateTime=2000-01-01T04:00:00:00Z" + "&endDateTime=2000-01-01T07:00:00:00Z" + "&format=pijson"
+            uri + "?startDateTime=2000-01-01T04:00:00Z" + "&endDateTime=2000-01-01T07:00:00Z" + "&format=pijson"
         )
         self.assertEqual(len(r.json()), 3)  # test for number of fields in pijson (always 3)
         self.assertEqual(len(r.json()["timeSeries"]), 12)  # test for number of variables (currently 9)
         self.assertEqual(len(r.json()["timeSeries"][0]["events"]), 4)  # test for number of records
         # query in csv format
         r = client.get(
-            uri + "?startDateTime=2000-01-01T04:00:00:00Z" + "&endDateTime=2000-01-01T07:00:00:00Z" + "&format=csv"
+            uri + "?startDateTime=2000-01-01T04:00:00Z" + "&endDateTime=2000-01-01T07:00:00Z" + "&format=csv"
         )
-        self.assertEqual(len(r.content), 307)
+        self.assertEqual(len(r.content), 372)

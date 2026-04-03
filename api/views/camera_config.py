@@ -1,149 +1,35 @@
-from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import status, renderers
+from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import action
 
-from api.serializers import CameraConfigSerializer, CameraConfigCreateSerializer, CameraConfigUpdateSerializer, TaskFormSerializer
-from api.models import CameraConfig, Device, TaskForm
+from api.models import CameraConfig
+from api.serializers import CameraConfigCreateSerializer, CameraConfigSerializer, CameraConfigUpdateSerializer
 from api.views import BaseModelViewSet
-
-from api.task_utils import get_task_form
-from api import callback_utils
-
-# collect names of all callback functions valid for
-CALLBACK_FUNCTIONS_FORM = [f for f in dir(callback_utils) if f.startswith("get_form_callback")]
 
 
 class CameraConfigViewSet(BaseModelViewSet):
-    """
-    API endpoints that allows camera configurations to be viewed or edited.
-    """
-    queryset = CameraConfig.objects.all().order_by('name')
+    """API endpoints that allow camera configurations to be viewed or edited."""
+
+    queryset = CameraConfig.objects.all().order_by("name")
     serializer_class = CameraConfigSerializer
     http_method_names = ["get", "post", "delete", "patch"]
 
     def get_serializer_class(self):
-        if self.action == 'create':
+        if self.action == "create":
             return CameraConfigCreateSerializer
-        elif self.action in ['update', 'partial_update']:
+        if self.action in ["update", "partial_update"]:
             return CameraConfigUpdateSerializer
         return CameraConfigSerializer
 
     def create(self, request, site_pk=None, *args, **kwargs):
-        # insert the site
         data = request.data.copy()
-        if not(data.get("site")):
+        if not data.get("site"):
             data["site"] = site_pk
-        if not(data.get("creator")):
+        if not data.get("creator"):
             data["creator"] = request.user.pk
-        # replace the serializer
-        serializer_class = CameraConfigSerializer
-        # run create in the usual manner
-        kwargs.setdefault('context', self.get_serializer_context())
-        serializer = serializer_class(data=data)
+
+        kwargs.setdefault("context", self.get_serializer_context())
+        serializer = CameraConfigSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-    def partial_update(self, request, *args, **kwargs):
-        return super().partial_update(request, *args, **kwargs)
-
-    @extend_schema(
-        description="Create a task form for a specified device of the camera configuration",
-        parameters=[
-            OpenApiParameter(
-                name='device_id',
-                type=str,
-                required=True,
-                location=OpenApiParameter.QUERY,
-                description='UUID of device to provide task form to'
-            ),
-            OpenApiParameter(
-                name="callback",
-                type=str,
-                required=True,
-                enum=[c.lstrip("get_form_callback_") for c in CALLBACK_FUNCTIONS_FORM],  # allowed names of callbacks
-                location=OpenApiParameter.QUERY,
-                description='name of callback function to add',
-
-            ),
-        ],
-    )
-    @action(detail=True, methods=['post'], renderer_classes=[renderers.JSONRenderer])
-    def create_task(self, request, *args, **kwargs):
-        if not "device_id" in request.query_params:
-            return Response(
-                data={"device_id": ["This field is required."]},
-                status=status.HTTP_400_BAD_REQUEST,
-                content_type="application/json"
-            )
-        try:
-            device = Device.objects.get(pk=request.query_params["device_id"])
-            # TODO: check if device belongs to request.user
-            if not(request.user == device.creator):
-                return Response(
-                    data={"device_id": [f"Device {request.query_params['device_id']} does not belong to user."]},
-                    status=status.HTTP_403_FORBIDDEN,
-                    content_type="application/json"
-                )
-        except:
-            return Response(
-                data={"device_id": [f"Device {request.query_params['device_id']} does not exist."]},
-                status=status.HTTP_400_BAD_REQUEST,
-                content_type="application/json"
-            )
-        if not "callback" in request.query_params:
-            return Response(
-                data={"callback": ["At least one callback must be provided"]},
-                status=status.HTTP_400_BAD_REQUEST,
-                content_type="application/json"
-            )
-        query_callbacks = [f"get_form_callback_{c}" for c in request.query_params.getlist("callback")]
-        # check if callbacks are available
-        for callback in query_callbacks:
-            if not callback in CALLBACK_FUNCTIONS_FORM:
-                return Response(
-                    data={
-                        "callback": [
-                            f"Callback {callback.lsplit('get_form_callback')} is not available, choose from {[c.lstrip('get_form_callback_') for c in CALLBACK_FUNCTIONS_FORM]}"
-                        ]
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                    content_type="application/json"
-                )
-        instance = self.get_object()
-        if not instance.recipe:
-            return Response(
-                data={
-                    "recipe": [
-                        "Camera config does not contain a recipe. Please add a recipe before making a task form"
-                    ]
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-                content_type="application/json"
-            )
-        if not instance.profile:
-            return Response(
-                data={
-                    "recipe": [
-                        "Camera config does not contain a profile. Please add a profile before making a task form"
-                    ]
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-                content_type="application/json"
-            )
-        task_form = get_task_form(instance, query_callbacks)
-        record = TaskForm(
-            id=task_form["id"],
-            task_body=task_form,
-            device=device,
-            creator=request.user,
-            institute=instance.institute
-        )
-        record.save()
-        # TODO: implement task_form in database
-        serializer = TaskFormSerializer(record)
-        # print(f"URL: {request.build_absolute_uri(reverse('video'))}")
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-

@@ -5,6 +5,9 @@ from api.custom_validators import institute_validator
 
 
 class SiteSerializer(serializers.ModelSerializer):
+    geom = serializers.CharField(
+        help_text="WKT point string, e.g. SRID=4326;POINT (5.9141 50.8067)"
+    )
     class Meta:
         model = Site
         fields = "__all__"

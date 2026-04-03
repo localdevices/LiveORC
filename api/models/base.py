@@ -22,6 +22,10 @@ class BaseModel(models.Model):
 
 
 class BaseModelNoInstitute(models.Model):
+    """ This model includes a creator field but no institute field or property
+    
+    Used for models that are not linked to an institute including server and device. Used for
+    """
 
     creator = models.ForeignKey(
         get_user_model(),

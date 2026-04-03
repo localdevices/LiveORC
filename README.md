@@ -33,13 +33,20 @@ Web-based, professional and scalable velocimetry analysis for operational river 
 * [Trademark](#trademark)
 
 > [!IMPORTANT]
-> LiveORC is still in development. Features such as interactive selection of ground control points, assembling a camera 
-> configuration and making of recipes is not yet available. To make a camera configuration, and guidance on how to 
-> establish a recipe, please use pyOpenRiverCam and continue to the following sections of the user guide:
+> LiveORC is still in development. Currently, cloud processing is being migrated to the ORC-OS API and is
+> therefore temporarily not supported (starting from v0.3.0). 
+> If you want to do cloud processing, please stay on v0.2.3 until the new ORC-OS API has been implemented.
+> LiveORC should be run as central
+> part of one or multiple ORC-OS instances running in the field, collecting and processing videos as edge processors.
+> To make video configurations, please install an ORC-OS instance (see the links below), create a video configuration
+> and sync one video from ORC-OS to your LiveORC server. This will also sync the video configuration.
 > 
-> - [camera configuration](https://localdevices.github.io/pyorc/user-guide/camera_config/index.html)
-> - [processing recipes](https://localdevices.github.io/pyorc/user-guide/cli.html). Scroll down until you find 
-    information on building recipes.
+> For command line processing and creation of video configurations and recipes, please check out PyOpenRiverCam.
+> This library contains all the underlying methods and more that are used in ORC-OS and LiveORC.
+> 
+> - [ORC-OS](https://github.com/localdevices/ORC-OS). Follow the README to install an ORC-OS instance on your 
+>   monitoring site
+> - [PyORC](https://localdevices.github.io/pyorc)
 
 # What is LiveOpenRiverCam
 
@@ -55,15 +62,15 @@ LiveORC will provide you with the following functionalities:
 * An administration-style front end for managing sites, configuration, videos and time series.
 * Visualization of time series and video analyses.
 * Fully automated data streaming from operational camera/water level feeds in the field with "edge processing".
-* Per-video processing through "cloud processing". 
+* Per-video processing through "cloud processing" (**temporarily not supported, see note above**). 
 * A very fast and easy start to this all, through convenient virtualization of services and a very easy to use set up 
   script.
 
-Processing on sites ("edge processing") or on cloud nodes ("cloud processing") is performed by
-[NodeOpenRiverCam](https://github.com/localdevice/nodeorc), the node processing tool around OpenRiverCam. The 
-processing methods read videos, select frames, enhance features, orthorectify and estimates surface velocity 
-and discharge using state-of-the-art velocimetry methods. NodeOpenRiverCam is included in LiveORC, so deployment is 
-very easy and automated.
+Processing on sites ("edge processing") or on cloud nodes ("cloud processing", not yet available) is performed by
+the API of [ORC-OS](https://github.com/localdevice/ORC-OS), the core operations API and front-end around OpenRiverCam. 
+The processing methods read videos, select frames, enhance features, orthorectify and estimates surface velocity 
+and discharge using state-of-the-art velocimetry methods. ORC-OS will soon be included in LiveORC for cloud processing
+with a docker-compose included installation procedure.
 
 # Acknowledgements
 
@@ -87,8 +94,8 @@ required to set up the LiveORC. These services include:
 - the web dashboard,
 - the database, storing sites, time series, video metadata, but also users, institutes and their accessibility to 
   videos, time series and any other assets,
-- compute nodes, equipped with [NodeOpenRiverCam](https://github.com/localdevices/nodeorc). The more you have the 
-  more videos can be processed at the same time,
+- compute nodes (not yet available), equipped with [ORC-OS API](https://github.com/localdevices/ORC-OS). The more you 
+  have the more videos can be processed at the same time,
 - a cloud storage volume.
 
 Without any additional arguments, `liveorc.sh` automatically sets up all these services in a virtualized manner on your 
@@ -224,12 +231,14 @@ look for a database with the name `liveorc`.
 
 ### More processing nodes
 
-By default, one processing node, equipped with NodeORC is installed on the same machine. You can extend this with the
+> [!WARNING]
+> Processing nodes are temporarily not available as we are migrating from NodeORC to ORC-OS API.
+<!-- By default, one processing node, equipped with NodeORC is installed on the same machine. You can extend this with the
 option `--nodes` followed by the number of nodes you wish to deploy. You can in principle also deploy nodes remotely 
 but currently we do not yet have a separate API for running these. This means that your entire LiveORC environment 
 details must be present on that remote node, including all passwords. This is potentially a security risk. We have 
 plans to write a separate API for NodeORC so that remote nodes do not need passwords, but can simply be monitored 
-through their own API.
+through their own API. -->
 
 ### Debug mode
 
@@ -270,14 +279,14 @@ the services again by issuing:
 
 ### Rebuilding
 
-If you wish to entirely rebuild LiveORC, then you may run
+If you wish to entirely rebuild LiveORC from the latest code base, checked out with `git`, then you may run
 
 ```shell
 ./liveorc.sh rebuild
 ```
 
-This will only rebuild the services, not the volumes. This means that any data you may have stored will remain in 
-the persistent volumes.
+This will only rebuild the services, not the volumes. This means that any data and database you may have stored will
+remain in the persistent volumes.
 
 # Getting started
 
@@ -407,40 +416,41 @@ recipes and a full working example, we refer to the [recipe](#recipes) section.
 
 ![add_recipe](https://github.com/localdevices/LiveORC/assets/7658673/4407a981-b4fd-4c22-b683-493bc92b31d9)
 
-## Add a first profile
+## Add a first cross-section
 
-In a very similar way, you can also add a profile. The profile consists of a set of x, y, z points describing the 
-cross-section of the stream you are observing. The cross-section naturally has to be located as much as possible within 
-the objective that your camera is looking at, and must be measured using the same coordinate system as your control 
-points. Note that also the vertical datum MUST be the same. It is not a problem if a part of the profile is 
-partly outside the objective. In fact, this can easily occur in rivers with a very wide floodplain, that only 
-occasionally inundates. This then means that if those sections become inundated, velocity in those sections will 
-be estimated through infilling techniques.
+In a very similar way, you can also add a cross-section. The cross-section consists of a set of x, y, z points 
+describing the cross-section of the stream you are observing. The cross-section naturally has to be located as much as 
+possible within the objective that your camera is looking at, and must be measured using the same coordinate system 
+as your control points. Note that also the vertical datum MUST be the same. It is not a problem if a part of the 
+cross-section is partly outside the objective. In fact, this can easily occur in rivers with a very wide floodplain, 
+that only occasionally inundates. This then means that if those sections become inundated, velocity in those sections 
+will be estimated through infilling techniques.
 
 > [!NOTE]
-> Under the "Assets" menu section, click on the ➕ Add button of the "Profiles" menu item. You can give a profile a name,
-> associate it with a site that you own and select the profile file (.geojson formatted). Here, use the file 
-> `profile.geojson`, provided in the test dataset. Once you click "SAVE" you will see a new profile in the menu. If 
-> you click it you can inspect the profile on a geographical map. 
+> Under the "Assets" menu section, click on the ➕ Add button of the "Cross-sections" menu item. You can give a 
+> cross-section a name, associate it with a site that you own and select the cross-section file (.geojson formatted). 
+> Here, use the file `profile.geojson`, provided in the test dataset. Once you click "SAVE" you will see a new 
+> cross-section in the menu. If you click it you can inspect the cross-section on a geographical map.
 
 ## Make your first camera configuration
 
 A camera configuration contains all information about the camera perspective, lens characteristics, video 
-resolution, and also the resolution of orthorectification. For geographical displaying, it also holds the
+resolution, and also the resolution of orthorectification. For geographical displaying, it may also hold the
 coordinate reference system of any coordinates used (not mandatory).
 
 Currently, camera configuration cannot yet be made directly in the web interface. This is a high priority 
-for future developments. Instead, you must use pyOpenRiverCam to prepare the camera configuration. We recommend
-to use the command-line interface of pyOpenRiverCam to do this. We refer to the 
+for future developments. Instead, you must use ORC-OS or PyORC to prepare the camera configuration. 
+In case you use PyORC use its command-line interface to do this. We refer to the 
 [camera configuration user guide](https://localdevices.github.io/pyorc/user-guide/camera_config/index.html) for 
-further information.
+further information. In ORC-OS, normally you would create the entire configuration and then start synchronizing videos
+with all their time series and configuration with it, so creating these details in LiveORC is then not necessary.
 
 Once a camera configuration is prepared within pyOpenRiverCam, it is stored in a `.json` file. You can then upload this 
 into a new camera configuration in LiveOpenRiverCam. The test dataset contains a camera config .json file that was 
 made for the camera view of the video of the test dataset. 
 
 > [!NOTE]
-> Under the "Assets" menu section, click on the ➕ Add button of the "Camera configs" menu item. You can give a 
+> Under the "Assets" menu section, click on the ➕ Add button of the "Camera configs" menu item. You must give a 
 > camera configuration a name (easy to recognise) and associate it with a site. Through the site, it will also 
 > become associated with the institute owning that site. Besides the camera configuration itself, you can, and in most
 > cases should provide additional details.
@@ -449,12 +459,24 @@ made for the camera view of the video of the test dataset.
 > difference in time stamp between a video that is processed with the camera configuration, and the water level 
 > associated with the video. In case no water level is available that has a time stamp that is near enough to the 
 > video time stamp, the video cannot yet be processed as a water level is essential for processing a video.
-> You can (and should) also provide a recipe and a profile (see earlier sections) to go with the camera configuration.
-> And finally, you must upload the camera configuration, prepared through pyOpenRiverCam. Here provide the file 
-> `cameraconfig.json` from the test dataset. This in total gives you all the information required to process videos at 
-> a given site. Click on "SAVE" to store your selections.
+> Finally, you must upload the camera configuration, prepared through pyOpenRiverCam. Here provide the file 
+> `cameraconfig.json` from the test dataset. 
+
 
 ![add_cameraconfig](https://github.com/localdevices/LiveORC/assets/7658673/eec52ea2-5def-4635-b60a-b6aa0e0ff2cd)
+
+## Combine all information in a Video configuration
+
+A Video configuration holds all information to process a video from raw data into river discharge. It includes
+
+- A camera configuration with the details of the video camera and its pose
+- A recipe for processing
+- A cross-section 
+- Possibly also a second cross-section for detecting the water level (which may be the same as the first.)
+
+> You can (and should) also provide a recipe and a profile (see earlier sections) to go with the camera configuration.
+> And This in total gives you all the information required to process videos at 
+> a given site. Click on "SAVE" to store your selections.
 
 Once done you will be brought back to an overview of all camera configurations, managed
 by you. If you want to see the result, then select the new camera configuration. You can then also see a 

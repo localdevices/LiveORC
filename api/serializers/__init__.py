@@ -1,7 +1,8 @@
 from .device import DeviceSerializer
 from .site import SiteSerializer
 from .camera_config import CameraConfigSerializer, CameraConfigCreateSerializer, CameraConfigUpdateSerializer
-from .profile import ProfileSerializer, ProfileCreateSerializer
+from .cross_section import CrossSectionSerializer, CrossSectionCreateSerializer
+from .video_config import VideoConfigSerializer, VideoConfigCreateSerializer, VideoConfigUpdateSerializer
 from .recipe import RecipeSerializer
 from .video import VideoSerializer
 from .time_series import TimeSeriesSerializer, TimeSeriesCreateSerializer, TimeSeriesUpdateSerializer

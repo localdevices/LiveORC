@@ -1,27 +1,22 @@
-from datetime import timedelta
 import base64
-import geopandas as gpd
 import io
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.use("Agg")  # make sure a non-interactive backend is used only
+matplotlib.use("Agg")
+import pyorc
+import shapely.ops
 import shapely.wkt
 
-from django.contrib.auth import get_user_model
+from datetime import timedelta
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.html import mark_safe
-from django.utils.translation import gettext_lazy
 from pyproj import CRS, Transformer
-from shapely import ops
-from shapely.geometry import Point
 
-from api.models import BaseModel, Site, Server, Recipe, Profile
-import pyorc
-
-from api.tests.test_api_video import camera_config
+from .base import BaseModel
+from .server import Server
+from .site import Site
 
 map_template = """
 <div id="id_geom_div_map" class="dj_map_wrapper">
@@ -29,30 +24,20 @@ map_template = """
 </div>
 <script>
     ol.proj.useGeographic();
-    // add a feature
-    
     const wkt = '{}';
-    const wkt_profile = '{}';
     const format = new ol.format.WKT();
     const feature = format.readFeature(wkt);
-    const feature_profile = format.readFeature(wkt_profile);
     const vector = new ol.layer.Vector({{
         source: new ol.source.Vector({{
             features: [feature],
         }}),
     }});
 
-    const vector_profile = new ol.layer.Vector({{
-        source: new ol.source.Vector({{
-            features: [feature_profile],
-        }}),
-    }});
-   
     const map = new ol.Map({{
         layers: [
             new ol.layer.Tile({{
                 source: new ol.source.OSM(),
-            }}), vector, vector_profile
+            }}), vector
         ],
         target: 'map',
         view: new ol.View({{
@@ -61,13 +46,12 @@ map_template = """
         }}),
     }});
 </script>
-
 """
 
 # Simple HTML template for non‑geographic x/y plot
 bbox_plot_3d_template = """
 <div class="bbox-plot-wrapper">
-    <img src="data:image/png;base64,{}" alt="Bounding box and profile plot" />
+    <img src="data:image/png;base64,{}" alt="3D camera config plot" />
 </div>
 
 """
@@ -88,116 +72,87 @@ lens_position_schema = {
 
 
 class CameraConfig(BaseModel):
-    """
-    Contains JSON with a full camera configuration
-    """
-    def __str__(self):
-        return f"{self.name} at {self.site.name}"
+    """Camera pose/calibration data used by VideoConfig."""
+
     name = models.CharField(max_length=100, help_text="Recognizable unique name for the camera configuration")
-    camera_config = models.JSONField(
+    data = models.JSONField(
         null=True,
         blank=True,
-        help_text="JSON fields containing a camera configuration, "
-                  "see https://localdevices.github.io/pyorc/user-guide/camera_config/index.html for setup instructions"
+        help_text=(
+            "JSON fields containing a camera configuration, "
+            "see https://localdevices.github.io/pyorc/user-guide/camera_config/index.html for setup instructions"
+        ),
     )
     allowed_dt = models.DurationField(
         "Allowed difference in time stamp",
-        help_text="Maximum time difference allowed between a time stamp of an associated video, and a time series "
-                  "instance at the associated site [sec]",
+        help_text=(
+            "Maximum time difference allowed between an associated video time stamp and a "
+            "time series instance at the associated site [sec]"
+        ),
         default=timedelta(seconds=1800),
-        validators=[
-            MinValueValidator(timedelta(seconds=0)),
-            MaxValueValidator(timedelta(seconds=86400))
-        ]
+        validators=[MinValueValidator(timedelta(seconds=0)), MaxValueValidator(timedelta(seconds=86400))],
     )
     start_date = models.DateTimeField("start validity date", auto_now_add=True)
     end_date = models.DateTimeField("end validity date", null=True)
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
     version = models.CharField("pyORC version compatibility", max_length=15, blank=True, editable=False)
     server = models.ForeignKey(Server, on_delete=models.SET_NULL, null=True, blank=True)
-    recipe = models.ForeignKey(Recipe, on_delete=models.SET_NULL, null=True, blank=True)
-    profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True)
-    # user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
-    # TODO also connect to server
-    # TODO connect to recipe and profile (where necessary)
 
-    def clean(self):
-        super().clean()
-        # try:
-        #     pyorc.CameraConfig(**self.camera_config)
-        #     # see if you can make a camera config object
-        # except BaseException as e:
-        #     raise ValidationError(f"Problem with Camera Configuration: {e}")
-        if self.profile:
-            if self.profile.site != self.site:
-                raise ValidationError(gettext_lazy("Profile site and Camera config site are not the same. Select a "
-                                                   "profile with the same site as the camera configuration"))
+    def __str__(self):
+        return f"{self.name} at {self.site.name}"
 
     @property
     def crs(self):
-        return CRS.from_user_input(self.camera_config["crs"])
+        if self.data and "crs" in self.data:
+            return CRS.from_user_input(self.data["crs"])
 
     @property
     def bbox(self):
-        if self.camera_config is not None:
-            if "crs" in self.camera_config:
-                crs = self.camera_config["crs"]
-                if crs:
-                    transformer = Transformer.from_crs(
-                        CRS.from_user_input(crs),
-                        CRS.from_epsg(4326),
-                        always_xy=True).transform
-
-                    polygon = shapely.wkt.loads(self.camera_config["bbox"])
-                    polygon = shapely.ops.transform(transformer, polygon)
-                    return GEOSGeometry(polygon.wkt, srid=4326)
+        if self.data and "crs" in self.data and self.data["crs"] is not None and self.data.get("bbox"):
+            transformer = Transformer.from_crs(
+                CRS.from_user_input(self.data["crs"]),
+                CRS.from_epsg(4326),
+                always_xy=True,
+            ).transform
+            polygon = shapely.wkt.loads(self.data["bbox"])
+            polygon = shapely.ops.transform(transformer, polygon)
+            return GEOSGeometry(polygon.wkt, srid=4326)
 
     bbox.fget.short_description = "Polygon bounding box (wkt only) for area of interest"
 
     @property
     def x(self):
-        return self.bbox.centroid.x
-
+        return self.bbox.centroid.x if self.bbox else None
 
     @property
     def y(self):
-        return self.bbox.centroid.y
-
+        return self.bbox.centroid.y if self.bbox else None
 
     @property
     def height(self):
-        if self.camera_config is not None:
-            return self.camera_config["height"]
+        if self.data:
+            return self.data.get("height")
 
     height.fget.short_description = "Height of frames [pix]"
 
     @property
     def width(self):
-        if self.camera_config is not None:
-            return self.camera_config["width"]
+        if self.data:
+            return self.data.get("width")
 
     width.fget.short_description = "Width of frames [pix]"
 
     @property
     def bbox_plot_3d(self):
         """
-        render a 3d plot with cross section and bbox in matplotlib,
+        render a 3d plot with bbox and gcps in matplotlib,
         This does not use any geographic CRS; it just plots coordinates.
         """
         fig = plt.figure(figsize=(7, 5))
         ax = fig.add_subplot(111, projection="3d")
         # load cam config and cross section from data fields
-        camera_config = pyorc.CameraConfig(**self.camera_config)
-        cs_data, crs = pyorc.cli.cli_utils.read_shape(geojson=self.profile.data)
-        # coerce into a geopandas GeoDataFrame
-        if crs is not None:
-            geometry = [Point(_x, _y, _z) for _x, _y, _z in cs_data]
-            cs_data = gpd.GeoDataFrame(geometry=geometry, crs=crs)
-        cs = pyorc.CrossSection(camera_config=camera_config, cross_section=cs_data)
-        cs.camera_config.plot(ax=ax, mode="3d")
-        cs.plot(ax=ax, h=cs.camera_config.gcps["h_ref"])
-        # ax.set_xlabel("x")
-        # ax.set_ylabel("y")
+        camera_config = pyorc.CameraConfig(**self.data)
+        camera_config.plot(ax=ax, mode="3d")
         ax.set_aspect("equal", adjustable="datalim")
         ax.legend(loc="best", fontsize=7)
 
@@ -213,53 +168,24 @@ class CameraConfig(BaseModel):
     @property
     def bbox_view(self):
         if self.bbox:
-            try:
-                bbox_wkt = self.bbox.wkt
-            except Exception:
-                bbox_wkt = None
-        else:
-            bbox_wkt = None
-        if self.profile and getattr(self.profile, "multipoint", None):
-            try:
-                profile_wkt = self.profile.multipoint.wkt
-            except Exception:
-                profile_wkt = None
-        else:
-            profile_wkt = None
-        if bbox_wkt and profile_wkt:
-            return mark_safe(
-                map_template.format(self.bbox.wkt, self.profile.multipoint.wkt, self.x, self.y)
-            )
-        elif bbox_wkt:
-            # only plot bounding box
-            return mark_safe(
-                map_template.format(
-                    self.bbox.wkt,
-                    'MULTIPOINT EMPTY',
-                    self.x,
-                    self.y
-                )
-            )
-        else:
-            #fallback to simple plot
-            return None
+            return mark_safe(map_template.format(self.bbox.wkt, self.x, self.y))
+        return None
 
-    bbox_view.fget.short_description = "Camera calibration geographical view"
 
     @property
     def resolution(self):
-        if self.camera_config:
-            return self.camera_config["resolution"]
+        if self.data:
+            return self.data.get("resolution")
 
     resolution.fget.short_description = "Resolution for orthorectification [m]"
+
     @property
     def window_size(self):
-        if self.camera_config:
-            return self.camera_config["window_size"]
+        if self.data:
+            return self.data.get("window_size")
 
-    window_size.fget.short_description = "interrogation window size [pix]"
+    window_size.fget.short_description = "Interrogation window size [pix]"
 
     @property
     def institute(self):
         return self.site.institute
-

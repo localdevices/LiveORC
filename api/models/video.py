@@ -6,7 +6,8 @@ import urllib
 import cv2
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.files.storage import storages
+from django.core.files import storage
+from django.core.files.storage import storages, FileSystemStorage
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
@@ -16,14 +17,27 @@ from django.core.files.base import ContentFile
 import numpy as np
 from PIL import Image
 
-from api.models import CameraConfig, Project, TimeSeries
+from .project import Project
+from .time_series import TimeSeries
+from .video_config import VideoConfig
 
 
 VIDEO_EXTENSIONS = ["MOV", "MKV", "MP4", "AVI", "M4V"]
 
+class OverwriteFileSystemStorage(FileSystemStorage):
+    """Custom FileSystemStorage that overwrites existing files with the same name."""
+    def get_available_name(self, name, max_length=None):
+        if self.exists(name):
+            self.delete(name)
+        return name
 
 def select_storage():
-    return storages["media"]
+    storage = storages["media"]
+    if "FileSystemStorage" in str(type(storage)):
+        # override save behaviour, make sure files are overwritten when a new video with the same name is uploaded
+        return OverwriteFileSystemStorage(location=storage.location, base_url=storage.base_url)
+    # for S3 storage, the overwrite behaviour is already set in the settings, so we can just return the storage as is
+    return storage
 
 
 def storage_path(file_field):
@@ -101,9 +115,11 @@ def get_closest_to_dt(queryset, timestamp):
 
 def get_video_path(instance, filename):
     _, ext = os.path.splitext(filename)
+    if not instance.video_config:
+        raise ValueError("video_config with camera_config is required before storing video files")
     end_point = os.path.join(
         "videos",
-        str(instance.camera_config.site_id),
+        str(instance.video_config.site.id),
         instance.timestamp.strftime("%Y%m%d"),
         instance.timestamp.strftime("%Y%m%dT%H%M%S") + ext
     )
@@ -111,9 +127,11 @@ def get_video_path(instance, filename):
 
 
 def get_thumb_path(instance, filename):
+    if not instance.video_config:
+        raise ValueError("video_config with camera_config is required before storing thumbnails")
     end_point = os.path.join(
         "thumb",
-        str(instance.camera_config.site.id),
+        str(instance.video_config.site.id),
         instance.timestamp.strftime("%Y%m%d"),
         filename
     )
@@ -121,9 +139,11 @@ def get_thumb_path(instance, filename):
 
 
 def get_keyframe_path(instance, filename):
+    if not instance.video_config:
+        raise ValueError("video_config with camera_config is required before storing keyframes")
     end_point = os.path.join(
         "keyframe",
-        str(instance.camera_config.site.id),
+        str(instance.video_config.site.id),
         instance.timestamp.strftime("%Y%m%d"),
         filename
     )
@@ -190,7 +210,7 @@ class Video(models.Model):
         # editable=False,
         help_text="Status of processing"
     )
-    camera_config = models.ForeignKey(CameraConfig, on_delete=models.CASCADE)
+    video_config = models.ForeignKey(VideoConfig, on_delete=models.SET_NULL, null=True, blank=True)
     time_series = models.OneToOneField(TimeSeries, on_delete=models.SET_NULL, null=True, blank=True)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
     creator = models.ForeignKey(
@@ -224,8 +244,11 @@ class Video(models.Model):
                 super(Video, self).save(*(), **{})
                 return
             # look for time series instances that are for the same site and not yet associated with a video
+            if not self.video_config:
+                super(Video, self).save(*(), **{})
+                return
             ts_at_site = TimeSeries.objects.filter(
-                site=self.camera_config.site
+                site = self.video_config.site
             ) # TODO: exclude time series records that are already used by another video ....filter(
             #     video__time_series__ne=...
             if len(ts_at_site) != 0:
@@ -233,7 +256,7 @@ class Video(models.Model):
                 ts_closest = get_closest_to_dt(ts_at_site, self.timestamp)
                 # check if time diff is acceptable
                 dt = np.abs(self.timestamp - ts_closest.timestamp)
-                if dt < self.camera_config.allowed_dt:
+                if dt < self.video_config.camera_config.allowed_dt:
                     self.time_series = ts_closest
             super(Video, self).save(*(), **{})
 
@@ -259,6 +282,14 @@ class Video(models.Model):
         raise NotImplementedError
 
 
+    # @property
+    # def effective_camera_config(self):
+    #     return self.video_config.camera_config if self.video_config else None
+
+    # @property
+    # def effective_video_config(self):
+    #     return self.video_config if self.video_config else None
+
     @property
     def thumbnail_preview(self):
         if self.thumbnail:
@@ -268,7 +299,9 @@ class Video(models.Model):
             except:
                 return mark_safe("File missing")
                 # width = height * 1.5
-            uri = reverse('api:site-video-thumbnail', args=([str(self.camera_config.site.id), str(self.id)]))
+            if not self.video_config:
+                return mark_safe("N/A")
+            uri = reverse('api:site-video-thumbnail', args=([str(self.video_config.site.id), str(self.id)]))
             return mark_safe('<img src="{}" width="{}" height="{}" />'.format(uri, width, height))
         return mark_safe("N/A")
 
@@ -276,9 +309,12 @@ class Video(models.Model):
     def is_ready_for_task(self):
         if not self.time_series:
             return False
-        if not self.camera_config:
+        if not self.video_config:
             return False
-        if not (self.camera_config.recipe and self.camera_config.profile):
+        video_config = self.video_config
+        if not video_config:
+            return False
+        if not (video_config.recipe and video_config.cross_section):
             return False
 
         return (self.status == VideoStatus.NEW or self.status == VideoStatus.ERROR) and self.time_series.h is not None
@@ -286,9 +322,11 @@ class Video(models.Model):
     @property
     def video_preview(self):
         try:
+            if not self.video_config:
+                return "video config missing"
             height = int(300)
             width = int((self.keyframe.width / self.keyframe.height) * height)
-            uri = reverse('api:site-video-playback', args=([str(self.camera_config.site.id), str(self.id)]))
+            uri = reverse('api:site-video-playback', args=([str(self.video_config.site.id), str(self.id)]))
             mimetype, _ = mimetypes.guess_type(self.file.name)
             if self.file:
                 return mark_safe(
@@ -308,8 +346,10 @@ class Video(models.Model):
         height = int(300)
         if self.image:
             try:
+                if not self.video_config:
+                    return mark_safe("video config missing")
                 width = int((self.image.width / self.image.height) * height)
-                uri = reverse('api:site-video-image', args=([str(self.camera_config.site.id), str(self.id)]))
+                uri = reverse('api:site-video-image', args=([str(self.video_config.site.id), str(self.id)]))
                 return mark_safe('<img src="{}" width="{}" height="{}" />'.format(uri, width, height))
             except:
                 return mark_safe("File missing")
@@ -340,9 +380,9 @@ class Video(models.Model):
             else:
                 if not self.time_series:
                     queue_msg = "water level missing"
-                elif not self.camera_config.profile:
-                    queue_msg = "no profile"
-                elif not self.camera_config.recipe:
+                elif not self.video_config or not self.video_config.cross_section:
+                    queue_msg = "no cross section"
+                elif not self.video_config.recipe:
                     queue_msg = "no recipe"
                 else:
                     queue_msg = "n/a"
@@ -367,7 +407,9 @@ class Video(models.Model):
 
     @property
     def institute(self):
-        return self.camera_config.institute
+        if self.video_config and self.video_config.site:
+            return self.video_config.site.institute
+        return None
 
     def create_task(self, request, *args, **kwargs):
         from api.models import Task
@@ -394,6 +436,6 @@ class Video(models.Model):
 
 
     class Meta:
-        # organize tables along the camera config id and then per time stamp
-        indexes = [models.Index(fields=['camera_config', 'timestamp'])]
+        # organize tables along the video config id and then per time stamp
+        indexes = [models.Index(fields=['video_config', 'timestamp'])]
 

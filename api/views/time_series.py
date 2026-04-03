@@ -7,7 +7,7 @@ from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
 from api.serializers import TimeSeriesSerializer, TimeSeriesCreateSerializer, TimeSeriesUpdateSerializer
 from api.models import TimeSeries, Task, VideoStatus
-from api.task_utils import get_task
+# from api.task_utils import get_task
 from api.views import BaseModelViewSet
 from api.filters import TimeSeriesFilter
 from api.custom_renderers import PIJSONRenderer, WebJSONRenderer
@@ -55,21 +55,22 @@ class TimeSeriesViewSet(BaseModelViewSet):
         self.perform_create(serializer)
         # look for a video instance linked to the time series
         instance = TimeSeries.objects.get(id=serializer.data["id"])
-        if hasattr(instance, "video"):
-            video_instance = instance.video
-            if video_instance.is_ready_for_task:
-                # launch creation of a new task
-                task_body = get_task(video_instance, request, serialize=False,*args, **kwargs)
-                task = {
-                    "id": task_body["id"],
-                    "task_body": task_body,
-                    "video": video_instance,
-                    "creator": request.user
-                }
-                Task.objects.create(**task)
-                # update the Video instance
-                video_instance.status = VideoStatus.QUEUE
-                video_instance.save()
+        # TODO bring back once ORCOS task creation is supported
+        # if hasattr(instance, "video"):
+        #     video_instance = instance.video
+        #     if video_instance.is_ready_for_task:
+        #         # launch creation of a new task
+        #         task_body = get_task(video_instance, request, serialize=False,*args, **kwargs)
+        #         task = {
+        #             "id": task_body["id"],
+        #             "task_body": task_body,
+        #             "video": video_instance,
+        #             "creator": request.user
+        #         }
+        #         Task.objects.create(**task)
+        #         # update the Video instance
+        #         video_instance.status = VideoStatus.QUEUE
+        #         video_instance.save()
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

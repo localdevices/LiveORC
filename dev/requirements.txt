@@ -1,6 +1,6 @@
 celery
 cryptography
-django
+Django
 djangorestframework
 djangorestframework-csv
 djangorestframework-queryfields
@@ -17,7 +17,7 @@ django-storages
 drf-nested-routers
 drf-spectacular
 fontawesomefree
-nodeorc==0.2.0
+pyopenrivercam
 pytest-django
 psycopg2-binary
 shortuuid

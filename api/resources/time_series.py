@@ -14,8 +14,8 @@ class TimeSeriesResource(resources.ModelResource):
     def get_display_name(cls):
         return "Time series"  # Customize this display name as needed
 
-    def get_export_headers(self, fields=None):
-        headers = super().get_export_headers(fields=fields)
+    def get_export_headers(self, **kwargs):
+        headers = super().get_export_headers(**kwargs)
         header_mapping = {"site__name": "site"}
         # Replace the original headers with custom headers
         custom_headers = [header_mapping.get(header, header) for header in headers]
