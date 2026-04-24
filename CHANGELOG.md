@@ -1,3 +1,13 @@
+## [0.3.1] - 2026-XX-XX
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- PATCH of video config was not working. Fixed.
+### Security
+
+
 ## [0.3.0] - 2026-04-03
 ### Added
 ### Changed
