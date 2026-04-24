@@ -26,7 +26,7 @@ class VideoConfigSerializer(serializers.ModelSerializer):
             user = self.instance.creator
         if user is None:
             user = self.context["request"].user
-
+            
         site = attrs.get("site")
         # validate if site is compliant with user permissions
         institute_validator(institute=site.institute, user=user)
@@ -57,7 +57,7 @@ class VideoConfigCreateSerializer(VideoConfigSerializer):
 class VideoConfigUpdateSerializer(VideoConfigSerializer):
     class Meta: # (VideoConfigSerializer.Meta):
         model = VideoConfig
-        exclude = ("site", "creator")
+        exclude = ("creator",)
 
     def validate(self, attrs):
         return super().validate(attrs)

@@ -47,6 +47,25 @@ class VideoConfigViewSet(BaseModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+
+    def update(self, request, site_pk=None, *args, **kwargs):
+        """Override update to prevent site and creator from being updated, even if included in request body."""
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        data = request.data.copy()
+        if not data.get("site"):
+            data["site"] = int(site_pk)
+        if not data.get("creator"):
+            data["creator"] = instance.creator.pk
+        data["creator"] = instance.creator.pk
+
+        kwargs.setdefault("context", self.get_serializer_context())
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        # headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data) #, status=status.HTTP_200_OK, headers=headers)
+    
     # TODO: once orc-os api is connected, bring back task generation in a new approach with celery agents.
     # @extend_schema(
     #     description="Create a task form for a specified device based on this video configuration",
