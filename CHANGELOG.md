@@ -1,4 +1,4 @@
-## [0.3.1] - 2026-XX-XX
+## [0.3.1] - 2026-05-14
 ### Added
 ### Changed
 ### Deprecated
