@@ -1,3 +1,15 @@
+## [0.3.2] - 2026-08-XX
+### Added
+- Email settings in `liverorc.sh` and app settings.
+- Password reset page for sending onetime reset to user
+
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+
 ## [0.3.1] - 2026-05-14
 ### Added
 ### Changed

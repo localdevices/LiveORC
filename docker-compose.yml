@@ -15,6 +15,12 @@ services:
       - LORC_SECRET_KEY
       - LORC_DEBUG
       - LORC_SSL
+      - LORC_EMAIL_HOST
+      - LORC_EMAIL_PORT
+      - LORC_EMAIL_USER
+      - LORC_EMAIL_PASSWORD
+      - LORC_EMAIL_TLS
+      - LORC_EMAIL_FROM
     ports:
       - "${LORC_PORT}:8000"
 volumes:

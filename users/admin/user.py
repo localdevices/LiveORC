@@ -24,7 +24,7 @@ REQUIRED_FIELDS = (USERNAME_FIELD,) + tuple(User.REQUIRED_FIELDS)
 EDITABLE_FIELDS = (
     "name",
     "is_staff",
-    "active",
+    "is_active",
     "is_superuser",
 )
 ADD_FIELDS = (
@@ -69,4 +69,4 @@ class UserAdmin(DjangoUserAdmin):
     )
     search_fields = (USERNAME_FIELD,)
     ordering = (USERNAME_FIELD,)
-    list_filter = ("active", "is_staff")
+    list_filter = ("is_active", "is_staff")

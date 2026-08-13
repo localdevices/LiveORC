@@ -32,7 +32,7 @@ import boto3
 FORMS_URLFIELD_ASSUME_HTTPS = True
 
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-VERSION = "0.3.0"
+VERSION = "0.3.2"
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # try to get BASE_DIR from env variable
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -91,6 +91,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'users.backends.CaseInsensitiveEmailBackend',
+]
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
@@ -107,6 +111,18 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv("LORC_EMAIL_HOST", None)
+EMAIL_PORT = int(os.getenv("LORC_EMAIL_PORT", 587))
+EMAIL_USE_TLS = bool(os.getenv("LORC_EMAIL_TLS", "1") == "1")
+EMAIL_HOST_USER = os.getenv("LORC_EMAIL_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("LORC_EMAIL_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.getenv("LORC_EMAIL_FROM", "")
+
+# Flag to check if email is properly configured, used to determine if password reset functionality should be available or not 
+EMAIL_CONFIGURED = bool(EMAIL_HOST and EMAIL_HOST_USER and EMAIL_HOST_PASSWORD and DEFAULT_FROM_EMAIL)
 
 # Celery Configuration Options
 CELERY_BROKER_URL = f'amqp://{os.getenv("LORC_RABBITMQ_USER")}:{os.getenv("LORC_RABBITMQ_PASS")}@{os.getenv("LORC_RABBITMQ_HOST")}:5672/'
