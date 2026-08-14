@@ -4,6 +4,8 @@ from django.contrib.auth.hashers import make_password
 from django.shortcuts import redirect, reverse
 from django.utils.translation import gettext_lazy
 from django.views.generic.edit import CreateView
+from django.contrib.auth.views import PasswordResetView
+from django.conf import settings
 from .models import User
 from .admin import FirstUserCreationForm, FirstUserAdmin
 
@@ -39,4 +41,32 @@ class FirstUserCreateView(CreateView):
             keys = list(user_form.errors.keys())
             messages.error(request, f"{user_form.errors[keys[0]][0]}")
             return redirect('/')
+
+
+class CustomPasswordResetView(PasswordResetView):
+    """
+    Custom password reset view that checks if email is configured.
+    If email is not configured, shows a user-friendly error message.
+    """
+    # template_name = 'password_reset_form.html'
+
+    def get(self, request, *args, **kwargs):
+        if not settings.EMAIL_CONFIGURED:
+            messages.error(
+                request,
+                "Email functionality is not configured on this server. "
+                "Please contact your system administrator to enable password reset."
+            )
+            return redirect('admin:index')
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if not settings.EMAIL_CONFIGURED:
+            messages.error(
+                request,
+                "Email functionality is not configured on this server. "
+                "Please contact your system administrator to enable password reset."
+            )
+            return redirect('admin:index')
+        return super().post(request, *args, **kwargs)
 

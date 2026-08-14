@@ -173,11 +173,41 @@ case $key in
     shift # past argument
     shift # past value
     ;;
-  --nodes)
-    export LORC_DEFAULT_NODES="$2"
+    --email-host)
+    export LORC_EMAIL_HOST="$2"
     shift # past argument
     shift # past value
     ;;
+    --email-port)
+    export LORC_EMAIL_PORT="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --email-user)
+    export LORC_EMAIL_USER="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --email-password)
+    export LORC_EMAIL_PASSWORD="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --email-tls)
+    export LORC_EMAIL_TLS="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --email-from)
+    export LORC_EMAIL_FROM="$2"
+    shift # past argument
+    shift # past value
+    ;;
+  # --nodes)
+  #   export LORC_DEFAULT_NODES="$2"
+  #   shift # past argument
+  #   shift # past value
+  #   ;;
     --debug)
     export LORC_DEBUG=YES
     shift # past argument
@@ -240,7 +270,14 @@ usage(){
   echo "        --storage-user  <username>      Set the remote S3 username that LiveORC will be using (default: $DEFAULT_STORAGE_USER)."
   echo "        --storage-pass  <password>      Set the remote Postgis password host that LiveORC will be using (default: $DEFAULT_STORAGE_PASS)"
   echo "        --storage-dir   <path>          Path where storage volume is mounted (default: $DEFAULT_STORAGE_DIR docker volume) a S3 bucket"
-  echo "        --nodes         <amount>        The amount of NodeORC nodes attached to LiveORC on startup (default: $DEFAULT_NODES)"
+  echo "        --email-host    <hostname>      Set the email host for sending admin emails and password reset links (default: not set)"
+  echo "        --email-port    <port>          Set the email port (default: not set)"
+  echo "        --email-user    <username>      Set the email user (default: not set)"
+  echo "        --email-password    <password>  Set the email password (default: not set)"
+  echo "        --email-tls     <0|1>           Enable TLS for email (default: not set)"
+  echo "        --email-from    <email>         Set the email from address (default: not set)"
+
+  # echo "        --nodes         <amount>        The amount of NodeORC nodes attached to LiveORC on startup (default: $DEFAULT_NODES)"
   echo "        --ssl               Enable SSL and automatically request and install a certificate from letsencrypt.org. (default: $DEFAULT_SSL)"
   echo "        --ssl-key       <path>          Manually specify a path to the private key file (.pem) to use with nginx to enable SSL (default: None)"
   echo "        --ssl-cert      <path>          Manually specify a path to the certificate file (.pem) to use with nginx to enable SSL (default: None)"
@@ -296,6 +333,11 @@ start(){
 	else
 		echo "Database: Postgis at $LORC_DB_HOST:$LORC_DB_PORT"
 	fi
+  echo "Email host: $LORC_EMAIL_HOST"
+  echo "Email port: $LORC_EMAIL_PORT"
+  echo "Email user: $LORC_EMAIL_USER"
+  echo "Email TLS: $LORC_EMAIL_TLS"
+  echo "Email from: $LORC_EMAIL_FROM"
 #	echo "Media directory: $LORC_MEDIA_DIR"
 #	echo "Postgres DB directory: $LORC_DB_DIR"
 	echo "SSL: $LORC_SSL"

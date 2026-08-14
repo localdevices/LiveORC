@@ -22,6 +22,9 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from django.views.generic.base import RedirectView
+from django.contrib.auth.views import PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
+from users.views import CustomPasswordResetView
+
 from django.urls import reverse_lazy
 
 ## CODE BELOW IS TO REORDER MENU ITEMS, CAN BE FINISHED WHEN ADMIN VIEW IS DONE
@@ -56,7 +59,20 @@ from django.urls import reverse_lazy
 urlpatterns = [
     path('', include('users.urls')),
     # path('', RedirectView.as_view(url=reverse_lazy('admin:index'))),
+    # path("accounts/", include("django.contrib.auth.urls")),
     path('admin/', admin.site.urls),
+    path('password-reset/', CustomPasswordResetView.as_view(), name='password_reset'),
+    path('password-reset/done/', PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path(
+        'password-reset/<uidb64>/<token>/',
+        PasswordResetConfirmView.as_view(),
+        name='password_reset_confirm'
+    ),
+    path(
+        'password-reset/complete/',
+        PasswordResetCompleteView.as_view(template_name='admin/password_reset_complete.html'),
+        name='password_reset_complete'
+    ),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/', include('api.urls', namespace='api')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

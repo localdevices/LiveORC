@@ -139,8 +139,6 @@ class BaseAdmin(admin.GISModelAdmin):
         )
 
 
-
-
 class BaseInstituteAdmin(BaseAdmin):
     """
     Specific save method in case an institute field is mandatory

@@ -5,7 +5,7 @@ from django_extensions.db.fields import ShortUUIDField
 class BaseModel(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
     slug = ShortUUIDField()
 
     class Meta:

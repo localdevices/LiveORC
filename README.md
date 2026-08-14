@@ -229,6 +229,16 @@ This can be done in the same way as the storage settings, with similar arguments
 In case you want to open, change and review the database directly, e.g. with [pgAdmin](https://www.pgadmin.org/), 
 look for a database with the name `liveorc`.
 
+### Set up password retrieval email
+
+To allow users to reset their passwords with a onetime link, email settings have to be provided. Several flags are available to control this. Currently we only support standard smtp emails. If you require any other method for your organization then please make a feature request.
+An example of the configuration options is given below using typical gmail smtp settings with an app password as example. `--email-tls` should be set to 1 to enable TLS security.
+
+```shell
+./liveorc.sh start --email-host smtp.google.com --email-port 587 --email-user john.doe@freewaterdata.com --email-password mysecret --email-tls 1 --email-from no-reply@freewaterdata.com
+```
+
+
 ### More processing nodes
 
 > [!WARNING]

@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.db import models
+from users.models.base import BaseModel
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
-from users.models.base import BaseModel
 
 
 class UserManager(BaseUserManager):
