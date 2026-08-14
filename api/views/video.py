@@ -48,6 +48,45 @@ class VideoViewSet(BaseModelViewSet):
         mimetype, _ = mimetypes.guess_type(img.file.name)
         return HttpResponse(img, content_type=mimetype)
 
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def log_file(self, request, *args, **kwargs):
+        # first retrieve the path to the log file
+        # log_file = self.get_object().log_file
+        # if os.path.isfile(log_file):
+        #     with open(log_file, 'r') as f:
+        #         log_data = f.read()
+        # else:
+        #     log_data = f"No log file found for video {self.get_object().id} at site {self.get_object().video_config.site.name}."
+        log_data = f"dummy log for video {self.get_object().id}"
+        return HttpResponse(log_data, content_type='text/plain')
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def netcdf_1d(self, request, *args, **kwargs):
+        # retrieve the path to the 1d netcdf file
+        # netcdf_1d_file = self.get_object().netcdf_1d
+        netcdf_1d_file = "dummy_file.nc"
+        # come up with a logical name for the netcdf file for downloading
+        netcdf_filename = f"{self.get_object().video_config.site.name}_{self.get_object().video_config.name}_1d.nc"
+        with open(netcdf_1d_file, 'rb') as f:
+            netcdf_data = f.read()
+        response = HttpResponse(netcdf_data, content_type='application/x-netcdf')
+        response['Content-Disposition'] = f'attachment; filename="{netcdf_filename}"'
+        return response
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def netcdf_2d(self, request, *args, **kwargs):
+        # retrieve the path to the 2d netcdf file
+        # netcdf_2d_file = self.get_object().netcdf_2d
+        netcdf_2d_file = "dummy_file.nc"
+        # come up with a logical name for the netcdf file for downloading
+        netcdf_filename = f"{self.get_object().video_config.site.name}_{self.get_object().video_config.name}_2d.nc"
+        with open(netcdf_2d_file, 'rb') as f:
+            netcdf_data = f.read()
+        response = HttpResponse(netcdf_data, content_type='application/x-netcdf')
+        response['Content-Disposition'] = f'attachment; filename="{netcdf_filename}"'
+        return response
+
+
     def create(self, request, *args, **kwargs):
         """
         Override create to make sure that if a time series with a water level is found, a new task is launched to
