@@ -38,6 +38,7 @@ var data_25 = [];
 var data_75 = [];
 var data_95 = [];
 var data_median = [];
+var data_av = [];
 var data_h = [];
 var chartInitial = true;
 
@@ -46,7 +47,19 @@ var config = {
     data: {
         datasets: [
             {
-                label: 'Discharge',
+                label: 'Average Q',
+//                type: 'time',
+                data: datapoints,
+                fill: false,
+                pointRadius: 1,
+                backgroundColor: 'rgb(255, 255, 255)',
+                pointHoverRadius: 3,
+                borderColor: 'rgb(0, 0, 255)',
+                borderWidth: 1,
+                tension: 0.1
+            },
+            {
+                label: 'Q',
 //                type: 'time',
                 data: datapoints,
                 fill: false,
@@ -292,18 +305,20 @@ function updatePlot(t1, t2) {
 }
 function updateLines() {
     fraction = parseInt(document.getElementById("fractionRange").value);
+    data_av = get_x_y(datapoints, "q_raw", fraction, true);
     data_05 = get_x_y(datapoints, "q_05", fraction, false);
     data_25 = get_x_y(datapoints, "q_25", fraction, false);
     data_75 = get_x_y(datapoints, "q_75", fraction, false);
     data_95 = get_x_y(datapoints, "q_95", fraction, false);
     data_h = get_x_y(datapoints, "h", 0, false);
     data_median = get_x_y(datapoints, "q_50", fraction, true);
-    window.myLine.data.datasets[0].data = data_median;
-    window.myLine.data.datasets[1].data = data_05;
-    window.myLine.data.datasets[2].data = data_95;
-    window.myLine.data.datasets[3].data = data_25;
-    window.myLine.data.datasets[4].data = data_75;
-    window.myLine.data.datasets[5].data = data_h;
+    window.myLine.data.datasets[0].data = data_av;
+    window.myLine.data.datasets[1].data = data_median;
+    window.myLine.data.datasets[2].data = data_05;
+    window.myLine.data.datasets[3].data = data_95;
+    window.myLine.data.datasets[4].data = data_25;
+    window.myLine.data.datasets[5].data = data_75;
+    window.myLine.data.datasets[6].data = data_h;
     // Update the chart itself
     window.myLine.update()
 }

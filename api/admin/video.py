@@ -65,6 +65,7 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
         "get_water_level",
         "get_fraction",
         "get_discharge",
+        "get_discharge_mean",
         "created_at",
         "play_button",
     ]
@@ -77,6 +78,7 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
         'get_timestamp',
         'get_water_level',
         'get_discharge',
+        'get_discharge_mean',
         'get_fraction',
         'play_button'
     )
@@ -108,6 +110,7 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
             "fields": [
                 "get_timestamp",
                 "get_water_level",
+                "get_discharge_mean",
                 "get_discharge",
                 "get_fraction"
             ]}
@@ -142,6 +145,13 @@ class VideoAdmin(DjangoObjectActions, BaseAdmin):
         if obj.time_series:
             if obj.time_series.q_50:
                 return round(obj.time_series.q_50, 2)
+
+    @admin.display(ordering='time_series__q_raw', description='Discharge mean [m3/s]')
+    def get_discharge_mean(self, obj):
+        if obj.time_series:
+            if obj.time_series.q_raw:
+                return round(obj.time_series.q_raw, 2)
+
 
     @admin.display(ordering='time_series__h', description='Water level [m]')
     def get_water_level(self, obj):
