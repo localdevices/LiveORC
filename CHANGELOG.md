@@ -7,6 +7,9 @@
 ### Deprecated
 ### Removed
 ### Fixed
+- With correlation averaging selected, discharge would not show on time series graphs. Discharge from correlation
+  averaging is now shown as "Mean discharge".
+
 ### Security
 
 

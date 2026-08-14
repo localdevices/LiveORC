@@ -14,6 +14,9 @@ class CaseInsensitiveEmailBackend(ModelBackend):
     
     def authenticate(self, request, username=None, password=None, **kwargs):
         try:
+            if username is None:
+                # check if username is provides in kwargs
+                username = kwargs.get(User.USERNAME_FIELD)
             # Normalize email to lowercase for lookup
             user = User.objects.get(email__iexact=username)
         except User.DoesNotExist:

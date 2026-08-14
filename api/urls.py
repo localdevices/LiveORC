@@ -4,6 +4,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView
 )
+from api.serializers.auth import EmailTokenObtainPairSerializer
 from api.views import (
     VersionView,
     SiteViewSet,
@@ -43,7 +44,7 @@ video_router = routers.NestedSimpleRouter(site_router, r'video', lookup='video')
 
 urlpatterns = [
     path('version/', VersionView.as_view(), name='version'),
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/', TokenObtainPairView.as_view(serializer_class=EmailTokenObtainPairSerializer), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     # path('institute_switch/<int:institute_id>/', switch_institute),
     path('', include(router.urls)),
