@@ -291,6 +291,51 @@ class Video(models.Model):
     #     return self.video_config if self.video_config else None
 
     @property
+    def results_path(self):
+        # construct path from the video id and timestamp. The structure should be:
+        # results/<site_id>/<YYYYMMDD>/<video_id>/
+        if self.id is None:
+            return None
+
+        if self.video_config and self.video_config.site:
+            return os.path.join(
+                "results",
+                str(self.video_config.site.id),
+                self.timestamp.strftime("%Y%m%d"),
+                self.id
+            )
+        else:
+            return None
+
+    @property
+    def results_2d(self):
+        if self.results_path:
+            return os.path.join(self.results_path, "2d.nc")
+        else:
+            return None
+
+    @property
+    def results_2d_mask(self):
+        if self.results_path:
+            return os.path.join(self.results_path, "2d_mask.nc")
+        else:
+            return None
+
+    @property
+    def results_1d(self):
+        if self.results_path:
+            return os.path.join(self.results_path, "1d.nc")
+        else:
+            return None
+
+    @property
+    def results_2d_ugrid(self):
+        if self.results_path:
+            return os.path.join(self.results_path, "2d_ugrid.nc")
+        else:
+            return None
+
+    @property
     def thumbnail_preview(self):
         if self.thumbnail:
             height = int(settings.THUMBSIZE) / 2
