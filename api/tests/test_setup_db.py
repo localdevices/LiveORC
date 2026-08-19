@@ -1,7 +1,9 @@
 # from django.contrib.auth.models import User
+import tempfile
+
 from users.models import User, Institute, Group, Member
 from users.management.commands.creategroups import add_group_permissions, READ_GROUPS, WRITE_GROUPS, MODELS, READ_PERMISSIONS, WRITE_PERMISSIONS
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 
 def setupUsers():

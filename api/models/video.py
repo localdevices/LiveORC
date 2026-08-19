@@ -8,9 +8,11 @@ import cv2
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files import storage
-from django.core.files.storage import storages, FileSystemStorage
+from django.core.files.storage import FileSystemStorage, storages
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.http import HttpResponse
 from django.urls import reverse
 from django.utils import timezone
@@ -639,3 +641,45 @@ class Video(models.Model):
         # organize tables along the video config id and then per time stamp
         indexes = [models.Index(fields=['video_config', 'timestamp'])]
 
+
+@receiver(pre_delete, sender=Video)
+def delete_video_files(sender, instance, **kwargs):
+    """
+    Signal handler to delete all associated files when a Video is deleted.
+    Deletes: file, keyframe, thumbnail, image, and all result files.
+    """
+    storage = select_storage()
+    
+    # Delete model file fields
+    for field_name in ['file', 'keyframe', 'thumbnail', 'image']:
+        field_file = getattr(instance, field_name, None)
+        if field_file and field_file.name:
+            try:
+                storage.delete(field_file.name)
+            except Exception as e:
+                print(f"Error deleting {field_name}: {str(e)}")
+    
+    # Delete all result files in the results directory
+    if instance.id and instance.video_config and instance.video_config.site:
+        results_base = os.path.join(
+            "results",
+            str(instance.video_config.site.id),
+            instance.timestamp.strftime("%Y%m%d"),
+            str(instance.id)
+        )
+        try:
+            _, files = storage.listdir(results_base)
+            for file_name in files:
+                file_path = os.path.join(results_base, file_name)
+                try:
+                    storage.delete(file_path)
+                except Exception as e:
+                    print(f"Error deleting result file {file_name}: {str(e)}")
+            # also remove the results directory once empty
+            try:
+                storage.delete(results_base)
+            except Exception as e:
+                print(f"Error deleting results directory: {str(e)}")
+        except (FileNotFoundError, OSError):
+            # Results directory doesn't exist, nothing to clean up
+            pass

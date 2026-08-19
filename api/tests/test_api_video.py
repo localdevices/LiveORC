@@ -5,9 +5,10 @@ from django.contrib.gis.geos import Point
 from django.core.files.uploadedfile import SimpleUploadedFile
 from .test_setup_db import InitTestCase
 # Create your tests here.
-from api.models import Site, Recipe, CrossSection
+from api.models import Site, Recipe, CrossSection, Video
 from users.models import User, Institute
-from datetime import datetime
+from datetime import datetime, timedelta
+import copy
 import json
 import os
 import requests
@@ -15,6 +16,8 @@ import requests
 # get some data for filling in the dbase
 from .test_api_recipe import recipe
 from .test_api_profile import profile
+
+
 
 
 video_sample_url = "https://raw.githubusercontent.com/localdevices/pyorc/main/examples/ngwerere/ngwerere_20191103.mp4"
@@ -96,9 +99,9 @@ results_sample = prep_results_sample()
 
 # test also patching an already existing video with results
 results_sample_patch = {
-    "results_2d": results_sample["result_2d"],
-    "results_2d_mask": results_sample["result_2d_mask"],
-    "log_file": SimpleUploadedFile("orc.log", b"Some log content", content_type="text/plain")
+    "result_2d": copy.deepcopy(results_sample["result_2d"]),
+    "result_2d_mask": copy.deepcopy(results_sample["result_2d_mask"]),
+    "log_file": SimpleUploadedFile("orc.log", b"Some log content2", content_type="text/plain")
 }
 
 
@@ -126,11 +129,12 @@ class VideoViewTests(InitTestCase):
         site = Site.objects.create(name="ngwerere", geom=Point(28.329686, -15.334151), creator=user, institute=institute)
         Recipe.objects.create(name="ngwerere_recipe", data=recipe, creator=user, institute=institute)
         CrossSection.objects.create(name="some_cross_section", features=profile, site=site, creator=user)
+        self.test_timestamp = datetime.now()
 
     def tearDown(self):
-        pass
+        Video.objects.all().delete()
 
-    def test_add_video_patch_results(self):
+    def test_add_video_patch_results_delete(self):
         client = APIClient()
         client.login(username='user@institute1.com', password='test1234')
         # create a camera config on site
@@ -192,10 +196,16 @@ class VideoViewTests(InitTestCase):
         r = client.get("/api/site/1/video/1/log_file/")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertIn("Some log content", r.content.decode())
+        # delete
+        r = client.delete("/api/site/1/video/1/")
+        self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_add_image(self):
+        self.test_timestamp = datetime.now() + timedelta(seconds=1)
         client = APIClient()
         client.login(username='user@institute1.com', password='test1234')
+        image_sample = prep_image_sample(image_sample_url)
+
         # create a camera config on site
         r = client.post(
             '/api/site/1/cameraconfig/',

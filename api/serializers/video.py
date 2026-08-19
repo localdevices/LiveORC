@@ -6,11 +6,11 @@ from api.models import Video
 class VideoSerializer(serializers.ModelSerializer):
     # camera_config = serializers.IntegerField(write_only=True, required=False)
     # Write-only fields for result file uploads
-    result_1d = serializers.FileField(write_only=True, required=False, help_text="1D result file")
-    result_2d = serializers.FileField(write_only=True, required=False, help_text="2D result file")
-    result_2d_mask = serializers.FileField(write_only=True, required=False, help_text="2D mask result file")
-    result_2d_ugrid = serializers.FileField(write_only=True, required=False, help_text="2D UGRID result file")
-    log_file = serializers.FileField(write_only=True, required=False, help_text="ORC processing log file")
+    result_1d = serializers.FileField(write_only=True, required=False, help_text="1D result file (NetCDF)")
+    result_2d = serializers.FileField(write_only=True, required=False, help_text="2D result file (NetCDF)")
+    result_2d_mask = serializers.FileField(write_only=True, required=False, help_text="2D mask result file (NetCDF)")
+    result_2d_ugrid = serializers.FileField(write_only=True, required=False, help_text="2D UGRID result file (NetCDF-UGRID)")
+    log_file = serializers.FileField(write_only=True, required=False, help_text="ORC processing log file (text file)")
     
     parent_lookup_kwargs = {
         # "site_pk": "camera_config__site__pk",
