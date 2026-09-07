@@ -2,6 +2,7 @@
 ### Added
 - Email settings in `liverorc.sh` and app settings.
 - Password reset page for sending onetime reset to user
+- API options for storage and retrieval of result files per video. This allows communicating NetCDF files and log files.
 
 ### Changed
 ### Deprecated

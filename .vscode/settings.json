@@ -1,0 +1,7 @@
+{
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda",
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": ["api/tests", "--ds=LiveORC.test_settings"],
+    "python.envFile": ""
+}

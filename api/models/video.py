@@ -2,14 +2,18 @@ import io
 import mimetypes
 import os
 import urllib
+import zipfile
 
 import cv2
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files import storage
-from django.core.files.storage import storages, FileSystemStorage
+from django.core.files.storage import FileSystemStorage, storages
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
+from django.http import HttpResponse
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import mark_safe
@@ -30,6 +34,7 @@ class OverwriteFileSystemStorage(FileSystemStorage):
         if self.exists(name):
             self.delete(name)
         return name
+
 
 def select_storage():
     storage = storages["media"]
@@ -290,6 +295,203 @@ class Video(models.Model):
     # def effective_video_config(self):
     #     return self.video_config if self.video_config else None
 
+    def save_result_file(self, fn, file_content):
+        """
+        Save a result file to the appropriate storage.
+        
+        Parameters
+        ----------
+        fn : str
+            Result file name (e.g., "2d.nc", "2d_mask.nc", "1d.nc", "2d_ugrid.nc", "orc.log")
+        file_content : bytes or file-like object
+            Content to save
+        
+        Returns
+        -------
+        str
+            Path/URL of saved file (local path or S3 URL)
+        """
+        
+        # Generate the file path
+        file_path = os.path.join(
+            "results",
+            str(self.video_config.site.id),
+            self.timestamp.strftime("%Y%m%d"),
+            str(self.id),
+            fn
+        )
+        
+        # Save using the appropriate storage
+        storage = select_storage()
+        storage.save(file_path, ContentFile(file_content))
+        return file_path
+
+    def get_log_file(self):
+        """
+        Retrieve the log file content for this video.
+        
+        Returns
+        -------
+        str or None
+            Content of the log file, or None if not found
+        """
+        log_file_path = os.path.join(
+            "results",
+            str(self.video_config.site.id),
+            self.timestamp.strftime("%Y%m%d"),
+            str(self.id),
+            "orc.log"
+        )
+        storage = select_storage()
+        if storage.exists(log_file_path):
+            with storage.open(log_file_path, 'r') as f:
+                return f.read()
+        return None
+
+    def get_result_file(self, key):
+        """
+        Retrieve a result file path/URL from storage.
+        
+        Parameters
+        ----------
+        key : str
+            Result file key (e.g., "2d", "2d_mask")
+        
+        Returns
+        -------
+        str or None
+            relative path of file within selected storage, None if file doesn't exist
+        """
+        file_path = os.path.join(
+            "results",
+            str(self.video_config.site.id),
+            self.timestamp.strftime("%Y%m%d"),
+            str(self.id),
+            f"{key}.nc"
+        )
+        
+        storage = select_storage()
+        if storage.exists(file_path):
+            return file_path
+        return None
+
+
+    def delete_result_file(self, key):
+        """
+        Delete a result file from storage.
+        """
+        file_path = os.path.join(
+            "results",
+            str(self.video_config.site.id),
+            self.timestamp.strftime("%Y%m%d"),
+            str(self.id),
+            f"{key}.nc"
+        )
+        storage = select_storage()
+        if storage.exists(file_path):
+            storage.delete(file_path)
+
+
+    def download_result(self, key):
+        """
+        Download a result file from storage.
+        
+        Parameters
+        ----------
+        key : str
+            Result file key (e.g., "2d", "2d_mask")
+        
+        Returns
+        -------
+        HttpResponse
+            Response containing the file for download, or 404 if not found
+        """
+        file_path = self.get_result_file(key)
+        if not file_path:
+            return HttpResponse(
+                f"No result file found for {key} for video {self.id} at site {self.video_config.site.name}.",
+                status=404
+            )
+        storage = storages["media"]
+        with storage.open(file_path, 'rb') as f:
+            bin_data = f.read()
+        # Determine the filename for download
+        netcdf_fn = f"{self.video_config.site.name}_{self.video_config.name}_{key}.nc"
+        response = HttpResponse(bin_data, content_type='application/x-netcdf')
+        response['Content-Disposition'] = f'attachment; filename="{netcdf_fn}"'
+        return response
+
+
+    def download_all_results(self):
+        """
+        Create a zip file containing all result files for this video.
+        
+        Returns
+        -------
+        bytes or None
+            Content of the zip file, or None if no results exist
+        """
+    
+        if self.id is None or not (self.video_config and self.video_config.site):
+            return None
+        
+        results_base = os.path.join(
+            "results",
+            str(self.video_config.site.id),
+            self.timestamp.strftime("%Y%m%d"),
+            str(self.id)
+        )
+        
+        storage = select_storage()
+        
+        try:
+            _, files = storage.listdir(results_base)
+        except (FileNotFoundError, OSError):
+            # Results directory doesn't exist
+            return None
+        
+        if not files:
+            return None
+        
+        # Create zip file in memory
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for file_name in files:
+                file_path = os.path.join(results_base, file_name)
+                with storage.open(file_path, 'rb') as f:
+                    file_content = f.read()
+                
+                # Add to zip with just the filename (not full path)
+                zip_file.writestr(file_name, file_content)
+        
+        zip_buffer.seek(0)
+
+        # zip_buffer.getvalue()
+        # Determine the filename for download
+        zip_fn = f"{self.video_config.site.name}_{self.video_config.name}.zip"
+        response = HttpResponse(zip_buffer, content_type='application/zip')
+        response['Content-Disposition'] = f'attachment; filename="{zip_fn}"'
+        return response
+
+
+    @property
+    def results_path(self):
+        # construct path from the video id and timestamp. The structure should be:
+        # results/<site_id>/<YYYYMMDD>/<video_id>/
+        if self.id is None:
+            return None
+
+        if self.video_config and self.video_config.site:
+            return os.path.join(
+                "results",
+                str(self.video_config.site.id),
+                self.timestamp.strftime("%Y%m%d"),
+                str(self.id)
+            )
+        else:
+            return None
+
+
     @property
     def thumbnail_preview(self):
         if self.thumbnail:
@@ -439,3 +641,45 @@ class Video(models.Model):
         # organize tables along the video config id and then per time stamp
         indexes = [models.Index(fields=['video_config', 'timestamp'])]
 
+
+@receiver(pre_delete, sender=Video)
+def delete_video_files(sender, instance, **kwargs):
+    """
+    Signal handler to delete all associated files when a Video is deleted.
+    Deletes: file, keyframe, thumbnail, image, and all result files.
+    """
+    storage = select_storage()
+    
+    # Delete model file fields
+    for field_name in ['file', 'keyframe', 'thumbnail', 'image']:
+        field_file = getattr(instance, field_name, None)
+        if field_file and field_file.name:
+            try:
+                storage.delete(field_file.name)
+            except Exception as e:
+                print(f"Error deleting {field_name}: {str(e)}")
+    
+    # Delete all result files in the results directory
+    if instance.id and instance.video_config and instance.video_config.site:
+        results_base = os.path.join(
+            "results",
+            str(instance.video_config.site.id),
+            instance.timestamp.strftime("%Y%m%d"),
+            str(instance.id)
+        )
+        try:
+            _, files = storage.listdir(results_base)
+            for file_name in files:
+                file_path = os.path.join(results_base, file_name)
+                try:
+                    storage.delete(file_path)
+                except Exception as e:
+                    print(f"Error deleting result file {file_name}: {str(e)}")
+            # also remove the results directory once empty
+            try:
+                storage.delete(results_base)
+            except Exception as e:
+                print(f"Error deleting results directory: {str(e)}")
+        except (FileNotFoundError, OSError):
+            # Results directory doesn't exist, nothing to clean up
+            pass

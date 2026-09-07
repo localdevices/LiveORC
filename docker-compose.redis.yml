@@ -6,17 +6,12 @@ services:
       - LORC_RABBITMQ_HOST
       - LORC_RABBITMQ_PASS
       - LORC_RABBITMQ_USER
-  rabbitmq:
-    # rabbitmq >=4 returns an error related to a celery dependency
-    image: rabbitmq:3.13.7
-    container_name: rabbitmq
-    hostname: rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: password
+  redis:
+    image: redis:7.0.11
+    container_name: redis
+    hostname: redis
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "6379:6379"
 # TODO: add back workers that connect to ORC-OS API
 #   liveorc_worker:
 #     image: localdevices/liveorc

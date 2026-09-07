@@ -792,3 +792,18 @@ LiveORC is licensed under the terms of the
 # Trademark
 See our [OpenRiverCam Trademark guidelines](https://github.com/localdevices/pyorc/blob/main/TRADEMARK.md)
 
+# Developer's guide
+Code contributions may require side-by-side development of ORC-OS and LiveORC, especially when node-server interactions must be modified. In order to develop LiveORC with ORC-OS please do the following:
+
+* check out the ORC-OS code in a separate folder from https://github.com/localdevices/ORC-OS.
+* Create a symbolic link in the root of this project. The structure should be like this
+  `/path/to/your/LiveORC/ORC-OS`
+* Now create a development image with ORC-OS code mounted with 
+  ```bash
+  docker compose -f docker-compose.dev.yml build --no-cache
+  ```
+* Start a redis server and the orc node image with the following command:
+```bash
+docker compose -f docker-compose.dev.yml
+```
+`docker-compose.dev.yml` only work in conjunction with the symbolic link as shown above.
