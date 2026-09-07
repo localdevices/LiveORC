@@ -1,0 +1,29 @@
+services:
+  redis:
+    image: redis:7.0.11
+    container_name: redis
+    hostname: redis
+    command: redis-server --bind 0.0.0.0
+    ports:
+      - 6379:6379
+    restart: unless-stopped
+
+  node:
+    container_name: orcnode
+    build:
+      context: ORC-OS
+      dockerfile: Dockerfile.node.dev
+    restart: unless-stopped
+    depends_on:
+      - redis
+    volumes:
+      - ./ORC-OS:/app:z
+    environment:
+      - ORC_DEV_MODE=1
+      - ORC_CELERY_BROKER_URL=redis://redis:6379/0
+      - ORC_CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - ORC_HOME=/app/data
+      - ORC_UPLOAD_DIRECTORY=/app/data/uploads
+      - ORC_INCOMING_DIRECTORY=/app/data/uploads/incoming
+    ports:
+      - 5000:5000

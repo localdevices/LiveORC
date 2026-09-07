@@ -175,3 +175,10 @@ cython_debug/
 .idea/
 # may contain sensitive information
 .vscode/launch.json
+
+# Any symlink to ORC-OS
+ORC-OS
+
+# any test scripts in the root of the project
+test_*.py
+test_*.sh
