@@ -11,7 +11,8 @@ from api.models import (
     CrossSection,
     Recipe,
     TimeSeries,
-    Device
+    Device,
+    ComputeNode
 )
 
 from .admin_filters import (
@@ -35,6 +36,7 @@ from .device import DeviceAdmin
 from .task import TaskAdmin
 from .task_form import TaskFormAdmin
 from .server import ServerAdmin
+from .compute_node import ComputeNodeAdmin
 
 # initiate orc admin site with specific titles and logos
 # admin.site.site_title = gettext_lazy("LiveOpenRiverCam")
@@ -54,5 +56,6 @@ admin.site.register(Server, ServerAdmin)
 admin.site.register(Task, TaskAdmin)
 admin.site.register(TaskForm, TaskFormAdmin)
 admin.site.register(TimeSeries, TimeSeriesAdmin)
+admin.site.register(ComputeNode, ComputeNodeAdmin)
 admin.site.unregister(Group)
 
